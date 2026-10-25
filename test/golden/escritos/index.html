@@ -28,8 +28,8 @@
 
     <body>
         <header class="site-header" lang="en">
-    <a class="site-logo" href="../">
-        <div>Example</div>
+    <a class="site-logo h-card u-url" href="../">
+        <div class="p-name">Example</div>
     </a>
     <div class="site-description">An example site</div>
     <nav class="site-menu">
@@ -52,20 +52,21 @@
   <p>Escritos varios.</p>
 </div>
 
-<ol class="main-list">
+<ol class="main-list h-feed">
     
-        <li>
-            <a href="../escritos/una-noche">
+        <li class="h-entry">
+            <a class="u-url" href="../escritos/una-noche">
                 <article>
                     <header lang="es">
-                        <h2>Una noche</h2>
+                        <h2 class="p-name">Una noche</h2>
                         <div class="post-date-header">
-  <time datetime="2024-03-09">2024-03-09</time>
+  <time class="dt-published" datetime="2024-03-09">2024-03-09</time>
   
+  <span> by </span><span class="p-author h-card">Example Author</span>
 </div>
 
                     </header>
-                    <div>Un escrito corto.</div>
+                    <div class="p-summary">Un escrito corto.</div>
                 </article>
             </a>
         </li>

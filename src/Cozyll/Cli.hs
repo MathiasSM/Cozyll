@@ -68,6 +68,8 @@ loadSiteConfig contentDir website = do
     year <- override "SITE_COPYRIGHT_YEAR" (Web.siteCopyrightYear site)
     domain <- override "SITE_DOMAIN" (Web.siteDomain site)
     twitter <- override "TWITTER_HANDLE" (Web.siteTwitterHandle site)
+    authorUrl <- overrideOptional "SITE_AUTHOR_URL" (Web.siteAuthorUrl site)
+    let contact = Web.websiteContact website
     mathjax <- override "MATHJAX_VERSION" (Web.mathjaxVersion (Web.websiteMathjax website))
     highlight <- highlightStyleFromEnv (Web.websiteHighlight website)
     contentTemplates <- discoverContentTemplateNames (contentDir </> "templates")
@@ -76,9 +78,12 @@ loadSiteConfig contentDir website = do
             { siteName = name
             , siteDescription = description
             , siteAuthor = author
+            , siteAuthorUrl = authorUrl
             , siteCopyrightYear = year
             , siteDomain = domain
             , twitterHandle = twitter
+            , contactEmail = Web.contactEmail contact
+            , contactPage = Web.contactPage contact
             , mathjaxVersion = mathjax
             , highlightStyle = highlight
             , contentDir = contentDir
@@ -92,6 +97,14 @@ loadSiteConfig contentDir website = do
   where
     override :: (Read a) => String -> a -> IO a
     override var fallback = fromMaybe fallback . (>>= readMaybe) <$> lookupEnv var
+
+    -- An optional string override; an empty value falls back to the default
+    overrideOptional :: String -> Maybe String -> IO (Maybe String)
+    overrideOptional var fallback = do
+        value <- lookupEnv var
+        pure $ case value of
+            Just v | not (null v) -> Just v
+            _ -> fallback
 
     -- Unlike 'override', unknown values fail (matching the strict @website.yaml@ parsing)
     highlightStyleFromEnv :: Web.Highlight -> IO Web.HighlightStyle

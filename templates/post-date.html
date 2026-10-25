@@ -1,4 +1,5 @@
 <div class="post-date-header">
-  <time datetime="$date$">$date$</time>
-  $if(lastModifiedAt)$<span> (Updated on <time datetime="$lastModifiedAt$">$lastModifiedAt$</time>)</span>$endif$
+  <time class="dt-published" datetime="$date$">$date$</time>
+  $if(lastModifiedAt)$<span> (Updated on <time class="dt-updated" datetime="$lastModifiedAt$">$lastModifiedAt$</time>)</span>$endif$
+  <span> by </span>$if(authorUrl)$<a class="p-author h-card u-url" href="$authorUrl$">$author$</a>$else$<span class="p-author h-card">$author$</span>$endif$
 </div>

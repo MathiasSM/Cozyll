@@ -20,6 +20,10 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   checkbox, replacing each control's inline script.
 - A README section, "Adding a control (toggle)", explaining how to add a new
   show/hide-by-class control.
+- Microformats2 markup: `h-entry` on post pages (`p-name`, `u-url`, `dt-published`, `dt-updated`, `p-author`, `e-content`), `h-feed` on post indexes, `rel="me"` on social links, and a representative `h-card` in the site header.
+- Per-post `author` and `authorUrl` front matter, falling back to the site-wide `author` and `site.authorUrl` (`SITE_AUTHOR_URL` env override).
+- `contact-email` and `contact-page` template fields, for a contact-page `h-card`.
+- Structural microformats2 checks (post `h-entry`, index `h-feed`, `rel="me"`, `h-card`) in the golden test suite.
 
 ### Changed
 
@@ -29,6 +33,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   controls menu moved out of `as-post.html`/`as-page.html` into `site-aside.html`.
 - The table of contents is no longer prepended to the article body; it is built
   as a context field and rendered in the aside (feeds no longer embed it).
+- Posts and post lists now show the author name next to the date.
 
 ## [2.0.0.0] - 2026-10-23
 

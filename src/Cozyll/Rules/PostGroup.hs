@@ -8,6 +8,7 @@ import Cozyll.Content (isHidden, isTemplated, requirePost)
 import Cozyll.Context (globalContext, postSocialTagsContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Nav (navContext)
+import Cozyll.Context.Post (postContext)
 import Cozyll.Rules.SinglePages (Page (..), page, processPage)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
@@ -51,7 +52,7 @@ processPostGroupItems cfg groupName =
                 >>= (if templated then applyContentAsTemplate cfg (globalContext cfg) else return)
                 >>= runPandoc
                 >>= \(item', tocHtml) ->
-                    let ctx' = asideContext tocHtml <> globalContext cfg
+                    let ctx' = postContext cfg <> asideContext tocHtml <> globalContext cfg
                      in saveSnapshot (postSnapshot groupName) item'
                             >>= applyTemplates ctx' [minimalTemplate cfg, postTemplate cfg]
                             >>= finish cfg (postSocialTagsContext cfg <> navContext cfg groupName <> ctx')
@@ -60,4 +61,4 @@ processPostGroupItems cfg groupName =
 getCtx :: SiteConfig -> String -> Compiler (Context String)
 getCtx cfg groupName = do
     posts <- recentFirst =<< loadAllSnapshots (postsPattern cfg groupName) (postSnapshot groupName)
-    return $ listField "posts" (globalContext cfg) (return posts) <> globalContext cfg
+    return $ listField "posts" (postContext cfg <> globalContext cfg) (return posts) <> globalContext cfg

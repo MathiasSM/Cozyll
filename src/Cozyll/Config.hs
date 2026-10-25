@@ -61,12 +61,18 @@ data SiteConfig = SiteConfig
     -- ^ Site tagline, exposed as @site-description@
     , siteAuthor :: String
     -- ^ Site author, exposed as @site-author@
+    , siteAuthorUrl :: Maybe String
+    -- ^ Site author's homepage URL (from @site.authorUrl@), the default author link. Exposed as @site-author-url@.
     , siteCopyrightYear :: Int
     -- ^ Copyright year, exposed as @site-copyrightYear@
     , siteDomain :: String
     -- ^ Domain without scheme, exposed as @site-domain@
     , twitterHandle :: String
     -- ^ Twitter (X) handle (without \@), used for the social cards of posts
+    , contactEmail :: String
+    -- ^ Contact email (from @contact.email@), exposed as @contact-email@
+    , contactPage :: String
+    -- ^ Contact page path (from @contact.page@), exposed as @contact-page@
     , mathjaxVersion :: String
     {- ^ MathJax CDN version (from @mathjax:@ in @website.yaml@), exposed as @mathjax-version@
 

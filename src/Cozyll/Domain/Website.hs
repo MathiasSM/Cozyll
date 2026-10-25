@@ -50,7 +50,7 @@ module Cozyll.Domain.Website (
 
 import Control.Monad (unless, when)
 import Cozyll.Yaml (enumFromJSON)
-import Data.Aeson (FromJSON (parseJSON), withObject, (.:))
+import Data.Aeson (FromJSON (parseJSON), withObject, (.:), (.:?))
 import Data.Time (getCurrentTime, utctDay)
 import Data.Time.Calendar (Day, addDays)
 import Data.Time.Format (defaultTimeLocale, parseTimeM)
@@ -68,6 +68,7 @@ data Site = Site
     , siteCopyrightYear :: Int
     , siteDomain :: String
     , siteTwitterHandle :: String
+    , siteAuthorUrl :: Maybe String
     }
     deriving (Eq, Show)
 
@@ -228,6 +229,7 @@ instance FromJSON Site where
             <*> o .: "copyrightYear"
             <*> o .: "domain"
             <*> o .: "twitterHandle"
+            <*> o .:? "authorUrl"
 
 instance FromJSON Contact where
     parseJSON = withObject "contact" $ \o ->

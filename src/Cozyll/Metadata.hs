@@ -75,6 +75,12 @@ data Key
       ShortDescription
     | -- | A project's long description.
       LongDescription
+    | -- | A post's author name (defaults to the site author).
+      Author
+    | -- | A post's author homepage URL (defaults to the site author's).
+      AuthorUrl
+    | -- | A post's tags, as a list of strings.
+      Tags
     deriving (Eq, Show, Enum, Bounded)
 
 -- | The key as spelled in front matter
@@ -85,6 +91,8 @@ keyName key = case key of
     Published -> "published"
     Description -> "description"
     Aliases -> "aliases"
+    Author -> "author"
+    AuthorUrl -> "authorUrl"
     Draft -> "draft"
     EndDate -> "endDate"
     Group -> "group"
@@ -104,6 +112,7 @@ keyName key = case key of
     Sitemap -> "sitemap"
     StartDate -> "startDate"
     Status -> "status"
+    Tags -> "tags"
     Team -> "team"
     Templated -> "templated"
     TOC -> "TOC"
