@@ -4,6 +4,7 @@ live in @GoldenMain.hs@ and are run as a separate test suite.
 module Main (main) where
 
 import Cozyll.AccessibilitySpec qualified as Accessibility
+import Cozyll.AsideSpec qualified as Aside
 import Cozyll.CleanURLSpec qualified as CleanURL
 import Cozyll.ContentSpec qualified as Content
 import Cozyll.DataSpec qualified as Data
@@ -27,6 +28,7 @@ main =
         ( testGroup
             "unit"
             [ Accessibility.tests
+            , Aside.tests
             , CleanURL.tests
             , Content.tests
             , Data.tests

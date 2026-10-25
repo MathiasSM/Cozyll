@@ -2,7 +2,7 @@
 title: "Table of contents"
 description: "A page that generates its own table of contents"
 path: "/example/toc"
-TOC: true
+TOC: Contents
 ---
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. This page sets `TOC: true`, so pandoc generates a table of contents from its headings automatically.

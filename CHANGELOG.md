@@ -7,6 +7,29 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 
+### Added
+
+- A per-page aside, rendered to the right of the article on desktop (and above
+  it on mobile), that holds the reading controls and the table of contents. It
+  only renders when it has something to show.
+- An images toggle (`imagesToggle: <label>`) that hides a page's images by
+  toggling a `no-images` class.
+- The table of contents now lives in a collapsible `<details>` inside the aside.
+- The table of contents label is configurable via `TOC: <label>` (markdown-rendered).
+- A shared script (in `site-aside.html`) that wires every `data-toggle-class`
+  checkbox, replacing each control's inline script.
+- A README section, "Adding a control (toggle)", explaining how to add a new
+  show/hide-by-class control.
+
+### Changed
+
+- The ruby toggle is now declared with `rubyToggle: <label>` (a markdown-rendered
+  label) instead of `showRubyToggle: true`.
+- Control templates moved to `templates/controls--<name>-toggle.html`, and the
+  controls menu moved out of `as-post.html`/`as-page.html` into `site-aside.html`.
+- The table of contents is no longer prepended to the article body; it is built
+  as a context field and rendered in the aside (feeds no longer embed it).
+
 ## [2.0.0.0] - 2026-10-23
 
 ### Added

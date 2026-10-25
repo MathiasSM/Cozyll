@@ -5,6 +5,7 @@ module Cozyll.Content (
     isIndex,
     isSitemapExcluded,
     isTemplated,
+    tocLabelOf,
     groupOf,
     aliasesOf,
     parseAliasesYaml,
@@ -64,6 +65,13 @@ isTemplated :: Compiler Bool
 isTemplated = do
     metadata <- getUnderlying >>= getMetadata
     return $ K.lookupKey K.Templated metadata == Just "true"
+
+-- | The table of contents label (markdown); 'Nothing' when the page has none.
+tocLabelOf :: Metadata -> Maybe String
+tocLabelOf o = case K.lookupKey K.TOC o of
+    Just "" -> Nothing
+    Just label -> Just label
+    Nothing -> Nothing
 
 -- | The group an item belongs to: its `group:` front matter, or the folder it sits in under `writings/`
 groupOf :: FilePath -> Identifier -> Metadata -> Maybe String

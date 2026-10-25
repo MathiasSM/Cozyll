@@ -48,6 +48,7 @@ library
                   , Cozyll.Config
                   , Cozyll.Content
                   , Cozyll.Context
+                  , Cozyll.Context.Aside
                   , Cozyll.Context.Data
                   , Cozyll.Context.Feed
                   , Cozyll.Context.Language
@@ -112,6 +113,7 @@ test-suite spec
   hs-source-dirs:   test
   other-modules:    Cozyll.TestUtils
                   , Cozyll.AccessibilitySpec
+                  , Cozyll.AsideSpec
                   , Cozyll.CleanURLSpec
                   , Cozyll.ContentSpec
                   , Cozyll.DataSpec

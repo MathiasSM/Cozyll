@@ -53,23 +53,36 @@
 </div>
   </header>
   
+<div class="site-aside">
+  
+  <aside class="controls">
+    <header>Controls</header>
     <menu>
+      
       <li><label class="ruby-toggle">
-  <input type="checkbox" checked />
-  <span>ruby (content)</span>
+  <input type="checkbox" checked data-toggle-class="no-ruby" />
+  ruby (content)
 </label>
-<script>
-(() => {
-  const input = document.querySelector('.ruby-toggle input');
-  if (!input) return;
-  const update = () => document.documentElement.classList.toggle('no-ruby', !input.checked);
-  input.addEventListener('change', update);
-})();
-</script>
 </li>
+      
+      
     </menu>
-  <div>
-  <p>This post turns on the ruby toggle with <code>showRubyToggle: true</code>, then annotates some ruby: <ruby>日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby>.</p>
+  </aside>
+  <script>
+    (() => {
+      const inputs = document.querySelectorAll('[data-toggle-class]');
+      for (const input of inputs) {
+        const update = () => document.documentElement.classList.toggle(input.dataset.toggleClass, !input.checked);
+        input.addEventListener('change', update);
+      }
+    })();
+  </script>
+  
+  
+</div>
+
+<div>
+  <p>This post turns on the ruby toggle with <code>rubyToggle: "ruby (content)"</code>, then annotates some ruby: <ruby>日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby>.</p>
 </div>
 
   <hr />
