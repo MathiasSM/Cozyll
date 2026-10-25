@@ -2,8 +2,8 @@
 module Cozyll.ContentSpec (tests) where
 
 import Cozyll.Config (Env (..))
-import Cozyll.Content (isHidden, parseAliasesYaml)
-import Data.Aeson (Value (Bool))
+import Cozyll.Content (isHidden, parseAliasesYaml, tocLabelOf)
+import Data.Aeson (Value (Bool, String))
 import Data.Aeson.Key (fromString)
 import Data.Aeson.KeyMap qualified as KM
 import Data.Either (isLeft)
@@ -16,6 +16,7 @@ tests =
         "Content"
         [ isHiddenTests
         , aliasTests
+        , tocLabelOfTests
         ]
 
 -- Draft visibility -----------------------------------------------------------
@@ -53,4 +54,20 @@ aliasTests =
             parseAliasesYaml "aliases: [/]" @?= Left ["aliases: / is the home page, it can't be an alias"]
         , testCase "rejects something that isn't text" $
             assertBool "expected parsing to fail" (isLeft (parseAliasesYaml "aliases: 3"))
+        ]
+
+-- Table of contents label ----------------------------------------------------
+
+tocLabelOfTests :: TestTree
+tocLabelOfTests =
+    testGroup
+        "tocLabelOf"
+        [ testCase "reads the label" $
+            tocLabelOf (KM.singleton (fromString "TOC") (String "Contents")) @?= Just "Contents"
+        , testCase "reads a custom label" $
+            tocLabelOf (KM.singleton (fromString "TOC") (String "Table of contents")) @?= Just "Table of contents"
+        , testCase "is nothing for an empty label" $
+            tocLabelOf (KM.singleton (fromString "TOC") (String "")) @?= Nothing
+        , testCase "is nothing without a TOC" $
+            tocLabelOf (KM.singleton (fromString "title") (String "x")) @?= Nothing
         ]

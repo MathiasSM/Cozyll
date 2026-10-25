@@ -15,7 +15,7 @@
     <id>https://example.com/blog/ruby-toggle</id>
     <published>2026-03-02T00:00:00Z</published>
     <updated>2026-03-02T00:00:00Z</updated>
-    <content type="html"><![CDATA[<p>This post turns on the ruby toggle with <code>showRubyToggle: true</code>, then annotates some ruby: <ruby>日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby>.</p>]]></content>
+    <content type="html"><![CDATA[<p>This post turns on the ruby toggle with <code>rubyToggle: "ruby (content)"</code>, then annotates some ruby: <ruby>日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby>.</p>]]></content>
 </entry>
 <entry>
     <title><![CDATA[Templated post]]></title>

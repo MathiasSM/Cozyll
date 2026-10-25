@@ -2,7 +2,7 @@
 title: "Ruby"
 description: "Ruby annotations over kanji"
 path: "/example/ruby"
-showRubyToggle: true
+rubyToggle: "ruby"
 ---
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. The site renders a special link form as ruby annotations: `[kanji](-reading)`.

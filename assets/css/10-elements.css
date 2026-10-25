@@ -185,10 +185,6 @@ figcaption {
 ruby {line-height: 2;}
 rt {ruby-align: center; margin-bottom: .2em;}
 
-/* Ruby toggle: see ruby-toggle.html template */
-.ruby-toggle {padding:.5rem; background: var(--color-surface);}
-.no-ruby rt {visibility: hidden;}
-
 /* Have pandoc checkboxes readonly by default */
 input[type="checkbox"][aria-readonly="true"],
 label:has(> input[type="checkbox"][aria-readonly="true"]) {

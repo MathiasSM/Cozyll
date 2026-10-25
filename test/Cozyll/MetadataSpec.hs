@@ -14,8 +14,8 @@ tests =
         [ testGroup
             "keyName"
             [ testCase "spells keys as they appear in front matter" $
-                map keyName [Title, StartDate, ShortDescription, TOC]
-                    @?= ["title", "startDate", "shortDescription", "TOC"]
+                map keyName [Title, StartDate, ShortDescription, TOC, RubyToggle, ImagesToggle]
+                    @?= ["title", "startDate", "shortDescription", "TOC", "rubyToggle", "imagesToggle"]
             , testCase "gives every key a different spelling" $
                 let spellings = map keyName [minBound .. maxBound]
                  in length (nub spellings) @?= length spellings

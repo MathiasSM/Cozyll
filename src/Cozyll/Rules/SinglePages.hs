@@ -6,6 +6,7 @@ import Cozyll.Compile (applyTemplates, finish, runPandoc)
 import Cozyll.Config (SiteConfig, minimalTemplate, pageTemplate, pagesPattern, siteEnv)
 import Cozyll.Content (isHidden, isTemplated)
 import Cozyll.Context (globalContext)
+import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Nav (navContext)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
@@ -42,8 +43,10 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates} = do
     getResourceString
         >>= (if templated then applyContentAsTemplate cfg ctx else return)
         >>= runPandoc
-        >>= applyTemplates ctx ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg])
-        >>= finish cfg (navContext cfg pageName <> ctx)
+        >>= \(item', tocHtml) ->
+            let ctx' = asideContext tocHtml <> ctx
+             in applyTemplates ctx' ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
+                    >>= finish cfg (navContext cfg pageName <> ctx')
 
 -- | Processes a standalone page, routed by its `path:` front matter
 processPage :: SiteConfig -> Page -> Rules ()

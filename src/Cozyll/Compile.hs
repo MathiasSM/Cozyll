@@ -5,9 +5,10 @@ import Control.Monad (foldM)
 import Cozyll.Accessibility (checkAccessibility)
 import Cozyll.CleanURL (cleanIndexHtmls, cleanIndexUrls)
 import Cozyll.Config (SiteConfig, siteTemplate)
+import Cozyll.Content (tocLabelOf)
 import Cozyll.Filters (processRubyText)
 import Cozyll.Html (readonlyCheckboxes)
-import Cozyll.Metadata (Key (TOC), lookupKey)
+import Data.Maybe (isJust)
 import Hakyll (
     Compiler,
     Context,
@@ -33,16 +34,18 @@ import Text.Pandoc.Writers.Shared (toTableOfContents)
 -- citeproc) is ever added, literal `@` in content must be escaped as `\@`, or
 -- those fragments will silently turn into citations.
 
--- | Custom configuration for Pandoc
-runPandoc :: Item String -> Compiler (Item String)
+{- | Custom configuration for Pandoc, returning the rendered body and the table
+of contents (when @TOC@ is set), so templates can place the TOC separately.
+-}
+runPandoc :: Item String -> Compiler (Item String, String)
 runPandoc item = do
     metadata <- getUnderlying >>= getMetadata
-    let toc = lookupKey TOC metadata == Just "true"
+    let toc = isJust (tocLabelOf metadata)
     pandocItem <- readPandocWith defaultHakyllReaderOptions item
     let pandoc' = walk processRubyText (itemBody pandocItem)
         body = renderPandoc pandocItem pandoc'
         tocHtml = if toc then "<nav id=\"TOC\">" ++ renderPandoc pandocItem (tocPandoc pandoc') ++ "</nav>" else ""
-    pure (item{itemBody = tocHtml ++ body})
+    pure (item{itemBody = body}, tocHtml)
   where
     renderPandoc ident pandoc = itemBody (writePandocWith writerOptions (ident{itemBody = pandoc}))
 

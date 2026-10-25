@@ -143,3 +143,17 @@ A data file may ship a JSON Schema, co-located as `content/data/name.schema.json
 ## Frontmatter
 
 See `src/Cozyll/Metadata.hs` or its documentation for a full list of supported fields. Other fields become available as part of the page/post's context, which you may use in templates or templates markup.
+
+## Adding a control (toggle)
+
+A control is a checkbox in a page's aside that toggles a CSS class on `<html>`
+(e.g. `no-images`), so you can show/hide elements by classname. To add one:
+
+1. Pick the class to toggle (`no-images`) and add a front-matter key whose value
+   is the control's label (`imagesToggle: "Images"`); add a `Metadata.Key` for it.
+2. List it in `controlKeys` in `src/Cozyll/Context/Aside.hs`, and add its
+   `toggleLabelField <Key> "<name>ToggleLabel"` line to `asideContext`.
+3. Add `templates/controls--<name>-toggle.html`: a `<label>` with
+   `<input type="checkbox" checked data-toggle-class="no-images">` and `$<name>ToggleLabel$`.
+4. Add a gated `<li>` to `templates/site-aside.html`.
+5. Add the hiding CSS (`.no-images img { display:none }`). The shared script needs no change.

@@ -53,8 +53,14 @@ data Key
       Team
     | -- | Enables: Process the body as a template (@templated: true@).
       Templated
-    | -- | Enables: Generate a table of contents from the headings (@TOC: true@).
+    | {- | Enables: Generate a table of contents from the headings; the value is
+      the table of contents' label (@TOC: Contents@).
+      -}
       TOC
+    | -- | Enables: The ruby-annotation toggle; the value is the control's label (markdown).
+      RubyToggle
+    | -- | Enables: The hide-images toggle; the value is the control's label (markdown).
+      ImagesToggle
     | -- | A social account's username/handle.
       Username
     | -- | Show this social account on the about page.
@@ -101,6 +107,8 @@ keyName key = case key of
     Team -> "team"
     Templated -> "templated"
     TOC -> "TOC"
+    RubyToggle -> "rubyToggle"
+    ImagesToggle -> "imagesToggle"
     Username -> "username"
 
 -- | Looks up a key's value as a string

@@ -3,11 +3,7 @@
     <h1>$title$</h1>
     <div>$partial("templates/post-date.html")$</div>
   </header>
-  $if(showRubyToggle)$
-    <menu>
-      <li>$partial("templates/ruby-toggle.html")$</li>
-    </menu>
-  $endif-$
+  $partial("templates/site-aside.html")-$
   $body$
   <hr/>
 </article>

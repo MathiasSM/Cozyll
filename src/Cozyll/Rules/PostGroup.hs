@@ -6,6 +6,7 @@ import Cozyll.Compile (applyTemplates, finish, runPandoc)
 import Cozyll.Config (SiteConfig, minimalTemplate, postSnapshot, postTemplate, postsPattern, resolveTemplate, siteEnv)
 import Cozyll.Content (isHidden, isTemplated, requirePost)
 import Cozyll.Context (globalContext, postSocialTagsContext)
+import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Nav (navContext)
 import Cozyll.Rules.SinglePages (Page (..), page, processPage)
 import Cozyll.Theme (applyContentAsTemplate)
@@ -49,9 +50,11 @@ processPostGroupItems cfg groupName =
             getResourceString
                 >>= (if templated then applyContentAsTemplate cfg (globalContext cfg) else return)
                 >>= runPandoc
-                >>= saveSnapshot (postSnapshot groupName)
-                >>= applyTemplates (globalContext cfg) [minimalTemplate cfg, postTemplate cfg]
-                >>= finish cfg (postSocialTagsContext cfg <> navContext cfg groupName <> globalContext cfg)
+                >>= \(item', tocHtml) ->
+                    let ctx' = asideContext tocHtml <> globalContext cfg
+                     in saveSnapshot (postSnapshot groupName) item'
+                            >>= applyTemplates ctx' [minimalTemplate cfg, postTemplate cfg]
+                            >>= finish cfg (postSocialTagsContext cfg <> navContext cfg groupName <> ctx')
 
 -- | Build context for archive page
 getCtx :: SiteConfig -> String -> Compiler (Context String)

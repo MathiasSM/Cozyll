@@ -2,10 +2,6 @@
   <header>
     <h1>$title$</h1>
   </header>
-  $if(showRubyToggle)$
-    <menu>
-      <li>$partial("templates/ruby-toggle.html")$</li>
-    </menu>
-  $endif-$
+  $partial("templates/site-aside.html")-$
   $body$
 </article>

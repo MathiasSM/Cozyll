@@ -1,0 +1,34 @@
+$if(hasAside)$
+<div class="site-aside">
+  $if(hasControls)$
+  <aside class="controls">
+    <header>Controls</header>
+    <menu>
+      $if(rubyToggleLabel)$
+      <li>$partial("templates/controls--ruby-toggle.html")$</li>
+      $endif$
+      $if(imagesToggleLabel)$
+      <li>$partial("templates/controls--images-toggle.html")$</li>
+      $endif$
+    </menu>
+  </aside>
+  <script>
+    (() => {
+      const inputs = document.querySelectorAll('[data-toggle-class]');
+      for (const input of inputs) {
+        const update = () => document.documentElement.classList.toggle(input.dataset.toggleClass, !input.checked);
+        input.addEventListener('change', update);
+      }
+    })();
+  </script>
+  $endif$
+  $if(toc)$
+  <aside>
+    <details class="toc">
+      <summary>$tocLabel$</summary>
+      $toc$
+    </details>
+  </aside>
+  $endif$
+</div>
+$endif$

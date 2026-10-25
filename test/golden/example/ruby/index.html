@@ -48,22 +48,35 @@
     <h1>Ruby</h1>
   </header>
   
+<div class="site-aside">
+  
+  <aside class="controls">
+    <header>Controls</header>
     <menu>
+      
       <li><label class="ruby-toggle">
-  <input type="checkbox" checked />
-  <span>ruby (content)</span>
+  <input type="checkbox" checked data-toggle-class="no-ruby" />
+  ruby
 </label>
-<script>
-(() => {
-  const input = document.querySelector('.ruby-toggle input');
-  if (!input) return;
-  const update = () => document.documentElement.classList.toggle('no-ruby', !input.checked);
-  input.addEventListener('change', update);
-})();
-</script>
 </li>
+      
+      
     </menu>
-  <div>
+  </aside>
+  <script>
+    (() => {
+      const inputs = document.querySelectorAll('[data-toggle-class]');
+      for (const input of inputs) {
+        const update = () => document.documentElement.classList.toggle(input.dataset.toggleClass, !input.checked);
+        input.addEventListener('change', update);
+      }
+    })();
+  </script>
+  
+  
+</div>
+
+<div>
   <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. The site renders a special link form as ruby annotations: <code>[kanji](-reading)</code>.</p>
 <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. The word <ruby>日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby> means “Japanese”, while <ruby>漢字<rp>(</rp><rt>かんじ</rt><rp>)</rp></ruby> are Chinese characters. You can annotate a single character too, like <ruby>猫<rp>(</rp><rt>ねこ</rt><rp>)</rp></ruby> for “cat”.</p>
 <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. A sentence can mix plain text and annotated words: I am learning <ruby>勉強<rp>(</rp><rt>べんきょう</rt><rp>)</rp></ruby> and <ruby>読書<rp>(</rp><rt>どくしょ</rt><rp>)</rp></ruby> every day.</p>
