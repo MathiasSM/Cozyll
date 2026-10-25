@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="sitemap" type="application/xml" href="../../sitemap.xml">
+    <link rel="stylesheet" href="../../styles.css" />
+
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"A tour of the example content","datePublished":"2024-02-20T00:00:00"}</script>
+    <meta property="og:type" content="article" /><meta property="og:url" content="https://example.com/prose/tour" /><meta property="og:title" content="A tour of the example content" />
+    <meta name="twitter:card" content="summary" /><meta name="twitter:creator" content="example" /><meta name="twitter:site" content="example" />
+
+    <link rel="alternate" type="application/atom+xml" title="Code - Example" href="../../code/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Elements - Example" href="../../elements/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Languages - Example" href="../../languages/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Prose - Example" href="../../prose/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Tables - Example" href="../../tables/atom.xml" />
+
+    <link rel="canonical" href="https://example.com/prose/tour" />
+    <title>A tour of the example content - Example</title>
+    <meta name="description" content="A longer post that mixes prose, tables, code, and footnotes." />
+
+    <link rel="icon" href="../../favicon.ico" sizes="any">
+    <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+    <link rel="manifest" href="../../manifest.webmanifest">
+
+    
+</head>
+
+    <body>
+        <header class="site-header" lang="en">
+    <a class="site-logo" href="../../">
+        <div>Example</div>
+    </a>
+    <div class="site-description">An example site</div>
+    <nav class="site-menu">
+    <a href="../../about">About</a>
+    <a class="active" aria-current="true" href="../../prose">Prose</a>
+    <a href="../../tables">Tables</a>
+    <a href="../../code">Code</a>
+    <a href="../../languages"><i>Languages</i></a>
+    <a href="../../elements">Elements</a>
+    <a href="../../showcase">Showcase</a>
+    <a href="../../contact">Contact</a>
+    <a href="../../colophon">Colophon</a>
+</nav>
+
+</header>
+
+
+        <main>
+            <article class="main-article">
+  <header>
+    <h1>A tour of the example content</h1>
+    <div><div class="post-date-header">
+  <time datetime="2024-02-20">2024-02-20</time>
+  
+</div>
+</div>
+  </header>
+  
+<div class="example-minimal">
+  <p>This post is a longer, flowing piece of prose. It exists because most of the other posts in the example content are short demonstrations that jump straight from one construct to the next, while real writing is mostly paragraphs.</p>
+<h2 id="why-longer-text-matters">Why longer text matters</h2>
+<p>A real post is not a list of features. It is a sequence of paragraphs, each building on the last, with the occasional heading to give the reader a place to rest and a way to find their place again. Short posts do not exercise the styles that make longer text comfortable to read: the space between paragraphs, the measure of a line, and the way a heading clears the text around it.</p>
+<p>So this post stretches those styles. It also, as a matter of course, mixes in several of the constructs the example content demonstrates elsewhere, so they can be seen working together rather than in isolation.</p>
+<h2 id="the-example-content-at-a-glance">The example content at a glance</h2>
+<p>The example content is organized into a handful of groups, each focused on one area of the generator’s input:</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>prose</td>
+<td>Core Markdown text, lists, and footnotes</td>
+</tr>
+<tr>
+<td>tables</td>
+<td>The four Pandoc table syntaxes</td>
+</tr>
+<tr>
+<td>code</td>
+<td>Syntax highlighting and math</td>
+</tr>
+<tr>
+<td>languages</td>
+<td>Language front matter, CJK, and ruby</td>
+</tr>
+<tr>
+<td>elements</td>
+<td>Raw HTML, forms, and controls</td>
+</tr>
+</tbody>
+</table>
+<h2 id="a-note-on-footnotes">A note on footnotes</h2>
+<p>Footnotes keep an aside out of the flow of a sentence.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> They are useful in longer writing, where a sentence needs a caveat that would otherwise interrupt the argument.</p>
+<h2 id="code-in-prose">Code in prose</h2>
+<p>Longer writing also leaves room for a short code block without it feeling forced:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ot">main ::</span> <span class="dt">IO</span> ()</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="fu">putStrLn</span> <span class="st">&quot;An example&quot;</span></span></code></pre></div>
+<p>And a quote, for good measure:</p>
+<blockquote>
+<p>A paragraph is not a luxury; it is the basic unit of argument.</p>
+</blockquote>
+<h2 id="where-to-go-next">Where to go next</h2>
+<p>From here, the other groups show the remaining features in detail: the <a href="../../languages/">languages</a> posts for ruby and CJK, the <a href="../../tables/">tables</a> posts for table syntax, and the <a href="../../elements/">elements</a> posts for raw HTML and controls.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Like this one, which is an inline footnote. It stays near its marker, and a back-link returns the reader to where they left off.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</div>
+
+  <hr />
+</article>
+
+        </main>
+
+        <footer class="site-footer">
+  <div><small><span>Example Author</span> <span>©</span> <span>2020</span></small></div>
+
+</footer>
+
+    </body>
+</html>

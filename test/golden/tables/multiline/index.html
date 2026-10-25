@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="sitemap" type="application/xml" href="../../sitemap.xml">
+    <link rel="stylesheet" href="../../styles.css" />
+
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Multiline tables","datePublished":"2024-03-04T00:00:00"}</script>
+    <meta property="og:type" content="article" /><meta property="og:url" content="https://example.com/tables/multiline" /><meta property="og:title" content="Multiline tables" />
+    <meta name="twitter:card" content="summary" /><meta name="twitter:creator" content="example" /><meta name="twitter:site" content="example" />
+
+    <link rel="alternate" type="application/atom+xml" title="Code - Example" href="../../code/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Elements - Example" href="../../elements/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Languages - Example" href="../../languages/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Prose - Example" href="../../prose/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Tables - Example" href="../../tables/atom.xml" />
+
+    <link rel="canonical" href="https://example.com/tables/multiline" />
+    <title>Multiline tables - Example</title>
+    <meta name="description" content="Multiline tables and a deliberately too-wide table." />
+
+    <link rel="icon" href="../../favicon.ico" sizes="any">
+    <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+    <link rel="manifest" href="../../manifest.webmanifest">
+
+    
+</head>
+
+    <body>
+        <header class="site-header" lang="en">
+    <a class="site-logo" href="../../">
+        <div>Example</div>
+    </a>
+    <div class="site-description">An example site</div>
+    <nav class="site-menu">
+    <a href="../../about">About</a>
+    <a href="../../prose">Prose</a>
+    <a class="active" aria-current="true" href="../../tables">Tables</a>
+    <a href="../../code">Code</a>
+    <a href="../../languages"><i>Languages</i></a>
+    <a href="../../elements">Elements</a>
+    <a href="../../showcase">Showcase</a>
+    <a href="../../contact">Contact</a>
+    <a href="../../colophon">Colophon</a>
+</nav>
+
+</header>
+
+
+        <main>
+            <article class="main-article">
+  <header>
+    <h1>Multiline tables</h1>
+    <div><div class="post-date-header">
+  <time datetime="2024-03-04">2024-03-04</time>
+  
+</div>
+</div>
+  </header>
+  
+<div class="example-minimal">
+  <p>A multiline table needs a full separator line at the top:</p>
+<table style="width:27%;">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Left</th>
+<th style="text-align: left;">Right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">alpha
+gamma</td>
+<td style="text-align: left;">beta
+delta</td>
+</tr>
+</tbody>
+</table>
+<h2 id="a-too-wide-table">A too-wide table</h2>
+<p>A table with a very long, unbroken cell overflows its column. The example stylesheet wraps it in a scrollable <code>.wide</code> container.</p>
+<div class="wide">
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>short</td>
+</tr>
+<tr>
+<td>a-long-unbroken-token</td>
+<td>this-cell-contains-an-extremely-long-unbroken-string-that-forces-the-table-wider-than-the-page-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+  <hr />
+</article>
+
+        </main>
+
+        <footer class="site-footer">
+  <div><small><span>Example Author</span> <span>©</span> <span>2020</span></small></div>
+
+</footer>
+
+    </body>
+</html>

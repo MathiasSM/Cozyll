@@ -1,6 +1,5 @@
 User-Agent: *
 
-Disallow: /example
 Disallow: /404.html
 
 Sitemap: https://example.com/sitemap.xml

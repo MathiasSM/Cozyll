@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="sitemap" type="application/xml" href="../../sitemap.xml">
+    <link rel="stylesheet" href="../../styles.css" />
+
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Figures","datePublished":"2024-06-05T00:00:00"}</script>
+    <meta property="og:type" content="article" /><meta property="og:url" content="https://example.com/elements/figures" /><meta property="og:title" content="Figures" />
+    <meta name="twitter:card" content="summary" /><meta name="twitter:creator" content="example" /><meta name="twitter:site" content="example" />
+
+    <link rel="alternate" type="application/atom+xml" title="Code - Example" href="../../code/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Elements - Example" href="../../elements/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Languages - Example" href="../../languages/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Prose - Example" href="../../prose/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Tables - Example" href="../../tables/atom.xml" />
+
+    <link rel="canonical" href="https://example.com/elements/figures" />
+    <title>Figures - Example</title>
+    <meta name="description" content="Inline images, figures, captions, and the images toggle." />
+
+    <link rel="icon" href="../../favicon.ico" sizes="any">
+    <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+    <link rel="manifest" href="../../manifest.webmanifest">
+
+    
+</head>
+
+    <body>
+        <header class="site-header" lang="en">
+    <a class="site-logo" href="../../">
+        <div>Example</div>
+    </a>
+    <div class="site-description">An example site</div>
+    <nav class="site-menu">
+    <a href="../../about">About</a>
+    <a href="../../prose">Prose</a>
+    <a href="../../tables">Tables</a>
+    <a href="../../code">Code</a>
+    <a href="../../languages"><i>Languages</i></a>
+    <a class="active" aria-current="true" href="../../elements">Elements</a>
+    <a href="../../showcase">Showcase</a>
+    <a href="../../contact">Contact</a>
+    <a href="../../colophon">Colophon</a>
+</nav>
+
+</header>
+
+
+        <main>
+            <article class="main-article">
+  <header>
+    <h1>Figures</h1>
+    <div><div class="post-date-header">
+  <time datetime="2024-06-05">2024-06-05</time>
+  
+</div>
+</div>
+  </header>
+  
+<div class="site-aside">
+  
+  <aside class="controls">
+    <header>Controls</header>
+    <menu>
+      
+      
+      <li><label class="class-toggle">
+  <input type="checkbox" checked data-toggle-class="no-images" />
+  Images
+</label>
+</li>
+      
+    </menu>
+  </aside>
+  <script>
+    (() => {
+      const inputs = document.querySelectorAll('[data-toggle-class]');
+      for (const input of inputs) {
+        const update = () => document.documentElement.classList.toggle(input.dataset.toggleClass, !input.checked);
+        input.addEventListener('change', update);
+      }
+    })();
+  </script>
+  
+  
+</div>
+
+<div class="example-minimal">
+  <p>Images can appear inline, as figures, or in a <code>.figures</code> group.</p>
+<h2 id="inline">Inline</h2>
+<p>An inline image sits in a paragraph: <img src="../../images/logo.svg" alt="the logo" /> right here.</p>
+<h2 id="a-figure">A figure</h2>
+<p>An image standing alone becomes a figure:</p>
+<figure>
+<img src="https://placehold.co/500x40" alt="A caption for the figure" />
+<figcaption aria-hidden="true">A caption for the figure</figcaption>
+</figure>
+<h2 id="a-group-of-figures">A group of figures</h2>
+<div class="figures">
+<p><img src="https://placehold.co/200x100" alt="First caption" />
+<img src="https://placehold.co/200x100" alt="Second caption" /></p>
+</div>
+</div>
+
+  <hr />
+</article>
+
+        </main>
+
+        <footer class="site-footer">
+  <div><small><span>Example Author</span> <span>©</span> <span>2020</span></small></div>
+
+</footer>
+
+    </body>
+</html>

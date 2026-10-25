@@ -1,0 +1,16 @@
+# The features the example content demonstrates, listed on the home page.
+- name: Ruby text
+  description: "Ruby annotations over CJK, with a toggle to hide them."
+- name: Languages
+  description: "Spanish and Japanese posts, and embedded Chinese and Korean."
+- name: Tables
+  description: "Pipe, simple, grid, and multiline tables."
+- name: Math and code
+  description: "MathJax math and syntax-highlighted code blocks."
+- name: Raw HTML and forms
+  description: "Raw HTML, fenced divs, and form controls."
+- name: Data files
+  description: "YAML data exposed to templates as lists and maps."
+- name: A hidden item
+  description: "Demonstrates _show: false, which omits an item from the loop."
+  _show: false

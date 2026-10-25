@@ -13,7 +13,7 @@ module Golden (
 where
 
 import Control.Monad (forM, forM_)
-import Cozyll.Config (Env (Dev), SiteConfig (..), siteConfiguration)
+import Cozyll.Config (Env (Example), SiteConfig (..), siteConfiguration)
 import Cozyll.Domain.Website (loadWebsite)
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.Rules (rules)
@@ -56,7 +56,7 @@ mkSiteConfig website contentTemplateNames =
             , contentTemplatesDir = "content/templates"
             , contentCssDir = "content/css"
             , contentTemplateNames = contentTemplateNames
-            , siteEnv = Dev
+            , siteEnv = Example
             }
 
 {- | Builds the fixture site in a fresh temporary directory and mirrors its
@@ -69,15 +69,14 @@ buildSiteSnapshot root = do
     work <- getCanonicalTemporaryDirectory >>= \tmp -> createTempDirectory tmp "golden"
     let buildDir = work </> "build"
         snapshot = work </> "snapshot"
-    -- The fixture's own website.yaml drives the build, so the golden output does not depend on the environment
-    website <- loadWebsite (root </> "test" </> "fixtures" </> "content")
-    contentTemplateNames <- discoverContentTemplateNames (root </> "test" </> "fixtures" </> "content" </> "templates")
+    -- The example content's own website.yaml drives the build, so the golden output does not depend on the environment
+    website <- loadWebsite (root </> "example-content")
+    contentTemplateNames <- discoverContentTemplateNames (root </> "example-content" </> "templates")
     let cfg = mkSiteConfig website contentTemplateNames
     createDirectoryIfMissing True buildDir
     copyTree (root </> "templates") (buildDir </> "templates")
     copyTree (root </> "assets") (buildDir </> "assets")
-    copyTree (root </> "test" </> "fixtures" </> "content") (buildDir </> "content")
-    copyTree (root </> "dev") (buildDir </> "dev")
+    copyTree (root </> "example-content") (buildDir </> "content")
     withCurrentDirectory buildDir $ do
         -- An Error-only logger keeps the build silent on success, like the old script
         logger <- Logger.new Logger.Error

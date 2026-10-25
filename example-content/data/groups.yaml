@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=./groups.schema.json
+# The example content's post groups, listed on the home page.
+- name: Prose
+  icon: book
+  href: /prose
+  description: Core Markdown prose.
+- name: Tables
+  icon: table
+  href: /tables
+  description: The four Pandoc table syntaxes.
+- name: Code
+  icon: code
+  href: /code
+  description: Syntax highlighting and math.
+- name: Languages
+  icon: globe
+  href: /languages
+  description: Language front matter, CJK, and ruby.
+- name: Elements
+  icon: box
+  href: /elements
+  description: Raw HTML and controls.
+- name: Showcase
+  icon: work
+  href: /showcase
+  description: Projects listed from YAML.

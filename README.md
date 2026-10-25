@@ -49,11 +49,14 @@ You may set environment variables to override some `website.yaml` fields; export
 ```sh
 # Environment:
 
-# dev: building might skip optimization steps, and create example/ pages
-SITE_ENV=dev
+# prod: production build of the real content; drafts hidden (default)
+SITE_ENV=prod
 
-# prod: building will run all optimizations and validations
-# SITE_ENV=prod
+# dev: development build of the real content; drafts shown
+# SITE_ENV=dev
+
+# example: build the example content at the site root; drafts hidden
+# SITE_ENV=example
 ```
 
 ## Development

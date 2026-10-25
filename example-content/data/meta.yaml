@@ -1,0 +1,5 @@
+# A top-level map, read in templates with dotted keys (e.g. $meta.author.location$).
+name: Example Site
+author:
+  name: Example Author
+  location: Example City

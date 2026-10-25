@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title><![CDATA[Languages - Example]]></title>
+    <subtitle><![CDATA[Language front matter, embedded CJK, and ruby text.]]></subtitle>
+    <link href="https://example.com/languages/atom.xml" rel="self" />
+    <link href="https://example.com" />
+    <id>https://example.com/languages/atom.xml</id>
+    <author>
+        <name><![CDATA[Example Author]]></name>
+    </author>
+    <updated>2024-05-03T00:00:00Z</updated>
+<entry>
+    <title><![CDATA[Polyglot]]></title>
+    <link href="https://example.com/languages/polyglot" />
+    <id>https://example.com/languages/polyglot</id>
+    <published>2024-05-03T00:00:00Z</published>
+    <updated>2024-05-03T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>An English post that mixes in other scripts with language spans, so the right font is selected.</p>
+<h2 id="japanese">Japanese</h2>
+<p>The word <span lang="ja">日本語</span> means “Japanese”.</p>
+<h2 id="chinese">Chinese</h2>
+<p><span lang="zh-Hans">中文</span> means “Chinese”. <span lang="zh-Hant">繁體</span> is traditional Chinese.</p>
+<h2 id="korean">Korean</h2>
+<p><span lang="ko">한국어</span> means “Korean”.</p>
+<h2 id="spanish">Spanish</h2>
+<p><span lang="es">Español</span> means “Spanish”.</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[日本語の記事]]></title>
+    <link href="https://example.com/languages/japanese" />
+    <id>https://example.com/languages/japanese</id>
+    <published>2024-05-02T00:00:00Z</published>
+    <updated>2024-05-02T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>この記事は日本語で書かれています。ルビを振ることもできます。</p>
+<h2 id="見出し">見出し</h2>
+<p><ruby>日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby>はルビで読み方を示せます。<ruby>漢字<rp>(</rp><rt>かんじ</rt><rp>)</rp></ruby>も同様です。</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Un escrito]]></title>
+    <link href="https://example.com/languages/spanish" />
+    <id>https://example.com/languages/spanish</id>
+    <published>2024-05-01T00:00:00Z</published>
+    <updated>2024-05-01T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Este escrito está en español. Demuestra la localización de las plantillas: la fecha se muestra en español.</p>
+<h2 id="un-subtítulo">Un subtítulo</h2>
+<p>Aquí hay más texto en español.</p>]]></content>
+</entry>
+
+</feed>

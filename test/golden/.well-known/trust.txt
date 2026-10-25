@@ -5,8 +5,9 @@ member=https://example.com
 contact=https://example.com/contact
 
 # My socials:
-social=https://x.com/example
 social=https://github.com/example
+social=https://x.com/example
+social=https://mastodon.social/@example
 
 
 # AI, begone (please):

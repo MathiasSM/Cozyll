@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="sitemap" type="application/xml" href="../../sitemap.xml">
+    <link rel="stylesheet" href="../../styles.css" />
+
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Formatting","datePublished":"2024-01-11T00:00:00"}</script>
+    <meta property="og:type" content="article" /><meta property="og:url" content="https://example.com/prose/formatting" /><meta property="og:title" content="Formatting" />
+    <meta name="twitter:card" content="summary" /><meta name="twitter:creator" content="example" /><meta name="twitter:site" content="example" />
+
+    <link rel="alternate" type="application/atom+xml" title="Code - Example" href="../../code/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Elements - Example" href="../../elements/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Languages - Example" href="../../languages/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Prose - Example" href="../../prose/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Tables - Example" href="../../tables/atom.xml" />
+
+    <link rel="canonical" href="https://example.com/prose/formatting" />
+    <title>Formatting - Example</title>
+    <meta name="description" content="Headings, emphasis, links, quotes, code, and footnotes." />
+
+    <link rel="icon" href="../../favicon.ico" sizes="any">
+    <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+    <link rel="manifest" href="../../manifest.webmanifest">
+
+    
+</head>
+
+    <body>
+        <header class="site-header" lang="en">
+    <a class="site-logo" href="../../">
+        <div>Example</div>
+    </a>
+    <div class="site-description">An example site</div>
+    <nav class="site-menu">
+    <a href="../../about">About</a>
+    <a class="active" aria-current="true" href="../../prose">Prose</a>
+    <a href="../../tables">Tables</a>
+    <a href="../../code">Code</a>
+    <a href="../../languages"><i>Languages</i></a>
+    <a href="../../elements">Elements</a>
+    <a href="../../showcase">Showcase</a>
+    <a href="../../contact">Contact</a>
+    <a href="../../colophon">Colophon</a>
+</nav>
+
+</header>
+
+
+        <main>
+            <article class="main-article">
+  <header>
+    <h1>Formatting</h1>
+    <div><div class="post-date-header">
+  <time datetime="2024-01-10">2024-01-10</time>
+  <span> (Updated on <time datetime="2024-02-15">2024-02-15</time>)</span>
+</div>
+</div>
+  </header>
+  
+<div class="example-minimal">
+  <p>This post demonstrates the core prose constructs: headings, emphasis, links, quotes, code, and footnotes.</p>
+<h2 id="headings">Headings</h2>
+<p>Headings start at level two here, because the page template already renders the title as the single level-one heading. A section can nest further.</p>
+<h3 id="a-subsection">A subsection</h3>
+<p>Subsections descend one level at a time.</p>
+<h4 id="a-sub-subsection">A sub-subsection</h4>
+<p>And keep descending, with no skipped levels.</p>
+<h5 id="a-fifth-level-heading">A fifth-level heading</h5>
+<p>Still descending.</p>
+<h6 id="a-sixth-level-heading">A sixth-level heading</h6>
+<p>The deepest level.</p>
+<h2 id="paragraphs-and-line-breaks">Paragraphs and line breaks</h2>
+<p>A paragraph is a run of text. A line break is forced with two trailing spaces.<br />
+Like this one.</p>
+<h2 id="emphasis">Emphasis</h2>
+<p>Text can be <em>emphasized</em>, <strong>strong</strong>, <del>deleted</del>, or shown as <code>inline code</code>.</p>
+<h2 id="links">Links</h2>
+<p>Links can point <a href="../../prose/">to a page</a>, <a href="#emphasis">to a section</a>, <a href="https://example.com">to an external site</a>, or <a href="mailto:example@example.com">to an email</a>.</p>
+<h2 id="blockquotes">Blockquotes</h2>
+<blockquote>
+<p>A blockquote contains quoted text.</p>
+<blockquote>
+<p>It can nest another level.</p>
+</blockquote>
+<p>And return to the first level.</p>
+</blockquote>
+<h2 id="code">Code</h2>
+<p>An indented code block:</p>
+<pre><code>def greet(name):
+    return &quot;Hello, &quot; + name</code></pre>
+<p>A fenced block with a language:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet(name):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;Hello, &quot;</span> <span class="op">+</span> name</span></code></pre></div>
+<h2 id="a-horizontal-rule">A horizontal rule</h2>
+<p>A rule separates sections.</p>
+<hr />
+<h2 id="notes">Notes</h2>
+<p>A sentence with an inline footnote.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> And one with a reference footnote.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>An inline footnote stays near its marker.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A reference footnote defined at the end of the document.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+</div>
+
+  <hr />
+</article>
+
+        </main>
+
+        <footer class="site-footer">
+  <div><small><span>Example Author</span> <span>©</span> <span>2020</span></small></div>
+
+</footer>
+
+    </body>
+</html>

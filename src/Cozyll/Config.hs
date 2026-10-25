@@ -47,8 +47,11 @@ import Data.String (fromString)
 import Hakyll (Configuration (ignoreFile), Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, (.||.))
 import System.FilePath.Posix (takeFileName, (<.>), (</>))
 
--- | The build environment: 'Dev' also publishes the preview pages under @/example/@
-data Env = Dev | Prod
+{- | The build environment: 'Dev' shows drafts for the real content, 'Example'
+builds the example content as the whole site, and 'Prod' is the production
+build (drafts hidden).
+-}
+data Env = Dev | Example | Prod
     deriving (Eq, Show)
 
 {- | Build-time site configuration, gathered once from the environment by "Cozyll.Cli".
@@ -87,7 +90,7 @@ data SiteConfig = SiteConfig
     , contentTemplateNames :: [FilePath]
     -- ^ The template names (relative to 'contentTemplatesDir') the content provides
     , siteEnv :: Env
-    -- ^ Whether this is a dev build (which publishes @/example/@ preview pages)
+    -- ^ The build environment (see 'Env')
     }
 
 {- | Hakyll's default configuration, except that `.well-known` folders are not ignored

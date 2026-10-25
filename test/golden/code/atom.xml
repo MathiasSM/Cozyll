@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title><![CDATA[Code - Example]]></title>
+    <subtitle><![CDATA[Syntax-highlighted code blocks and MathJax math.]]></subtitle>
+    <link href="https://example.com/code/atom.xml" rel="self" />
+    <link href="https://example.com" />
+    <id>https://example.com/code/atom.xml</id>
+    <author>
+        <name><![CDATA[Example Author]]></name>
+    </author>
+    <updated>2024-04-03T00:00:00Z</updated>
+<entry>
+    <title><![CDATA[Code attributes]]></title>
+    <link href="https://example.com/code/attributes" />
+    <id>https://example.com/code/attributes</id>
+    <published>2024-04-03T00:00:00Z</published>
+    <updated>2024-04-03T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Fenced code blocks can carry attributes.</p>
+<h2 id="line-numbers">Line numbers</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python numberLines"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-label="1"></a><span class="kw">def</span> greet(name):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-label="2"></a>    <span class="cf">return</span> <span class="st">&quot;Hello, &quot;</span> <span class="op">+</span> name</span></code></pre></div>
+<h2 id="a-caption">A caption</h2>
+<p>A code block with a caption attribute:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="fu">putStrLn</span> <span class="st">&quot;hi&quot;</span></span></code></pre></div>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Math]]></title>
+    <link href="https://example.com/code/math" />
+    <id>https://example.com/code/math</id>
+    <published>2024-04-02T00:00:00Z</published>
+    <updated>2024-04-02T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Mathematics is rendered with MathJax. Inline math sits in a sentence, like <span class="math inline">\(E = mc^2\)</span> or <span class="math inline">\(e^{i\pi} + 1 = 0\)</span>.</p>
+<h2 id="display-math">Display math</h2>
+<p>Display math is set on its own line:</p>
+<p><span class="math display">\[\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}\]</span></p>
+<p>Another:</p>
+<p><span class="math display">\[\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}\]</span></p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Syntax highlighting]]></title>
+    <link href="https://example.com/code/highlighting" />
+    <id>https://example.com/code/highlighting</id>
+    <published>2024-04-01T00:00:00Z</published>
+    <updated>2024-04-01T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Fenced code blocks highlight according to their language.</p>
+<h2 id="haskell">Haskell</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ot">main ::</span> <span class="dt">IO</span> ()</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="fu">putStrLn</span> <span class="st">&quot;Hello&quot;</span></span></code></pre></div>
+<h2 id="python">Python</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet(name):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f&quot;Hello, </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">&quot;</span></span></code></pre></div>
+<h2 id="javascript">JavaScript</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">greet</span>(name) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="vs">`Hello, </span><span class="sc">${</span>name<span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>]]></content>
+</entry>
+
+</feed>

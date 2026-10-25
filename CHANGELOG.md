@@ -20,6 +20,11 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   checkbox, replacing each control's inline script.
 - A README section, "Adding a control (toggle)", explaining how to add a new
   show/hide-by-class control.
+- A `SITE_ENV=example` environment that builds the bundled `example-content/`
+  as the whole site (drafts hidden, like `prod`).
+- Self-documenting example content (`example-content/`) covering every front
+  matter field, Markdown/Pandoc feature, and the engine's custom features; it
+  doubles as the golden-test fixture.
 
 ### Changed
 
@@ -29,6 +34,15 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   controls menu moved out of `as-post.html`/`as-page.html` into `site-aside.html`.
 - The table of contents is no longer prepended to the article body; it is built
   as a context field and rendered in the aside (feeds no longer embed it).
+- `SITE_ENV=dev` no longer publishes the `/example/` preview pages; that content
+  moved to `example-content/`, built with `SITE_ENV=example`.
+- The golden tests snapshot `example-content/` instead of `test/fixtures/content`
+  and `dev/example/`.
+
+### Removed
+
+- The `dev/example/` preview pages and `test/fixtures/content` fixtures,
+  superseded by `example-content/`.
 
 ## [2.0.0.0] - 2026-10-23
 

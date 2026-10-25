@@ -12,11 +12,11 @@
     
     
 
-    <link rel="alternate" type="application/atom+xml" title="Blog - Example" href="./blog/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Escritura Creativa - Example" href="./escritos/atom.xml" />
+    <link rel="alternate" type="application/atom+xml" title="Code - Example" href="./code/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Elements - Example" href="./elements/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Languages - Example" href="./languages/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Prose - Example" href="./prose/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Tables - Example" href="./tables/atom.xml" />
 
     <link rel="canonical" href="https://example.com/" />
     <title>Example - An example site</title>
-    <meta name="description" content="Fixture home page." />
+    <meta name="description" content="Example content for the generator." />
 
     <link rel="icon" href="./favicon.ico" sizes="any">
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
@@ -33,10 +33,15 @@
     </a>
     <div class="site-description">An example site</div>
     <nav class="site-menu">
+    <a href="./about">About</a>
+    <a href="./prose">Prose</a>
+    <a href="./tables">Tables</a>
+    <a href="./code">Code</a>
+    <a href="./languages"><i>Languages</i></a>
+    <a href="./elements">Elements</a>
     <a href="./showcase">Showcase</a>
-    <a href="./blog">Blog</a>
-    <a href="./escritos"><i><mark>Es</mark>critos</i></a>
     <a href="./contact">Contact</a>
+    <a href="./colophon">Colophon</a>
 </nav>
 
 </header>
@@ -45,52 +50,154 @@
         <main>
             <article class="main-article">
   <header>
-    <h1>Example Person</h1>
+    <h1>Example</h1>
   </header>
   
-<div>
-  <p>Hello, this is the <strong>fixture</strong> home page.</p>
-<h2 id="experience">Experience</h2>
-<div class="experience">
+<div class="example-minimal">
+  <p>Here is the example content, which doubles as the generator’s test fixture.</p>
+<h2 id="groups">Groups</h2>
+<div class="groups">
     <ul>
     
         <li>
-            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-briefcase"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2l0 -9"></path><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path><path d="M12 12l0 .01"></path><path d="M3 13a20 20 0 0 0 18 0"></path></svg>
-            <span><strong>Engineer</strong> for 5 years</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+</svg>
+
+            <div class="group-meta">
+                <a href="./prose">Prose</a>
+                <span>Core Markdown prose.</span>
+            </div>
         </li>
     
         <li>
-            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-school"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6"></path><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4"></path></svg>
-            <span><strong>Studied</strong> computer science</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+  <path d="M3 9h18"></path>
+  <path d="M3 15h18"></path>
+  <path d="M9 3v18"></path>
+  <path d="M15 3v18"></path>
+</svg>
+
+            <div class="group-meta">
+                <a href="./tables">Tables</a>
+                <span>The four Pandoc table syntaxes.</span>
+            </div>
+        </li>
+    
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <path d="M16 18l6-6-6-6"></path>
+  <path d="M8 6l-6 6 6 6"></path>
+</svg>
+
+            <div class="group-meta">
+                <a href="./code">Code</a>
+                <span>Syntax highlighting and math.</span>
+            </div>
+        </li>
+    
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <circle cx="12" cy="12" r="10"></circle>
+  <path d="M2 12h20"></path>
+  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+</svg>
+
+            <div class="group-meta">
+                <a href="./languages">Languages</a>
+                <span>Language front matter, CJK, and ruby.</span>
+            </div>
+        </li>
+    
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+  <path d="M3.27 6.96L12 12.01l8.73-5.05"></path>
+  <path d="M12 22.08V12"></path>
+</svg>
+
+            <div class="group-meta">
+                <a href="./elements">Elements</a>
+                <span>Raw HTML and controls.</span>
+            </div>
+        </li>
+    
+        <li>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <rect x="2" y="7" width="20" height="14" rx="2"></rect>
+  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+</svg>
+
+            <div class="group-meta">
+                <a href="./showcase">Showcase</a>
+                <span>Projects listed from YAML.</span>
+            </div>
         </li>
     
     </ul>
 </div>
 
-<h2 id="hobbies">Hobbies</h2>
-<div class="hobbies">
+<h2 id="features">Features</h2>
+<div class="features">
     <ul>
     
         <li>
-            <a href="./hobbies/drawing" class="item">
-                <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-sketching"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 15c2 -4.97 7.356 -11 9 -11c4.25 0 -5.5 11.958 -3 13s5.65 -6.678 7.4 -5.902c1.75 .777 -1.05 7.589 -.3 8.63s3.15 -.897 3.9 -2.728"></path></svg>
-                <span>Drawing</span>
-            </a>
+            <strong>Ruby text</strong>
+            <span>Ruby annotations over CJK, with a toggle to hide them.</span>
+        </li>
+    
+        <li>
+            <strong>Languages</strong>
+            <span>Spanish and Japanese posts, and embedded Chinese and Korean.</span>
+        </li>
+    
+        <li>
+            <strong>Tables</strong>
+            <span>Pipe, simple, grid, and multiline tables.</span>
+        </li>
+    
+        <li>
+            <strong>Math and code</strong>
+            <span>MathJax math and syntax-highlighted code blocks.</span>
+        </li>
+    
+        <li>
+            <strong>Raw HTML and forms</strong>
+            <span>Raw HTML, fenced divs, and form controls.</span>
+        </li>
+    
+        <li>
+            <strong>Data files</strong>
+            <span>YAML data exposed to templates as lists and maps.</span>
         </li>
     
     </ul>
 </div>
 
-<h2 id="reach-out">Reach out</h2>
+<h2 id="online">Online</h2>
 <ul class="social-contact">
 
   <li>
     <a href="https://github.com/example" title="example">
-        <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" aria-hidden="true" focusable="false">
-    <path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path>
+        <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+  <path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.3-3.4-1.3-.5-1.2-1.1-1.5-1.1-1.5-1-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.7-1.4-2.3-.3-4.7-1.1-4.7-5.1 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .9-.3 2.8 1a9.5 9.5 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 4-2.4 4.8-4.7 5.1.4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 12 2z"></path>
 </svg>
 </div>
         <div><strong>example</strong></div>
+    </a>
+</li>
+
+
+
+  <li>
+    <a href="https://mastodon.social/@example" title="@example@mastodon.social">
+        <div><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+  <path d="M23.193 7.879c0-5.206-3.411-6.732-3.411-6.732C18.062.357 14.108.025 12.041 0h-.076c-2.068.025-6.02.357-7.74 1.147 0 0-3.411 1.526-3.411 6.732 0 1.192-.023 2.618.015 4.129.124 5.092.934 10.109 5.641 11.355 2.17.574 4.034.695 5.535.612 2.722-.15 4.25-.972 4.25-.972l-.09-1.975s-1.945.613-4.129.539c-2.165-.074-4.449-.233-4.799-2.891a5.499 5.499 0 0 1-.048-.745s2.125.52 4.817.643c1.646.075 3.19-.097 4.758-.283 3.007-.359 5.625-2.212 5.954-3.905.517-2.665.475-6.507.475-6.507zm-4.024 6.105h-2.497v-6.09c0-1.288-.543-1.941-1.628-1.941-1.2 0-1.802.776-1.802 2.312v3.349h-2.483v-3.35c0-1.536-.602-2.312-1.802-2.312-1.085 0-1.628.653-1.628 1.941v6.091H4.832V7.783c0-1.288.328-2.312.984-3.073.677-.774 1.564-1.172 2.665-1.172 1.275 0 2.24.489 2.879 1.468l.62 1.04.62-1.04c.639-.979 1.604-1.468 2.879-1.468 1.101 0 1.988.398 2.665 1.172.656.761.984 1.785.984 3.073v6.201z"></path>
+</svg>
+</div>
+        <div><strong>@example@mastodon.social</strong></div>
     </a>
 </li>
 

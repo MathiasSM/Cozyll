@@ -27,6 +27,8 @@ isHiddenTests =
         "isHidden"
         [ testCase "hides a draft in prod" $
             isHidden Prod draftMetadata @?= True
+        , testCase "hides a draft in example" $
+            isHidden Example draftMetadata @?= True
         , testCase "shows a draft in dev" $
             isHidden Dev draftMetadata @?= False
         , testCase "shows a non-draft in prod" $

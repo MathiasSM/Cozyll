@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title><![CDATA[Tables - Example]]></title>
+    <subtitle><![CDATA[The four Pandoc table syntaxes, alignment, and captions.]]></subtitle>
+    <link href="https://example.com/tables/atom.xml" rel="self" />
+    <link href="https://example.com" />
+    <id>https://example.com/tables/atom.xml</id>
+    <author>
+        <name><![CDATA[Example Author]]></name>
+    </author>
+    <updated>2024-03-04T00:00:00Z</updated>
+<entry>
+    <title><![CDATA[Multiline tables]]></title>
+    <link href="https://example.com/tables/multiline" />
+    <id>https://example.com/tables/multiline</id>
+    <published>2024-03-04T00:00:00Z</published>
+    <updated>2024-03-04T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>A multiline table needs a full separator line at the top:</p>
+<table style="width:27%;">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Left</th>
+<th style="text-align: left;">Right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">alpha
+gamma</td>
+<td style="text-align: left;">beta
+delta</td>
+</tr>
+</tbody>
+</table>
+<h2 id="a-too-wide-table">A too-wide table</h2>
+<p>A table with a very long, unbroken cell overflows its column. The example stylesheet wraps it in a scrollable <code>.wide</code> container.</p>
+<div class="wide">
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>short</td>
+</tr>
+<tr>
+<td>a-long-unbroken-token</td>
+<td>this-cell-contains-an-extremely-long-unbroken-string-that-forces-the-table-wider-than-the-page-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
+</tr>
+</tbody>
+</table>
+</div>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Grid tables]]></title>
+    <link href="https://example.com/tables/grid" />
+    <id>https://example.com/tables/grid</id>
+    <published>2024-03-03T00:00:00Z</published>
+    <updated>2024-03-03T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>A grid table draws cell borders with <code>+</code> and <code>-</code>.</p>
+<table style="width:36%;">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grid table</td>
+<td>Cells are
+drawn with +</td>
+</tr>
+</tbody>
+</table>
+<p>A grid table can carry a footer, marked by an extra <code>=</code> separator:</p>
+<table style="width:22%;">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Eggs</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Milk</td>
+<td>3</td>
+</tr>
+</tbody><tfoot>
+<tr>
+<td>Total</td>
+<td>8</td>
+</tr>
+</tfoot>
+
+</table>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Simple tables]]></title>
+    <link href="https://example.com/tables/simple" />
+    <id>https://example.com/tables/simple</id>
+    <published>2024-03-02T00:00:00Z</published>
+    <updated>2024-03-02T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>A simple table uses a single <code>-</code> row under the header:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">data</td>
+<td>path to data files.</td>
+</tr>
+<tr>
+<td style="text-align: left;">engine</td>
+<td>template engine used.</td>
+</tr>
+</tbody>
+</table>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Pipe tables]]></title>
+    <link href="https://example.com/tables/pipe" />
+    <id>https://example.com/tables/pipe</id>
+    <published>2024-03-01T00:00:00Z</published>
+    <updated>2024-03-01T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Pipe tables are the most common table syntax.</p>
+<h2 id="alignment">Alignment</h2>
+<p>Alignment is expressed with colons on the separator row:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Left</th>
+<th style="text-align: center;">Center</th>
+<th style="text-align: right;">Right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">alpha</td>
+<td style="text-align: center;">beta</td>
+<td style="text-align: right;">gamma</td>
+</tr>
+<tr>
+<td style="text-align: left;">one</td>
+<td style="text-align: center;">two</td>
+<td style="text-align: right;">three</td>
+</tr>
+</tbody>
+</table>
+<h2 id="captions">Captions</h2>
+<p>A table can carry a caption:</p>
+<table>
+<caption>A captioned pipe table.</caption>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>alpha</td>
+<td>1</td>
+</tr>
+<tr>
+<td>beta</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>]]></content>
+</entry>
+
+</feed>

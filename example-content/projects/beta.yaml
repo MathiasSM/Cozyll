@@ -1,0 +1,9 @@
+title: "Beta"
+href: "https://example.org/beta"
+startDate: 2021-05-02
+endDate: 2022-01-15
+status: finished
+shortDescription: "The second project."
+longDescription: "Done and dusted."
+team:
+  - Carol

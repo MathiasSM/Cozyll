@@ -24,7 +24,7 @@
 
 If your change touches user-facing output, review [ACCESSIBILITY.md](ACCESSIBILITY.md) and check the items below that apply. Items are optional and only some will be relevant to your change.
 
-### Content (docs, README, dev/example)
+### Content (docs, README, example-content)
 
 - [ ] Headings follow a logical hierarchy and don't skip levels.
 - [ ] Link text is descriptive (no "click here" / "read more").

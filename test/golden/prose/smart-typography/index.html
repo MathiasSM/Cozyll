@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="sitemap" type="application/xml" href="../../sitemap.xml">
+    <link rel="stylesheet" href="../../styles.css" />
+
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Smart typography","datePublished":"2024-02-01T00:00:00"}</script>
+    <meta property="og:type" content="article" /><meta property="og:url" content="https://example.com/prose/smart-typography" /><meta property="og:title" content="Smart typography" />
+    <meta name="twitter:card" content="summary" /><meta name="twitter:creator" content="example" /><meta name="twitter:site" content="example" />
+
+    <link rel="alternate" type="application/atom+xml" title="Code - Example" href="../../code/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Elements - Example" href="../../elements/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Languages - Example" href="../../languages/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Prose - Example" href="../../prose/atom.xml" /><link rel="alternate" type="application/atom+xml" title="Tables - Example" href="../../tables/atom.xml" />
+
+    <link rel="canonical" href="https://example.com/prose/smart-typography" />
+    <title>Smart typography - Example</title>
+    <meta name="description" content="Smart quotes, dashes, ellipses, and escaping." />
+
+    <link rel="icon" href="../../favicon.ico" sizes="any">
+    <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+    <link rel="manifest" href="../../manifest.webmanifest">
+
+    
+</head>
+
+    <body>
+        <header class="site-header" lang="en">
+    <a class="site-logo" href="../../">
+        <div>Example</div>
+    </a>
+    <div class="site-description">An example site</div>
+    <nav class="site-menu">
+    <a href="../../about">About</a>
+    <a class="active" aria-current="true" href="../../prose">Prose</a>
+    <a href="../../tables">Tables</a>
+    <a href="../../code">Code</a>
+    <a href="../../languages"><i>Languages</i></a>
+    <a href="../../elements">Elements</a>
+    <a href="../../showcase">Showcase</a>
+    <a href="../../contact">Contact</a>
+    <a href="../../colophon">Colophon</a>
+</nav>
+
+</header>
+
+
+        <main>
+            <article class="main-article">
+  <header>
+    <h1>Smart typography</h1>
+    <div><div class="post-date-header">
+  <time datetime="2024-02-01">2024-02-01</time>
+  
+</div>
+</div>
+  </header>
+  
+<div class="example-minimal">
+  <p>Pandoc rewrites punctuation as it parses.</p>
+<h2 id="what-gets-rewritten">What gets rewritten</h2>
+<p>“Double quotes” and ‘single quotes’ become curly, two hyphens – become an en dash, three — become an em dash, and trailing dots… become an ellipsis.</p>
+<h2 id="escaping">Escaping</h2>
+<p>A backslash keeps characters literal: -- stays two hyphens, ... stays three dots. Code spans are never rewritten: <code>--flag</code>.</p>
+<h2 id="subscript-and-superscript">Subscript and superscript</h2>
+<p>Water is H<sub>2</sub>O and a square is x<sup>2</sup>. This is separate from math, which uses <code>$...$</code>.</p>
+</div>
+
+  <hr />
+</article>
+
+        </main>
+
+        <footer class="site-footer">
+  <div><small><span>Example Author</span> <span>©</span> <span>2020</span></small></div>
+
+</footer>
+
+    </body>
+</html>

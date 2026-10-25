@@ -47,10 +47,10 @@ import System.FilePath.Posix (addTrailingPathSeparator, (</>))
 isDraft :: Metadata -> Bool
 isDraft o = runCheck (optional o K.Draft) == Right (Just True)
 
--- | Whether a draft item is hidden from this build (dev shows drafts, prod hides them)
+-- | Whether a draft item is hidden from this build (dev shows drafts, prod and example hide them)
 isHidden :: Env -> Metadata -> Bool
-isHidden Prod = isDraft
 isHidden Dev = const False
+isHidden _ = isDraft
 
 -- | Whether an item is a group index page (`index: true` in its front matter)
 isIndex :: Metadata -> Bool

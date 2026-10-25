@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title><![CDATA[Prose - Example]]></title>
+    <subtitle><![CDATA[Core Markdown prose: headings, lists, links, quotes, code, and footnotes.]]></subtitle>
+    <link href="https://example.com/prose/atom.xml" rel="self" />
+    <link href="https://example.com" />
+    <id>https://example.com/prose/atom.xml</id>
+    <author>
+        <name><![CDATA[Example Author]]></name>
+    </author>
+    <updated>2024-02-20T00:00:00Z</updated>
+<entry>
+    <title><![CDATA[A tour of the example content]]></title>
+    <link href="https://example.com/prose/tour" />
+    <id>https://example.com/prose/tour</id>
+    <published>2024-02-20T00:00:00Z</published>
+    <updated>2024-02-20T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>This post is a longer, flowing piece of prose. It exists because most of the other posts in the example content are short demonstrations that jump straight from one construct to the next, while real writing is mostly paragraphs.</p>
+<h2 id="why-longer-text-matters">Why longer text matters</h2>
+<p>A real post is not a list of features. It is a sequence of paragraphs, each building on the last, with the occasional heading to give the reader a place to rest and a way to find their place again. Short posts do not exercise the styles that make longer text comfortable to read: the space between paragraphs, the measure of a line, and the way a heading clears the text around it.</p>
+<p>So this post stretches those styles. It also, as a matter of course, mixes in several of the constructs the example content demonstrates elsewhere, so they can be seen working together rather than in isolation.</p>
+<h2 id="the-example-content-at-a-glance">The example content at a glance</h2>
+<p>The example content is organized into a handful of groups, each focused on one area of the generator’s input:</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>prose</td>
+<td>Core Markdown text, lists, and footnotes</td>
+</tr>
+<tr>
+<td>tables</td>
+<td>The four Pandoc table syntaxes</td>
+</tr>
+<tr>
+<td>code</td>
+<td>Syntax highlighting and math</td>
+</tr>
+<tr>
+<td>languages</td>
+<td>Language front matter, CJK, and ruby</td>
+</tr>
+<tr>
+<td>elements</td>
+<td>Raw HTML, forms, and controls</td>
+</tr>
+</tbody>
+</table>
+<h2 id="a-note-on-footnotes">A note on footnotes</h2>
+<p>Footnotes keep an aside out of the flow of a sentence.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> They are useful in longer writing, where a sentence needs a caveat that would otherwise interrupt the argument.</p>
+<h2 id="code-in-prose">Code in prose</h2>
+<p>Longer writing also leaves room for a short code block without it feeling forced:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ot">main ::</span> <span class="dt">IO</span> ()</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="fu">putStrLn</span> <span class="st">&quot;An example&quot;</span></span></code></pre></div>
+<p>And a quote, for good measure:</p>
+<blockquote>
+<p>A paragraph is not a luxury; it is the basic unit of argument.</p>
+</blockquote>
+<h2 id="where-to-go-next">Where to go next</h2>
+<p>From here, the other groups show the remaining features in detail: the <a href="https://example.com/languages/">languages</a> posts for ruby and CJK, the <a href="https://example.com/tables/">tables</a> posts for table syntax, and the <a href="https://example.com/elements/">elements</a> posts for raw HTML and controls.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Like this one, which is an inline footnote. It stays near its marker, and a back-link returns the reader to where they left off.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Long form]]></title>
+    <link href="https://example.com/prose/long-form" />
+    <id>https://example.com/prose/long-form</id>
+    <published>2024-02-10T00:00:00Z</published>
+    <updated>2024-02-10T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>A longer document with several sections, demonstrating the generated table of contents.</p>
+<h2 id="first-section">First section</h2>
+<p>Some content under the first section.</p>
+<h3 id="a-subsection">A subsection</h3>
+<p>Content under a subsection.</p>
+<h2 id="second-section">Second section</h2>
+<p>Content under the second section.</p>
+<h3 id="another-subsection">Another subsection</h3>
+<p>More content.</p>
+<h2 id="third-section">Third section</h2>
+<p>Content under the third section.</p>
+<h2 id="fourth-section">Fourth section</h2>
+<p>Content under the fourth section.</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Smart typography]]></title>
+    <link href="https://example.com/prose/smart-typography" />
+    <id>https://example.com/prose/smart-typography</id>
+    <published>2024-02-01T00:00:00Z</published>
+    <updated>2024-02-01T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Pandoc rewrites punctuation as it parses.</p>
+<h2 id="what-gets-rewritten">What gets rewritten</h2>
+<p>“Double quotes” and ‘single quotes’ become curly, two hyphens – become an en dash, three — become an em dash, and trailing dots… become an ellipsis.</p>
+<h2 id="escaping">Escaping</h2>
+<p>A backslash keeps characters literal: -- stays two hyphens, ... stays three dots. Code spans are never rewritten: <code>--flag</code>.</p>
+<h2 id="subscript-and-superscript">Subscript and superscript</h2>
+<p>Water is H<sub>2</sub>O and a square is x<sup>2</sup>. This is separate from math, which uses <code>$...$</code>.</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Lists]]></title>
+    <link href="https://example.com/prose/lists" />
+    <id>https://example.com/prose/lists</id>
+    <published>2024-01-20T00:00:00Z</published>
+    <updated>2024-01-20T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Lists come in several flavours.</p>
+<h2 id="bulleted-and-ordered">Bulleted and ordered</h2>
+<ul>
+<li>one item</li>
+<li>another item
+<ul>
+<li>a nested item</li>
+<li>another nested item</li>
+</ul></li>
+<li>back to the top level</li>
+</ul>
+<ol type="1">
+<li>first</li>
+<li>second</li>
+<li>third</li>
+</ol>
+<h2 id="ordered-lists-with-a-start-value">Ordered lists with a start value</h2>
+<p>Any number starts the list at that value:</p>
+<ol start="3" type="1">
+<li>Starts at three.</li>
+<li>Then four.</li>
+</ol>
+<h2 id="task-lists">Task lists</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked />a completed item</label></li>
+<li><label><input type="checkbox" />a to-do item</label></li>
+</ul>
+<h2 id="example-lists">Example lists</h2>
+<p>Mark a list with <code>(@)</code> for an “example” list:</p>
+<ol class="example" type="1">
+<li>First example.</li>
+<li>Second example.</li>
+</ol>
+<h2 id="fancy-lists">Fancy lists</h2>
+<p>A letter or roman numeral controls the numbering:</p>
+<ol type="a">
+<li>Lowercase letters.</li>
+<li>Keep going.</li>
+</ol>
+<ol start="2" type="i">
+<li>Roman numerals.</li>
+<li>Continue.</li>
+</ol>
+<h2 id="line-blocks">Line blocks</h2>
+<p>A line block preserves line breaks:</p>
+<div class="line-block">A line block<br />
+keeps each line<br />
+   and leading spaces<br />
+   on its own line.</div>
+<h2 id="definition-lists">Definition lists</h2>
+<dl>
+<dt>Term</dt>
+<dd>
+A definition rendered as a <code>&lt;dl&gt;</code>.
+</dd>
+</dl>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Formatting]]></title>
+    <link href="https://example.com/prose/formatting" />
+    <id>https://example.com/prose/formatting</id>
+    <published>2024-01-10T00:00:00Z</published>
+    <updated>2024-02-15T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>This post demonstrates the core prose constructs: headings, emphasis, links, quotes, code, and footnotes.</p>
+<h2 id="headings">Headings</h2>
+<p>Headings start at level two here, because the page template already renders the title as the single level-one heading. A section can nest further.</p>
+<h3 id="a-subsection">A subsection</h3>
+<p>Subsections descend one level at a time.</p>
+<h4 id="a-sub-subsection">A sub-subsection</h4>
+<p>And keep descending, with no skipped levels.</p>
+<h5 id="a-fifth-level-heading">A fifth-level heading</h5>
+<p>Still descending.</p>
+<h6 id="a-sixth-level-heading">A sixth-level heading</h6>
+<p>The deepest level.</p>
+<h2 id="paragraphs-and-line-breaks">Paragraphs and line breaks</h2>
+<p>A paragraph is a run of text. A line break is forced with two trailing spaces.<br />
+Like this one.</p>
+<h2 id="emphasis">Emphasis</h2>
+<p>Text can be <em>emphasized</em>, <strong>strong</strong>, <del>deleted</del>, or shown as <code>inline code</code>.</p>
+<h2 id="links">Links</h2>
+<p>Links can point <a href="https://example.com/prose/">to a page</a>, <a href="#emphasis">to a section</a>, <a href="https://example.com">to an external site</a>, or <a href="mailto:example@example.com">to an email</a>.</p>
+<h2 id="blockquotes">Blockquotes</h2>
+<blockquote>
+<p>A blockquote contains quoted text.</p>
+<blockquote>
+<p>It can nest another level.</p>
+</blockquote>
+<p>And return to the first level.</p>
+</blockquote>
+<h2 id="code">Code</h2>
+<p>An indented code block:</p>
+<pre><code>def greet(name):
+    return &quot;Hello, &quot; + name</code></pre>
+<p>A fenced block with a language:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet(name):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="st">&quot;Hello, &quot;</span> <span class="op">+</span> name</span></code></pre></div>
+<h2 id="a-horizontal-rule">A horizontal rule</h2>
+<p>A rule separates sections.</p>
+<hr />
+<h2 id="notes">Notes</h2>
+<p>A sentence with an inline footnote.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> And one with a reference footnote.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>An inline footnote stays near its marker.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A reference footnote defined at the end of the document.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>]]></content>
+</entry>
+
+</feed>

@@ -1,0 +1,10 @@
+title: "Delta"
+href: "https://example.org/delta"
+priority: 2
+startDate: 2023-07-01
+status: alpha
+shortDescription: "A brand new one."
+longDescription: "Just getting started."
+team:
+  - Dana
+  - Erin

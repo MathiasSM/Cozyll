@@ -29,7 +29,8 @@ Note: build commands check for required content before running.
 -}
 cli :: IO ()
 cli = do
-    let contentDir = "content"
+    env <- parseEnv <$> lookupEnv "SITE_ENV"
+    let contentDir = contentDirFor env
     -- 1. Parse args
     args <- getArgs
     -- 2. Get and validate website files/config
@@ -61,7 +62,7 @@ ensureContentExists cfg = do
 loadSiteConfig :: FilePath -> Web.Website -> IO SiteConfig
 loadSiteConfig contentDir website = do
     let site = Web.websiteSite website
-    env <- siteEnv <$> lookupEnv "SITE_ENV"
+    env <- parseEnv <$> lookupEnv "SITE_ENV"
     name <- override "SITE_NAME" (Web.siteName site)
     description <- override "SITE_DESCRIPTION" (Web.siteDescription site)
     author <- override "SITE_AUTHOR" (Web.siteAuthor site)
@@ -101,8 +102,16 @@ loadSiteConfig contentDir website = do
             Nothing -> pure (Web.highlightStyle section)
             Just name -> maybe (die $ "unknown HIGHLIGHT_STYLE \"" ++ name ++ "\"") pure (Web.parseHighlightStyle name)
 
-    -- Defaults to Prod; unknown values currently also fall through to Prod.
-    -- TODO: Let's have a stricter parse; unknown values should fail
-    siteEnv (Just "prod") = Prod
-    siteEnv (Just "dev") = Dev
-    siteEnv _ = Prod
+{- | Parses @SITE_ENV@ (@dev@, @example@, or @prod@; defaults to 'Prod').
+TODO: Let's have a stricter parse; unknown values should fail
+-}
+parseEnv :: Maybe String -> Env
+parseEnv (Just "prod") = Prod
+parseEnv (Just "dev") = Dev
+parseEnv (Just "example") = Example
+parseEnv _ = Prod
+
+-- | The content directory an environment builds (@example@ builds the example content)
+contentDirFor :: Env -> FilePath
+contentDirFor Example = "example-content"
+contentDirFor _ = "content"
