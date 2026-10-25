@@ -1,13 +1,13 @@
-<ol class="main-list">
+<ol class="main-list h-feed">
     $for(posts)$
-        <li>
-            <a href="$url$">
+        <li class="h-entry">
+            <a class="u-url" href="$url$">
                 <article>
                     <header lang="$language$">
-                        <h2>$title$</h2>
+                        <h2 class="p-name">$title$</h2>
                         $partial("templates/post-date.html")$
                     </header>
-                    $if(description)$<div>$description$</div>$endif$
+                    $if(description)$<div class="p-summary">$description$</div>$endif$
                 </article>
             </a>
         </li>

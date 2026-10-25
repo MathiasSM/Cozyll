@@ -45,9 +45,12 @@ mkSiteConfig website contentTemplateNames =
             { siteName = Web.siteName site
             , siteDescription = Web.siteDescription site
             , siteAuthor = Web.siteAuthor site
+            , siteAuthorUrl = Web.siteAuthorUrl site
             , siteCopyrightYear = Web.siteCopyrightYear site
             , siteDomain = Web.siteDomain site
             , twitterHandle = Web.siteTwitterHandle site
+            , contactEmail = Web.contactEmail (Web.websiteContact website)
+            , contactPage = Web.contactPage (Web.websiteContact website)
             , mathjaxVersion = Web.mathjaxVersion (Web.websiteMathjax website)
             , highlightStyle = Web.highlightStyle (Web.websiteHighlight website)
             , contentDir = "content"
@@ -92,7 +95,7 @@ baseline in @test\/golden@.
 -}
 goldenTests :: FilePath -> FilePath -> [FilePath] -> TestTree
 goldenTests root snapshot files =
-    testGroup "golden" $
+    testGroup "snapshots" $
         [ goldenVsFile file (goldenDir </> file) (snapshot </> file) (pure ())
         | file <- files
         ]

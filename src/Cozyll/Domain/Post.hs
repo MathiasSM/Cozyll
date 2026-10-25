@@ -21,6 +21,9 @@ data Post = Post
     , postLanguage :: Language
     , postLastModified :: Maybe Day
     , postDraft :: Bool
+    , postAuthor :: Maybe String
+    , postAuthorUrl :: Maybe String
+    , postTags :: [String]
     }
     deriving (Eq, Show)
 
@@ -36,6 +39,9 @@ parsePost o = do
                 <*> languageOf o
                 <*> optional o K.LastModifiedAt
                 <*> (fromMaybe False <$> optional o K.Draft)
+                <*> optional o K.Author
+                <*> optional o K.AuthorUrl
+                <*> (fromMaybe [] <$> optional o K.Tags)
     case postLastModified post of
         Just modified
             | modified < postDate post -> Left ["lastModifiedAt: is before date"]

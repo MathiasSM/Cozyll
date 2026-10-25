@@ -28,8 +28,8 @@
 
     <body>
         <header class="site-header" lang="en">
-    <a class="site-logo" href="../">
-        <div>Example</div>
+    <a class="site-logo h-card u-url" href="../">
+        <div class="p-name">Example</div>
     </a>
     <div class="site-description">An example site</div>
     <nav class="site-menu">
@@ -52,16 +52,17 @@
   
 </div>
 
-<ol class="main-list">
+<ol class="main-list h-feed">
     
-        <li>
-            <a href="../blog/ruby-toggle">
+        <li class="h-entry">
+            <a class="u-url" href="../blog/ruby-toggle">
                 <article>
                     <header lang="en">
-                        <h2>Ruby toggle</h2>
+                        <h2 class="p-name">Ruby toggle</h2>
                         <div class="post-date-header">
-  <time datetime="2026-03-02">2026-03-02</time>
+  <time class="dt-published" datetime="2026-03-02">2026-03-02</time>
   
+  <span> by </span><span class="p-author h-card">Example Author</span>
 </div>
 
                     </header>
@@ -70,14 +71,15 @@
             </a>
         </li>
     
-        <li>
-            <a href="../blog/templated">
+        <li class="h-entry">
+            <a class="u-url" href="../blog/templated">
                 <article>
                     <header lang="en">
-                        <h2>Templated post</h2>
+                        <h2 class="p-name">Templated post</h2>
                         <div class="post-date-header">
-  <time datetime="2026-03-01">2026-03-01</time>
+  <time class="dt-published" datetime="2026-03-01">2026-03-01</time>
   
+  <span> by </span><span class="p-author h-card">Example Author</span>
 </div>
 
                     </header>
@@ -86,14 +88,15 @@
             </a>
         </li>
     
-        <li>
-            <a href="../blog/wip">
+        <li class="h-entry">
+            <a class="u-url" href="../blog/wip">
                 <article>
                     <header lang="en">
-                        <h2>Work in progress</h2>
+                        <h2 class="p-name">Work in progress</h2>
                         <div class="post-date-header">
-  <time datetime="2026-02-01">2026-02-01</time>
+  <time class="dt-published" datetime="2026-02-01">2026-02-01</time>
   
+  <span> by </span><span class="p-author h-card">Example Author</span>
 </div>
 
                     </header>
@@ -102,34 +105,36 @@
             </a>
         </li>
     
-        <li>
-            <a href="../hobbies/drawing">
+        <li class="h-entry">
+            <a class="u-url" href="../hobbies/drawing">
                 <article>
                     <header lang="en">
-                        <h2>Drawing</h2>
+                        <h2 class="p-name">Drawing</h2>
                         <div class="post-date-header">
-  <time datetime="2026-01-05">2026-01-05</time>
+  <time class="dt-published" datetime="2026-01-05">2026-01-05</time>
   
+  <span> by </span><span class="p-author h-card">Example Author</span>
 </div>
 
                     </header>
-                    <div>A hobby page.</div>
+                    <div class="p-summary">A hobby page.</div>
                 </article>
             </a>
         </li>
     
-        <li>
-            <a href="../blog/hello">
+        <li class="h-entry">
+            <a class="u-url" href="../blog/hello">
                 <article>
                     <header lang="en">
-                        <h2>Hello, world</h2>
+                        <h2 class="p-name">Hello, world</h2>
                         <div class="post-date-header">
-  <time datetime="2025-06-01">2025-06-01</time>
-  <span> (Updated on <time datetime="2025-07-02">2025-07-02</time>)</span>
+  <time class="dt-published" datetime="2025-06-01">2025-06-01</time>
+  <span> (Updated on <time class="dt-updated" datetime="2025-07-02">2025-07-02</time>)</span>
+  <span> by </span><a class="p-author h-card u-url" href="https://guest.example">Guest Author</a>
 </div>
 
                     </header>
-                    <div>A first post.</div>
+                    <div class="p-summary">A first post.</div>
                 </article>
             </a>
         </li>

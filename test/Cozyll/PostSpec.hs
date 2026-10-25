@@ -17,16 +17,19 @@ tests =
         "parsePostYaml"
         [ testCase "accepts a post with only title, date and path" $
             parse validPost
-                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" En Nothing False)
+                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" En Nothing False Nothing Nothing [])
         , testCase "reads language, last modification and draft" $
             parse (set "language" "es" $ set "lastModifiedAt" "2027-01-02" $ set "draft" "true" validPost)
-                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" Es (Just (day 2027 1 2)) True)
+                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" Es (Just (day 2027 1 2)) True Nothing Nothing [])
+        , testCase "reads author, authorUrl and tags" $
+            parse (set "author" "Jane" $ set "authorUrl" "https://jane.example" $ set "tags" "[one, two]" validPost)
+                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" En Nothing False (Just "Jane") (Just "https://jane.example") ["one", "two"])
         , testCase "rejects a lastModifiedAt before the date" $
             parse (set "lastModifiedAt" "2026-09-01" validPost)
                 @?= Left ["lastModifiedAt: is before date"]
         , testCase "allows a lastModifiedAt on the date" $
             parse (set "lastModifiedAt" "2026-10-06" validPost)
-                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" En (Just (day 2026 10 6)) False)
+                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" En (Just (day 2026 10 6)) False Nothing Nothing [])
         , testCase "ignores keys it doesn't model, even empty ones" $
             parse (set "description" "" $ set "TOC" "true" validPost)
                 @?= parse validPost

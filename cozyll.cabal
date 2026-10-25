@@ -53,6 +53,7 @@ library
                   , Cozyll.Context.Feed
                   , Cozyll.Context.Language
                   , Cozyll.Context.Nav
+                  , Cozyll.Context.Post
                   , Cozyll.Context.Project
                   , Cozyll.Context.Site
                   , Cozyll.Context.Social
@@ -144,14 +145,17 @@ test-suite golden
   main-is:          GoldenMain.hs
   hs-source-dirs:   test
   other-modules:    Golden
+                  , Mf2
   build-depends:    base
                   , hakyll
                   , cozyll
                   , tasty
                   , tasty-ant-xml
                   , tasty-golden
+                  , tasty-hunit
                   , bytestring
                   , directory
                   , filepath
+                  , tagsoup
                   , temporary
   ghc-options:      -threaded

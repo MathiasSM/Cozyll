@@ -18,7 +18,8 @@
         "author": { "type": "string", "description": "Site author, used in metadata." },
         "copyrightYear": { "type": "integer", "description": "The copyright year shown in the footer." },
         "domain": { "type": "string", "description": "The site's domain, without scheme." },
-        "twitterHandle": { "type": "string", "description": "The site's Twitter/X handle, without @." }
+        "twitterHandle": { "type": "string", "description": "The site's Twitter/X handle, without @." },
+        "authorUrl": { "type": "string", "description": "Optional. The site author's homepage URL, used as the default author link on posts." }
       }
     },
     "contact": {

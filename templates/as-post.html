@@ -1,9 +1,10 @@
-<article class="main-article">
+<article class="main-article h-entry">
   <header>
-    <h1>$title$</h1>
+    <h1 class="p-name">$title$</h1>
     <div>$partial("templates/post-date.html")$</div>
   </header>
   $partial("templates/site-aside.html")-$
-  $body$
+  <a class="u-url" href="$site-baseUrl$$path$" aria-hidden="true" tabindex="-1"></a>
+  <div class="e-content">$body$</div>
   <hr/>
 </article>
