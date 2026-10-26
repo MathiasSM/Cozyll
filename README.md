@@ -147,6 +147,13 @@ A data file may ship a JSON Schema, co-located as `content/data/name.schema.json
 
 See `src/Cozyll/Metadata.hs` or its documentation for a full list of supported fields. Other fields become available as part of the page/post's context, which you may use in templates or templates markup.
 
+### Social metadata
+
+Open Graph tags and JSON-LD structured data are emitted on posts, the home page, and standalone pages automatically.
+
+- `shareTitle` and `shareDescription` override the social title and description (which otherwise fall back to `title` and `description`).
+- `#main-image` on an image (`![alt](src){#main-image}`) marks it as the Open Graph / JSON-LD image; its URL is resolved to an absolute one.
+
 ## Adding a control (toggle)
 
 A control is a checkbox in a page's aside that toggles a CSS class on `<html>`

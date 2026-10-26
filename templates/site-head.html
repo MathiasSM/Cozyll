@@ -6,9 +6,8 @@
     <link rel="sitemap" type="application/xml" href="/sitemap.xml">
     <link rel="stylesheet" href="/styles.css" />
 
-    $if(jsonld)$$jsonld("embed")$$endif$
+    $if(jsonld)$$jsonld$$endif$
     $if(opengraph)$$opengraph$$endif$
-    $if(twitter)$$twitter$$endif$
 
     $for(feeds)$<link rel="alternate" type="application/atom+xml" title="$title$" href="$href$" />$endfor$
 

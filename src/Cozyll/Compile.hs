@@ -6,6 +6,7 @@ import Cozyll.Accessibility (checkAccessibility)
 import Cozyll.CleanURL (cleanIndexHtmls, cleanIndexUrls)
 import Cozyll.Config (SiteConfig, siteTemplate)
 import Cozyll.Content (tocLabelOf)
+import Cozyll.Context.SocialMeta (MainImage, mainImageOf)
 import Cozyll.Filters (processRubyText)
 import Cozyll.Html (readonlyCheckboxes)
 import Data.Maybe (isJust)
@@ -34,10 +35,12 @@ import Text.Pandoc.Writers.Shared (toTableOfContents)
 -- citeproc) is ever added, literal `@` in content must be escaped as `\@`, or
 -- those fragments will silently turn into citations.
 
-{- | Custom configuration for Pandoc, returning the rendered body and the table
-of contents (when @TOC@ is set), so templates can place the TOC separately.
+{- | Custom configuration for Pandoc, returning the rendered body, the table
+of contents (when @TOC@ is set), and the page's main image (when one is tagged
+@#main-image@), so templates can place the TOC separately and social metadata
+can use the image.
 -}
-runPandoc :: Item String -> Compiler (Item String, String)
+runPandoc :: Item String -> Compiler (Item String, String, Maybe MainImage)
 runPandoc item = do
     metadata <- getUnderlying >>= getMetadata
     let toc = isJust (tocLabelOf metadata)
@@ -45,7 +48,7 @@ runPandoc item = do
     let pandoc' = walk processRubyText (itemBody pandocItem)
         body = renderPandoc pandocItem pandoc'
         tocHtml = if toc then "<nav id=\"TOC\">" ++ renderPandoc pandocItem (tocPandoc pandoc') ++ "</nav>" else ""
-    pure (item{itemBody = body}, tocHtml)
+    pure (item{itemBody = body}, tocHtml, mainImageOf (itemBody pandocItem))
   where
     renderPandoc ident pandoc = itemBody (writePandocWith writerOptions (ident{itemBody = pandoc}))
 
