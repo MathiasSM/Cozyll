@@ -1,7 +1,7 @@
--- | The context every page is rendered with, and the contexts that depend on it
-module Cozyll.Context (globalContext, postSocialTagsContext) where
+-- | The context every page is rendered with
+module Cozyll.Context (globalContext) where
 
-import Cozyll.Config (SiteConfig, twitterHandle)
+import Cozyll.Config (SiteConfig)
 import Cozyll.Context.Data (dataContext)
 import Cozyll.Context.Feed (feedsContext)
 import Cozyll.Context.Language (languageContext)
@@ -12,11 +12,7 @@ import Hakyll (
     Context,
     Item (itemBody),
     boolField,
-    constField,
     defaultContext,
-    jsonldField,
-    openGraphField,
-    twitterCardField,
  )
 
 -- | Every field available to all pages and list items
@@ -35,19 +31,3 @@ mathContext :: Context String
 mathContext =
     boolField "math" $ \item ->
         "class=\"math " `isInfixOf` itemBody item
-
--- | Sets HTML (as context) for article metadata
-postSocialTagsContext :: SiteConfig -> Context String
-postSocialTagsContext cfg =
-    mconcat
-        [ twitterCardField "twitter" ctx
-        , openGraphField "opengraph" ctx
-        , jsonldField "jsonld" ctx
-        ]
-  where
-    ctx =
-        mconcat
-            [ constField "twitter-creator" (twitterHandle cfg)
-            , constField "twitter-site" (twitterHandle cfg)
-            , globalContext cfg
-            ]

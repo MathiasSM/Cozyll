@@ -16,6 +16,10 @@
     <published>2024-02-20T00:00:00Z</published>
     <updated>2024-02-20T00:00:00Z</updated>
     <content type="html"><![CDATA[<p>This post is a longer, flowing piece of prose. It exists because most of the other posts in the example content are short demonstrations that jump straight from one construct to the next, while real writing is mostly paragraphs.</p>
+<figure>
+<img src="https://example.com/images/logo.svg" alt="A regular image" />
+<figcaption aria-hidden="true">A regular image</figcaption>
+</figure>
 <h2 id="why-longer-text-matters">Why longer text matters</h2>
 <p>A real post is not a list of features. It is a sequence of paragraphs, each building on the last, with the occasional heading to give the reader a place to rest and a way to find their place again. Short posts do not exercise the styles that make longer text comfortable to read: the space between paragraphs, the measure of a line, and the way a heading clears the text around it.</p>
 <p>So this post stretches those styles. It also, as a matter of course, mixes in several of the constructs the example content demonstrates elsewhere, so they can be seen working together rather than in isolation.</p>
@@ -61,6 +65,10 @@
 <blockquote>
 <p>A paragraph is not a luxury; it is the basic unit of argument.</p>
 </blockquote>
+<figure id="main-image">
+<img src="https://example.com/images/photos/og-post.png" alt="Example post" />
+<figcaption aria-hidden="true">Example post</figcaption>
+</figure>
 <h2 id="where-to-go-next">Where to go next</h2>
 <p>From here, the other groups show the remaining features in detail: the <a href="https://example.com/languages/">languages</a> posts for ruby and CJK, the <a href="https://example.com/tables/">tables</a> posts for table syntax, and the <a href="https://example.com/elements/">elements</a> posts for raw HTML and controls.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">

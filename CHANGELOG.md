@@ -25,6 +25,10 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Self-documenting example content (`example-content/`) covering every front
   matter field, Markdown/Pandoc feature, and the engine's custom features; it
   doubles as the golden-test fixture.
+- `shareTitle` and `shareDescription` front matter, overriding the social title
+  and description.
+- A `#main-image` image attribute that marks an image as the page's Open Graph /
+  JSON-LD image.
 
 ### Changed
 
@@ -38,11 +42,15 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   moved to `example-content/`, built with `SITE_ENV=example`.
 - The golden tests snapshot `example-content/` instead of `test/fixtures/content`
   and `dev/example/`.
+- Social metadata is now generated in-house as Open Graph tags plus JSON-LD
+  structured data, for posts, the home page, and standalone pages.
 
 ### Removed
 
 - The `dev/example/` preview pages and `test/fixtures/content` fixtures,
   superseded by `example-content/`.
+- Twitter card tags, along with the `site.twitterHandle` configuration field and
+  the `TWITTER_HANDLE` environment override.
 
 ## [2.0.0.0] - 2026-10-23
 
