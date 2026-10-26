@@ -68,8 +68,6 @@ data SiteConfig = SiteConfig
     -- ^ Copyright year, exposed as @site-copyrightYear@
     , siteDomain :: String
     -- ^ Domain without scheme, exposed as @site-domain@
-    , twitterHandle :: String
-    -- ^ Twitter (X) handle (without \@), used for the social cards of posts
     , mathjaxVersion :: String
     {- ^ MathJax CDN version (from @mathjax:@ in @website.yaml@), exposed as @mathjax-version@
 

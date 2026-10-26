@@ -67,7 +67,6 @@ data Site = Site
     , siteAuthor :: String
     , siteCopyrightYear :: Int
     , siteDomain :: String
-    , siteTwitterHandle :: String
     }
     deriving (Eq, Show)
 
@@ -227,7 +226,6 @@ instance FromJSON Site where
             <*> o .: "author"
             <*> o .: "copyrightYear"
             <*> o .: "domain"
-            <*> o .: "twitterHandle"
 
 instance FromJSON Contact where
     parseJSON = withObject "contact" $ \o ->

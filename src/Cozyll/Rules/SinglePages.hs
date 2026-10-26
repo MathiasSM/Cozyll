@@ -8,6 +8,8 @@ import Cozyll.Content (isHidden, isTemplated)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Nav (navContext)
+import Cozyll.Context.SocialMeta (SocialKind (WebPage, WebSite), socialMetaContext)
+import Cozyll.Metadata (Key (Home), lookupKey)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
     Compiler,
@@ -16,7 +18,9 @@ import Hakyll (
     Item,
     Rules,
     compile,
+    getMetadata,
     getResourceString,
+    getUnderlying,
     matchMetadata,
     metadataRoute,
     route,
@@ -40,13 +44,13 @@ pageCompiler :: SiteConfig -> Page -> Compiler (Item String)
 pageCompiler cfg Page{pageName, pageContext, pageTemplates} = do
     ctx <- pageContext
     templated <- isTemplated
-    getResourceString
-        >>= (if templated then applyContentAsTemplate cfg ctx else return)
-        >>= runPandoc
-        >>= \(item', tocHtml) ->
-            let ctx' = asideContext tocHtml <> ctx
-             in applyTemplates ctx' ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
-                    >>= finish cfg (navContext cfg pageName <> ctx')
+    body <- getResourceString >>= (if templated then applyContentAsTemplate cfg ctx else return)
+    (item', tocHtml, mainImg) <- runPandoc body
+    metadata <- getUnderlying >>= getMetadata
+    let ctx' = asideContext tocHtml <> ctx
+        kind = if lookupKey Home metadata == Just "true" then WebSite else WebPage
+    applyTemplates ctx' ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
+        >>= finish cfg (socialMetaContext cfg kind mainImg <> navContext cfg pageName <> ctx')
 
 -- | Processes a standalone page, routed by its `path:` front matter
 processPage :: SiteConfig -> Page -> Rules ()

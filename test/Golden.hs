@@ -47,7 +47,6 @@ mkSiteConfig website contentTemplateNames =
             , siteAuthor = Web.siteAuthor site
             , siteCopyrightYear = Web.siteCopyrightYear site
             , siteDomain = Web.siteDomain site
-            , twitterHandle = Web.siteTwitterHandle site
             , mathjaxVersion = Web.mathjaxVersion (Web.websiteMathjax website)
             , highlightStyle = Web.highlightStyle (Web.websiteHighlight website)
             , contentDir = "content"

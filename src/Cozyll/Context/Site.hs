@@ -15,5 +15,5 @@ siteContext cfg =
         , constField "site-baseUrl" (baseUrl cfg)
         , constField "site-domain" (siteDomain cfg)
         , constField "mathjax-version" (mathjaxVersion cfg)
-        , constField "root" (baseUrl cfg) -- read by Hakyll's own social cards
+        , constField "root" (baseUrl cfg) -- absolute origin used by the atom feeds
         ]
