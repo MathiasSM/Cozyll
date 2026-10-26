@@ -68,7 +68,6 @@ loadSiteConfig contentDir website = do
     author <- override "SITE_AUTHOR" (Web.siteAuthor site)
     year <- override "SITE_COPYRIGHT_YEAR" (Web.siteCopyrightYear site)
     domain <- override "SITE_DOMAIN" (Web.siteDomain site)
-    twitter <- override "TWITTER_HANDLE" (Web.siteTwitterHandle site)
     mathjax <- override "MATHJAX_VERSION" (Web.mathjaxVersion (Web.websiteMathjax website))
     highlight <- highlightStyleFromEnv (Web.websiteHighlight website)
     contentTemplates <- discoverContentTemplateNames (contentDir </> "templates")
@@ -79,7 +78,6 @@ loadSiteConfig contentDir website = do
             , siteAuthor = author
             , siteCopyrightYear = year
             , siteDomain = domain
-            , twitterHandle = twitter
             , mathjaxVersion = mathjax
             , highlightStyle = highlight
             , contentDir = contentDir

@@ -7,6 +7,8 @@ path: /prose/tour
 
 This post is a longer, flowing piece of prose. It exists because most of the other posts in the example content are short demonstrations that jump straight from one construct to the next, while real writing is mostly paragraphs.
 
+![A regular image](/images/logo.svg)
+
 ## Why longer text matters
 
 A real post is not a list of features. It is a sequence of paragraphs, each building on the last, with the occasional heading to give the reader a place to rest and a way to find their place again. Short posts do not exercise the styles that make longer text comfortable to read: the space between paragraphs, the measure of a line, and the way a heading clears the text around it.
@@ -41,6 +43,8 @@ main = putStrLn "An example"
 And a quote, for good measure:
 
 > A paragraph is not a luxury; it is the basic unit of argument.
+
+![Example post](/images/photos/og-post.png){#main-image}
 
 ## Where to go next
 

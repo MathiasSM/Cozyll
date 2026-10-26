@@ -27,6 +27,10 @@ data Key
       Aliases
     | -- | A short description, used for the feed and page metadata.
       Description
+    | -- | Overrides 'Description' in social metadata (open graph and JSON-LD).
+      ShareDescription
+    | -- | Overrides 'Title' in social metadata (open graph and JSON-LD).
+      ShareTitle
     | -- | An icon name, resolved to @images/icons/<name>.svg@.
       Icon
     | -- | The item's language (@en@, @es@, or @ja@; defaults to @en@).
@@ -37,6 +41,8 @@ data Key
       Group
     | -- | Marks a page as a group's index page (@index: true@).
       Index
+    | -- | Marks a standalone page as the site's home page (@home: true@).
+      Home
     | -- | Include the page as a menu label (requires 'NavOrder').
       Nav
     | -- | The menu sort order (lower first).
@@ -88,6 +94,7 @@ keyName key = case key of
     Draft -> "draft"
     EndDate -> "endDate"
     Group -> "group"
+    Home -> "home"
     Href -> "href"
     Icon -> "icon"
     Index -> "index"
@@ -98,6 +105,8 @@ keyName key = case key of
     NavOrder -> "navOrder"
     Path -> "path"
     Priority -> "priority"
+    ShareDescription -> "shareDescription"
+    ShareTitle -> "shareTitle"
     ShortDescription -> "shortDescription"
     ShowAbout -> "showAbout"
     ShowContact -> "showContact"

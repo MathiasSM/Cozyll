@@ -56,6 +56,7 @@ library
                   , Cozyll.Context.Project
                   , Cozyll.Context.Site
                   , Cozyll.Context.Social
+                  , Cozyll.Context.SocialMeta
                   , Cozyll.Discover
                   , Cozyll.Domain.Feed
                   , Cozyll.Domain.Language
@@ -125,16 +126,19 @@ test-suite spec
                   , Cozyll.PostSpec
                   , Cozyll.ProjectSpec
                   , Cozyll.RedirectsSpec
+                  , Cozyll.SocialMetaSpec
                   , Cozyll.SocialSpec
                   , Cozyll.ThemeSpec
   build-depends:    base
                   , hakyll
                   , cozyll
                   , aeson
+                  , pandoc
                   , tasty
                   , tasty-ant-xml
                   , tasty-hunit
                   , tasty-quickcheck
+                  , text
                   , time
   ghc-options:      -threaded
 

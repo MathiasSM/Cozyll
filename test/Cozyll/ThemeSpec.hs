@@ -17,7 +17,6 @@ mkConfig names =
         , siteAuthor = ""
         , siteCopyrightYear = 0
         , siteDomain = "example.com"
-        , twitterHandle = ""
         , mathjaxVersion = ""
         , highlightStyle = Pygments
         , contentDir = "content"
