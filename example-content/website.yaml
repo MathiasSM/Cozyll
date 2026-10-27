@@ -3,9 +3,8 @@
 # This drives the build when SITE_ENV=example (and the golden tests). It uses
 # neutral values so the generated output carries no personal identity.
 site:
-  name: Example
+  title: Example
   description: An example site
-  author: Example Author
   copyrightYear: 2020
   domain: example.com
   alternateName: ["Ex", "example.com"]

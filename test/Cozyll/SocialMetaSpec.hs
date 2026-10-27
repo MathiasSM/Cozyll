@@ -37,9 +37,8 @@ metadataOf = KeyMap.fromList . map (\(key, value) -> (AesonKey.fromText key, Str
 mkConfig :: SiteConfig
 mkConfig =
     SiteConfig
-        { siteName = "site"
+        { siteTitle = "site"
         , siteDescription = ""
-        , siteAuthor = ""
         , siteCopyrightYear = 0
         , siteDomain = "example.com"
         , siteAlternateNames = []
@@ -248,9 +247,8 @@ siteParsingTests =
   where
     siteWithExtras =
         unlines
-            [ "name: Example"
+            [ "title: Example"
             , "description: An example site"
-            , "author: Example Author"
             , "copyrightYear: 2020"
             , "domain: example.com"
             , "alternateName: [Ex, example.com]"
@@ -258,9 +256,8 @@ siteParsingTests =
             ]
     siteMinimal =
         unlines
-            [ "name: Example"
+            [ "title: Example"
             , "description: An example site"
-            , "author: Example Author"
             , "copyrightYear: 2020"
             , "domain: example.com"
             ]
