@@ -2,5 +2,6 @@
 ./favicon-192.png PNG 192x192 
 ./favicon-512.png PNG 512x512 
 ./favicon.ico ICO 32x32 
+./images/logo.png PNG 512x512 
 ./images/photos/og-home.png PNG 1200x630 
 ./images/photos/og-post.png PNG 1200x630 

@@ -8,6 +8,8 @@ site:
   author: Example Author
   copyrightYear: 2020
   domain: example.com
+  alternateName: ["Ex", "example.com"]
+  logo: images/logo.png
 
 contact:
   email: contact@example.com

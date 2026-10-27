@@ -9,6 +9,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Added
 
+- `site.logo` and `site.alternateName` in `website.yaml`, published and surfaced
+  in JSON-LD.
 - A per-page aside, rendered to the right of the article on desktop (and above
   it on mobile), that holds the reading controls and the table of contents. It
   only renders when it has something to show.

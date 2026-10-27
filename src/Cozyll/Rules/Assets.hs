@@ -44,6 +44,7 @@ processAssets cfg = do
     processDotImages cfg
     processFavicon cfg
     justCopy (mediaPattern cfg "photos" ["jpg", "png", "gif"]) (mediaRoute (mediaDir cfg))
+    justCopy (mediaPattern cfg "branding" ["png"]) (mediaRoute (mediaDir cfg))
     processDataFiles cfg
 
 -- | Makes the data files (YAML) and their schemas loadable; they are not routed

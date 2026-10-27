@@ -8,11 +8,13 @@
 
 # The site's identity.
 site:
-  name: MathiasSM
-  description: Software Development Engineer
-  author: Mathias San Miguel
+  name: Example
+  description: Example description
+  author: John Doe
   copyrightYear: 2013
-  domain: mathiassm.dev
+  domain: example.com
+  alternateName: ["Cozyll Example"]
+  logo: images/logo.png
 
 # How to reach the site owner.
 contact:
