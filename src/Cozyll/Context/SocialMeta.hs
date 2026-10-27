@@ -18,7 +18,7 @@ module Cozyll.Context.SocialMeta (
     descriptionOf,
 ) where
 
-import Cozyll.Config (SiteConfig, baseUrl, siteAuthor, siteDescription, siteName)
+import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteAuthor, siteDescription, siteLogo, siteName)
 import Cozyll.JsonLd qualified as JsonLd
 import Cozyll.Metadata (Key (..), lookupKey)
 import Data.Aeson (ToJSON, object, (.=))
@@ -192,7 +192,9 @@ jsonObject cfg kind pageMeta mainImage = case kind of
             <> "name" .= siteName cfg
             <> "description" .= siteDescription cfg
             <> "url" .= (baseUrl cfg ++ "/")
+            <> optionalField "alternateName" (nonEmptyList (siteAlternateNames cfg))
             <> "author" .= person
+            <> "publisher" .= organization
             <> "inLanguage" .= pageMetaLanguage pageMeta
             <> imageSeries
     WebPage ->
@@ -206,7 +208,15 @@ jsonObject cfg kind pageMeta mainImage = case kind of
   where
     context = "@context" .= ("https://schema.org" :: String)
     person = object ["@type" .= ("Person" :: String), "name" .= siteAuthor cfg]
-    organization = object ["@type" .= ("Organization" :: String), "name" .= siteName cfg]
+    organization =
+        object $
+            [ "@type" .= ("Organization" :: String)
+            , "name" .= siteName cfg
+            ]
+                ++ maybe [] ((\logo -> ["logo" .= logo]) . absoluteImageUrl cfg) (siteLogo cfg)
+
+    nonEmptyList [] = Nothing
+    nonEmptyList values = Just values
 
     imageSeries = optionalField "image" (absoluteImageUrl cfg . src <$> mainImage)
 

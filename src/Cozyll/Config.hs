@@ -68,6 +68,10 @@ data SiteConfig = SiteConfig
     -- ^ Copyright year, exposed as @site-copyrightYear@
     , siteDomain :: String
     -- ^ Domain without scheme, exposed as @site-domain@
+    , siteAlternateNames :: [String]
+    -- ^ Alternate site names, exposed as @site-alternateNames@ (JSON-LD only for now)
+    , siteLogo :: Maybe String
+    -- ^ Site-relative path to the raster logo (e.g. @images/logo.png@), for JSON-LD
     , mathjaxVersion :: String
     {- ^ MathJax CDN version (from @mathjax:@ in @website.yaml@), exposed as @mathjax-version@
 
