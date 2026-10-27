@@ -44,6 +44,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   and `dev/example/`.
 - Social metadata is now generated in-house as Open Graph tags plus JSON-LD
   structured data, for posts, the home page, and standalone pages.
+- Extracted the pure JSON-LD building blocks into a new `Cozyll.JsonLd`
+  module (no behaviour change).
 
 ### Removed
 

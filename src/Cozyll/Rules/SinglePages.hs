@@ -8,7 +8,7 @@ import Cozyll.Content (isHidden, isTemplated)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (SocialKind (WebPage, WebSite), socialMetaContext)
+import Cozyll.Context.SocialMeta (SocialKind (WebPage, WebSite), pageMetaOf, socialMetaContext)
 import Cozyll.Metadata (Key (Home), lookupKey)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
@@ -48,9 +48,10 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates} = do
     (item', tocHtml, mainImg) <- runPandoc body
     metadata <- getUnderlying >>= getMetadata
     let ctx' = asideContext tocHtml <> ctx
+        pageMeta = pageMetaOf cfg metadata
         kind = if lookupKey Home metadata == Just "true" then WebSite else WebPage
     applyTemplates ctx' ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
-        >>= finish cfg (socialMetaContext cfg kind mainImg <> navContext cfg pageName <> ctx')
+        >>= finish cfg (socialMetaContext cfg kind pageMeta mainImg <> navContext cfg pageName <> ctx')
 
 -- | Processes a standalone page, routed by its `path:` front matter
 processPage :: SiteConfig -> Page -> Rules ()
