@@ -11,11 +11,10 @@
       "type": "object",
       "description": "The site's identity.",
       "additionalProperties": false,
-      "required": ["name", "description", "author", "copyrightYear", "domain"],
+      "required": ["title", "description", "copyrightYear", "domain"],
       "properties": {
-        "name": { "type": "string", "description": "Site name, used in titles and the footer." },
+        "title": { "type": "string", "description": "Site title, used in titles and the footer." },
         "description": { "type": "string", "description": "Short site description." },
-        "author": { "type": "string", "description": "Site author, used in metadata." },
         "copyrightYear": { "type": "integer", "description": "The copyright year shown in the footer." },
         "domain": { "type": "string", "description": "The site's domain, without scheme." },
         "alternateName": { "type": "array", "description": "Alternate site names.", "items": { "type": "string" } },
