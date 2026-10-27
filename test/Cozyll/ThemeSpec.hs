@@ -3,6 +3,7 @@ module Cozyll.ThemeSpec (tests) where
 
 import Cozyll.Config (Env (Dev), SiteConfig (..), resolveTemplate)
 import Cozyll.Domain.Website (HighlightStyle (Pygments))
+import Cozyll.TestUtils (mkAuthor)
 import Cozyll.Theme (rewritePartials)
 import Hakyll (toFilePath)
 import Test.Tasty (TestTree, testGroup)
@@ -19,6 +20,8 @@ mkConfig names =
         , siteDomain = "example.com"
         , siteAlternateNames = []
         , siteLogo = Nothing
+        , siteAuthors = [mkAuthor ""]
+        , siteDefaultAuthor = mkAuthor ""
         , mathjaxVersion = ""
         , highlightStyle = Pygments
         , contentDir = "content"

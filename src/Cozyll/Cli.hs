@@ -5,6 +5,7 @@ module Cozyll.Cli (cli) where
 
 import Control.Monad (filterM, unless)
 import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
+import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
@@ -71,6 +72,8 @@ loadSiteConfig contentDir website = do
     mathjax <- override "MATHJAX_VERSION" (Web.mathjaxVersion (Web.websiteMathjax website))
     highlight <- highlightStyleFromEnv (Web.websiteHighlight website)
     contentTemplates <- discoverContentTemplateNames (contentDir </> "templates")
+    authors <- Author.loadAuthors contentDir
+    defaultAuthor' <- either (die . unlines) pure (Author.defaultAuthor authors)
     pure
         SiteConfig
             { siteName = name
@@ -80,6 +83,8 @@ loadSiteConfig contentDir website = do
             , siteDomain = domain
             , siteAlternateNames = Web.siteAlternateNames site
             , siteLogo = Web.siteLogo site
+            , siteAuthors = authors
+            , siteDefaultAuthor = defaultAuthor'
             , mathjaxVersion = mathjax
             , highlightStyle = highlight
             , contentDir = contentDir

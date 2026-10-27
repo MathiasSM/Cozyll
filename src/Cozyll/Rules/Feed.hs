@@ -3,8 +3,9 @@ module Cozyll.Rules.Feed (processFeeds) where
 
 import Control.Monad (forM_)
 import Cozyll.CleanURL (cleanIndex)
-import Cozyll.Config (SiteConfig, baseUrl, postSnapshot, postsPattern, resolveTemplate, siteAuthor)
+import Cozyll.Config (SiteConfig, baseUrl, postSnapshot, postsPattern, resolveTemplate, siteDefaultAuthor)
 import Cozyll.Content (requirePostOf)
+import Cozyll.Domain.Author (authorName)
 import Cozyll.Domain.Feed (Feed (..), absoluteUrl, feeds)
 import Cozyll.Domain.Post (Post (..))
 import Cozyll.Domain.Website (Website (websiteFeed), feedSize)
@@ -53,7 +54,7 @@ configuration cfg feed =
     FeedConfiguration
         { feedTitle = Cozyll.Domain.Feed.feedTitle feed
         , feedDescription = Cozyll.Domain.Feed.feedDescription feed
-        , feedAuthorName = siteAuthor cfg
+        , feedAuthorName = authorName (siteDefaultAuthor cfg)
         , feedAuthorEmail = ""
         , feedRoot = baseUrl cfg
         }
