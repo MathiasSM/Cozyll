@@ -40,6 +40,7 @@ mkConfig =
         { siteTitle = "site"
         , siteDescription = ""
         , siteCopyrightYear = 0
+        , siteCurrentYear = 2021
         , siteDomain = "example.com"
         , siteAlternateNames = []
         , siteLogo = Nothing
