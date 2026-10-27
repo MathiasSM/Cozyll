@@ -1,7 +1,8 @@
 -- | Site-wide information (name, description, author, URLs) as template fields
 module Cozyll.Context.Site (siteContext) where
 
-import Cozyll.Config (SiteConfig, baseUrl, mathjaxVersion, siteCopyrightYear, siteDescription, siteDomain, siteTitle)
+import Cozyll.Config (SiteConfig, baseUrl, mathjaxVersion, siteCopyrightYear, siteCurrentYear, siteDescription, siteDomain, siteTitle)
+import Cozyll.Format (yearRange)
 import Hakyll (Context, constField)
 
 -- | Sets site-wide information (site-<info>)
@@ -11,6 +12,7 @@ siteContext cfg =
         [ constField "site-title" (siteTitle cfg)
         , constField "site-description" (siteDescription cfg)
         , constField "site-copyrightYear" (show $ siteCopyrightYear cfg)
+        , constField "site-copyrightRange" (yearRange (siteCopyrightYear cfg) (siteCurrentYear cfg))
         , constField "site-baseUrl" (baseUrl cfg)
         , constField "site-domain" (siteDomain cfg)
         , constField "mathjax-version" (mathjaxVersion cfg)

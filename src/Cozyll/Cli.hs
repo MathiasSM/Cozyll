@@ -10,6 +10,8 @@ import Cozyll.Domain.Website qualified as Web
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
 import Data.Maybe (fromMaybe)
+import Data.Time (getCurrentTime, utctDay)
+import Data.Time.Calendar (toGregorian)
 import Hakyll (hakyllWith)
 import System.Directory (doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs, lookupEnv)
@@ -73,11 +75,15 @@ loadSiteConfig contentDir website = do
     contentTemplates <- discoverContentTemplateNames (contentDir </> "templates")
     authors <- Author.loadAuthors contentDir
     defaultAuthor' <- either (die . unlines) pure (Author.defaultAuthor authors)
+    today <- utctDay <$> getCurrentTime
+    let (currentYearInteger, _, _) = toGregorian today
+        currentYear = fromIntegral currentYearInteger
     pure
         SiteConfig
             { siteTitle = title
             , siteDescription = description
             , siteCopyrightYear = year
+            , siteCurrentYear = currentYear
             , siteDomain = domain
             , siteAlternateNames = Web.siteAlternateNames site
             , siteLogo = Web.siteLogo site
