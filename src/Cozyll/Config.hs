@@ -60,12 +60,10 @@ data Env = Dev | Example | Prod
 Every field maps to an environment variable; see @.env.example@
 -}
 data SiteConfig = SiteConfig
-    { siteName :: String
-    -- ^ Site name, exposed to templates as @site-name@
+    { siteTitle :: String
+    -- ^ Site title, exposed to templates as @site-title@
     , siteDescription :: String
     -- ^ Site tagline, exposed as @site-description@
-    , siteAuthor :: String
-    -- ^ Site author, exposed as @site-author@
     , siteCopyrightYear :: Int
     -- ^ Copyright year, exposed as @site-copyrightYear@
     , siteDomain :: String

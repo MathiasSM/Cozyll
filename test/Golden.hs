@@ -44,9 +44,8 @@ mkSiteConfig website authors contentTemplateNames =
     let site = Web.websiteSite website
         defaultAuthor' = either (error . unlines) id (Author.defaultAuthor authors)
      in SiteConfig
-            { siteName = Web.siteName site
+            { siteTitle = Web.siteTitle site
             , siteDescription = Web.siteDescription site
-            , siteAuthor = Web.siteAuthor site
             , siteCopyrightYear = Web.siteCopyrightYear site
             , siteDomain = Web.siteDomain site
             , siteAlternateNames = Web.siteAlternateNames site

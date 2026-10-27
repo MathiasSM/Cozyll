@@ -12,7 +12,7 @@
     $for(feeds)$<link rel="alternate" type="application/atom+xml" title="$title$" href="$href$" />$endfor$
 
     <link rel="canonical" href="$site-baseUrl$$path$"/>
-    <title>$if(home)$$site-name$ - $site-description$$else$$title$ - $site-name$$endif$</title>
+    <title>$if(home)$$site-title$ - $site-description$$else$$title$ - $site-title$$endif$</title>
     $if(description)$<meta name="description" content="$description$" />$endif$
 
     <link rel="icon" href="/favicon.ico" sizes="any">

@@ -18,7 +18,7 @@ module Cozyll.Context.SocialMeta (
     descriptionOf,
 ) where
 
-import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLogo, siteName)
+import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLogo, siteTitle)
 import Cozyll.Domain.Author (authorName)
 import Cozyll.JsonLd qualified as JsonLd
 import Cozyll.Metadata (Key (..), lookupKey)
@@ -139,7 +139,7 @@ openGraph cfg kind pageMeta mainImage =
         , meta "og:title" (pageMetaTitle pageMeta)
         ]
             <> maybe [] (\description -> [meta "og:description" description]) (pageMetaDescription pageMeta)
-            <> [ meta "og:site_name" (siteName cfg)
+            <> [ meta "og:site_name" (siteTitle cfg)
                , meta "og:locale" (localeOf (pageMetaLanguage pageMeta))
                ]
             <> maybe [] imageTags mainImage
@@ -190,7 +190,7 @@ jsonObject cfg kind pageMeta mainImage = case kind of
     WebSite ->
         context
             <> "@type" .= ("WebSite" :: String)
-            <> "name" .= siteName cfg
+            <> "name" .= siteTitle cfg
             <> "description" .= siteDescription cfg
             <> "url" .= (baseUrl cfg ++ "/")
             <> optionalField "alternateName" (nonEmptyList (siteAlternateNames cfg))
@@ -212,7 +212,7 @@ jsonObject cfg kind pageMeta mainImage = case kind of
     organization =
         object $
             [ "@type" .= ("Organization" :: String)
-            , "name" .= siteName cfg
+            , "name" .= siteTitle cfg
             ]
                 ++ maybe [] ((\logo -> ["logo" .= logo]) . absoluteImageUrl cfg) (siteLogo cfg)
 

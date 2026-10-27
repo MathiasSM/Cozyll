@@ -64,9 +64,8 @@ loadSiteConfig :: FilePath -> Web.Website -> IO SiteConfig
 loadSiteConfig contentDir website = do
     let site = Web.websiteSite website
     env <- parseEnv <$> lookupEnv "SITE_ENV"
-    name <- override "SITE_NAME" (Web.siteName site)
+    title <- override "SITE_TITLE" (Web.siteTitle site)
     description <- override "SITE_DESCRIPTION" (Web.siteDescription site)
-    author <- override "SITE_AUTHOR" (Web.siteAuthor site)
     year <- override "SITE_COPYRIGHT_YEAR" (Web.siteCopyrightYear site)
     domain <- override "SITE_DOMAIN" (Web.siteDomain site)
     mathjax <- override "MATHJAX_VERSION" (Web.mathjaxVersion (Web.websiteMathjax website))
@@ -76,9 +75,8 @@ loadSiteConfig contentDir website = do
     defaultAuthor' <- either (die . unlines) pure (Author.defaultAuthor authors)
     pure
         SiteConfig
-            { siteName = name
+            { siteTitle = title
             , siteDescription = description
-            , siteAuthor = author
             , siteCopyrightYear = year
             , siteDomain = domain
             , siteAlternateNames = Web.siteAlternateNames site

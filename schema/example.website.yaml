@@ -8,9 +8,8 @@
 
 # The site's identity.
 site:
-  name: MathiasSM
+  title: MathiasSM
   description: Software Development Engineer
-  author: Mathias San Miguel
   copyrightYear: 2013
   domain: mathiassm.dev
   alternateName: ["MathiasSM", "mathiassm.dev"]
