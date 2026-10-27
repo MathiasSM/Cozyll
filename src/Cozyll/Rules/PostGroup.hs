@@ -8,7 +8,7 @@ import Cozyll.Content (isHidden, isTemplated, requirePost)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (SocialKind (Article), socialMetaContext)
+import Cozyll.Context.SocialMeta (SocialKind (Article), pageMetaOf, socialMetaContext)
 import Cozyll.Rules.SinglePages (Page (..), page, processPage)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
@@ -16,7 +16,9 @@ import Hakyll (
     Context,
     Rules,
     compile,
+    getMetadata,
     getResourceString,
+    getUnderlying,
     listField,
     loadAllSnapshots,
     matchMetadata,
@@ -51,11 +53,13 @@ processPostGroupItems cfg groupName =
             getResourceString
                 >>= (if templated then applyContentAsTemplate cfg (globalContext cfg) else return)
                 >>= runPandoc
-                >>= \(item', tocHtml, mainImg) ->
-                    let ctx' = asideContext tocHtml <> globalContext cfg
-                     in saveSnapshot (postSnapshot groupName) item'
-                            >>= applyTemplates ctx' [minimalTemplate cfg, postTemplate cfg]
-                            >>= finish cfg (socialMetaContext cfg Article mainImg <> navContext cfg groupName <> ctx')
+                >>= \(item', tocHtml, mainImg) -> do
+                    metadata <- getUnderlying >>= getMetadata
+                    let pageMeta = pageMetaOf cfg metadata
+                        ctx' = asideContext tocHtml <> globalContext cfg
+                    saveSnapshot (postSnapshot groupName) item'
+                        >>= applyTemplates ctx' [minimalTemplate cfg, postTemplate cfg]
+                        >>= finish cfg (socialMetaContext cfg Article pageMeta mainImg <> navContext cfg groupName <> ctx')
 
 -- | Build context for archive page
 getCtx :: SiteConfig -> String -> Compiler (Context String)

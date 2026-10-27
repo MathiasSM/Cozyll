@@ -1,9 +1,10 @@
--- | Tests for the social-meta helpers: main-image detection, URLs, dates, locales, and titles
+-- | Tests for the social-meta helpers: main-image detection, page metadata, URLs, dates, locales, and titles
 module Cozyll.SocialMetaSpec (tests) where
 
 import Cozyll.Config (Env (Dev), SiteConfig (..))
 import Cozyll.Context.SocialMeta (
     MainImage (..),
+    PageMeta (..),
     SocialKind (..),
     absoluteImageUrl,
     absoluteUrl,
@@ -12,6 +13,7 @@ import Cozyll.Context.SocialMeta (
     localeOf,
     mainImageOf,
     ogType,
+    pageMetaOf,
     titleOf,
  )
 import Cozyll.Domain.Website (HighlightStyle (Pygments))
@@ -59,6 +61,7 @@ tests =
     testGroup
         "SocialMeta"
         [ mainImageOfTests
+        , pageMetaOfTests
         , absoluteUrlTests
         , absoluteImageUrlTests
         , isoDateTests
@@ -88,6 +91,42 @@ mainImageOfTests =
         , testCase "uses the title as alt when there is no alt text" $
             mainImageOf (markdown "![](img.png 'Title'){#main-image}")
                 @?= Just (MainImage "img.png" "Title")
+        ]
+
+pageMetaOfTests :: TestTree
+pageMetaOfTests =
+    testGroup
+        "pageMetaOf"
+        [ testCase "collects the title, description, URL, language, and dates" $
+            pageMetaOf
+                mkConfig
+                ( metadataOf
+                    [ ("title", "T")
+                    , ("description", "D")
+                    , ("path", "prose/tour/")
+                    , ("language", "es")
+                    , ("date", "2024-02-10")
+                    , ("lastModifiedAt", "2024-03-01")
+                    ]
+                )
+                @?= PageMeta
+                    { pageMetaTitle = "T"
+                    , pageMetaDescription = Just "D"
+                    , pageMetaUrl = "https://example.com/prose/tour/"
+                    , pageMetaLanguage = "es"
+                    , pageMetaPublished = Just "2024-02-10"
+                    , pageMetaModified = Just "2024-03-01"
+                    }
+        , testCase "falls back to the site root, English, and no dates" $
+            pageMetaOf mkConfig (metadataOf [("title", "T")])
+                @?= PageMeta
+                    { pageMetaTitle = "T"
+                    , pageMetaDescription = Nothing
+                    , pageMetaUrl = "https://example.com/"
+                    , pageMetaLanguage = "en"
+                    , pageMetaPublished = Nothing
+                    , pageMetaModified = Nothing
+                    }
         ]
 
 absoluteUrlTests :: TestTree

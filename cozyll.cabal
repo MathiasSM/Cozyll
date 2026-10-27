@@ -67,6 +67,7 @@ library
                   , Cozyll.Domain.Website
                   , Cozyll.Filters
                   , Cozyll.Html
+                  , Cozyll.JsonLd
                   , Cozyll.Metadata
                   , Cozyll.Rules
                   , Cozyll.Rules.Assets
@@ -120,6 +121,7 @@ test-suite spec
                   , Cozyll.DataSpec
                   , Cozyll.FeedSpec
                   , Cozyll.HtmlSpec
+                  , Cozyll.JsonLdSpec
                   , Cozyll.LanguageSpec
                   , Cozyll.MetadataSpec
                   , Cozyll.NavSpec
