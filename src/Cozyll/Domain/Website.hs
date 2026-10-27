@@ -62,9 +62,8 @@ import Text.Pandoc.Highlighting (Style, breezeDark, espresso, haddock, kate, mon
 
 -- | The @site:@ section: the site's identity
 data Site = Site
-    { siteName :: String
+    { siteTitle :: String
     , siteDescription :: String
-    , siteAuthor :: String
     , siteCopyrightYear :: Int
     , siteDomain :: String
     , siteAlternateNames :: [String]
@@ -223,9 +222,8 @@ data Website = Website
 instance FromJSON Site where
     parseJSON = withObject "site" $ \o ->
         Site
-            <$> o .: "name"
+            <$> o .: "title"
             <*> o .: "description"
-            <*> o .: "author"
             <*> o .: "copyrightYear"
             <*> o .: "domain"
             <*> o .:? "alternateName" .!= []

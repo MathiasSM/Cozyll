@@ -36,6 +36,9 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Changed
 
+- `site.name` and `site.author` collapse into a single required `site.title`
+  (breaking): `$site-name$`/`$site-author$` become `$site-title$`, and the
+  `SITE_NAME`/`SITE_AUTHOR` env overrides become `SITE_TITLE`.
 - The ruby toggle is now declared with `rubyToggle: <label>` (a markdown-rendered
   label) instead of `showRubyToggle: true`.
 - Control templates moved to `templates/controls--<name>-toggle.html`, and the

@@ -2,7 +2,7 @@
 module Cozyll.Domain.Feed (Feed (..), feedHref, feeds, absoluteUrl) where
 
 import Cozyll.CleanURL (outputPath)
-import Cozyll.Config (SiteConfig, pagesPattern, projectsGroup, siteName)
+import Cozyll.Config (SiteConfig, pagesPattern, projectsGroup, siteTitle)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Metadata (Key (Description, Path, Title), lookupKey)
 import Data.Either (lefts, rights)
@@ -52,7 +52,7 @@ feedOf cfg group = do
                     Right
                         Feed
                             { feedGroup = group
-                            , feedTitle = fromMaybe group (lookupKey Title metadata) ++ " - " ++ siteName cfg
+                            , feedTitle = fromMaybe group (lookupKey Title metadata) ++ " - " ++ siteTitle cfg
                             , feedDescription = fromMaybe "" (lookupKey Description metadata)
                             , feedFile = takeDirectory (outputPath path) </> "atom.xml"
                             }

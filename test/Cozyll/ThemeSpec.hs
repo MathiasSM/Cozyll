@@ -13,9 +13,8 @@ import Test.Tasty.HUnit (testCase, (@?=))
 mkConfig :: [FilePath] -> SiteConfig
 mkConfig names =
     SiteConfig
-        { siteName = "site"
+        { siteTitle = "site"
         , siteDescription = ""
-        , siteAuthor = ""
         , siteCopyrightYear = 0
         , siteDomain = "example.com"
         , siteAlternateNames = []
