@@ -58,6 +58,7 @@ library
                   , Cozyll.Context.Social
                   , Cozyll.Context.SocialMeta
                   , Cozyll.Discover
+                  , Cozyll.Domain.Author
                   , Cozyll.Domain.Feed
                   , Cozyll.Domain.Language
                   , Cozyll.Domain.Nav
@@ -116,6 +117,7 @@ test-suite spec
   other-modules:    Cozyll.TestUtils
                   , Cozyll.AccessibilitySpec
                   , Cozyll.AsideSpec
+                  , Cozyll.AuthorSpec
                   , Cozyll.CleanURLSpec
                   , Cozyll.ContentSpec
                   , Cozyll.DataSpec

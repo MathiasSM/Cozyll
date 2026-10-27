@@ -143,6 +143,20 @@ Any scalar field whose name contains `icon` also gets two derived fields: `<fiel
 
 A data file may ship a JSON Schema, co-located as `content/data/name.schema.json` next to `content/data/name.yaml`; it is validated at build time (and the YAML's `$schema` points at the local file for editor hints).
 
+## Authors
+
+Authors live in `content/authors.yaml`, a map keyed by author id (the slug used in `author:` front matter). Each author supports:
+
+- `name` (required, non-empty) — the full name.
+- `type` — `person` (default) or `organization`.
+- `siteDefault: true` — marks the site's default author; exactly one author must set it. Posts without an `author:` fall back to this author.
+- `displayName` — a shorter name for the DOM (bylines, author page heading).
+- `description` — a short bio.
+- `profileImage` — a site-relative path to the author's image.
+- `links` — a list of profile URLs.
+- `addCopyrightNotice: true` — opt into a per-post copyright notice.
+- Any other scalar field is exposed to templates as-is.
+
 ## Frontmatter
 
 See `src/Cozyll/Metadata.hs` or its documentation for a full list of supported fields. Other fields become available as part of the page/post's context, which you may use in templates or templates markup.
