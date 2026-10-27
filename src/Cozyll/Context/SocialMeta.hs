@@ -4,8 +4,11 @@
 module Cozyll.Context.SocialMeta (
     SocialKind (..),
     MainImage (..),
+    PageMeta (..),
+    pageMetaOf,
     mainImageOf,
     socialMetaContext,
+    pageUrl,
     absoluteUrl,
     absoluteImageUrl,
     isoDate,
@@ -16,23 +19,16 @@ module Cozyll.Context.SocialMeta (
 ) where
 
 import Cozyll.Config (SiteConfig, baseUrl, siteAuthor, siteDescription, siteName)
+import Cozyll.JsonLd qualified as JsonLd
 import Cozyll.Metadata (Key (..), lookupKey)
-import Data.Aeson (ToJSON, object, pairs, (.=))
-import Data.Aeson.Encoding (Series, encodingToLazyByteString)
+import Data.Aeson (ToJSON, object, (.=))
+import Data.Aeson.Encoding (Series)
 import Data.Aeson.Key qualified as AesonKey
 import Data.Char (toLower)
 import Data.List (intercalate, isPrefixOf)
 import Data.Maybe (fromMaybe)
 import Data.Text qualified as T
-import Data.Text.Lazy qualified as LT
-import Data.Text.Lazy.Encoding qualified as LTE
-import Hakyll (
-    Context,
-    Item (itemIdentifier),
-    Metadata,
-    field,
-    getMetadata,
- )
+import Hakyll (Context, Metadata, constField)
 import Text.Pandoc (Block (Figure), Inline (Image), Pandoc)
 import Text.Pandoc.Shared (stringify)
 import Text.Pandoc.Walk (query)
@@ -46,6 +42,33 @@ data MainImage = MainImage
     , alt :: String
     }
     deriving (Eq, Show)
+
+-- | The metadata the social tags and structured data are built from
+data PageMeta = PageMeta
+    { pageMetaTitle :: String
+    , pageMetaDescription :: Maybe String
+    , pageMetaUrl :: String
+    -- ^ Absolute
+    , pageMetaLanguage :: String
+    -- ^ @en@, @es@, or @ja@
+    , pageMetaPublished :: Maybe String
+    -- ^ @YYYY-MM-DD@
+    , pageMetaModified :: Maybe String
+    -- ^ @YYYY-MM-DD@
+    }
+    deriving (Eq, Show)
+
+-- | Reads everything the social metadata needs, once, from an item's metadata
+pageMetaOf :: SiteConfig -> Metadata -> PageMeta
+pageMetaOf cfg metadata =
+    PageMeta
+        { pageMetaTitle = titleOf metadata
+        , pageMetaDescription = descriptionOf metadata
+        , pageMetaUrl = pageUrl cfg metadata
+        , pageMetaLanguage = languageOf metadata
+        , pageMetaPublished = lookupKey Date metadata
+        , pageMetaModified = lookupKey LastModifiedAt metadata
+        }
 
 {- | The first image whose identifier is @main-image@ (as in
 @!\[alt\](src){#main-image}@), with its alt text (falling back to its title)
@@ -81,17 +104,11 @@ mainImageOf doc =
         | T.null caption = T.unpack title
         | otherwise = T.unpack caption
 
-{- | Fields @opengraph@ and @jsonld@ describing a page, reading its metadata
-on its own (so composition order does not matter)
--}
-socialMetaContext :: SiteConfig -> SocialKind -> Maybe MainImage -> Context String
-socialMetaContext cfg kind mainImage =
-    field "opengraph" (render (openGraph cfg kind mainImage))
-        <> field "jsonld" (render (jsonLD cfg kind mainImage))
-  where
-    render make item = do
-        metadata <- getMetadata (itemIdentifier item)
-        pure $ make metadata (pageUrl cfg metadata)
+-- | Fields @opengraph@ and @jsonld@ describing a page, from metadata the caller has already read
+socialMetaContext :: SiteConfig -> SocialKind -> PageMeta -> Maybe MainImage -> Context String
+socialMetaContext cfg kind pageMeta mainImage =
+    constField "opengraph" (openGraph cfg kind pageMeta mainImage)
+        <> constField "jsonld" (jsonLD cfg kind pageMeta mainImage)
 
 -- | The absolute URL of an item: its @path:@, or else the site root
 pageUrl :: SiteConfig -> Metadata -> String
@@ -113,16 +130,16 @@ absoluteImageUrl cfg image
     lowered = map toLower image
 
 -- | The Open Graph tags for a page, one per line
-openGraph :: SiteConfig -> SocialKind -> Maybe MainImage -> Metadata -> String -> String
-openGraph cfg kind mainImage metadata url =
+openGraph :: SiteConfig -> SocialKind -> PageMeta -> Maybe MainImage -> String
+openGraph cfg kind pageMeta mainImage =
     intercalate "\n" $
         [ meta "og:type" (ogType kind)
-        , meta "og:url" url
-        , meta "og:title" (titleOf metadata)
+        , meta "og:url" (pageMetaUrl pageMeta)
+        , meta "og:title" (pageMetaTitle pageMeta)
         ]
-            <> maybe [] (\description -> [meta "og:description" description]) (descriptionOf metadata)
+            <> maybe [] (\description -> [meta "og:description" description]) (pageMetaDescription pageMeta)
             <> [ meta "og:site_name" (siteName cfg)
-               , meta "og:locale" (localeOf (languageOf metadata))
+               , meta "og:locale" (localeOf (pageMetaLanguage pageMeta))
                ]
             <> maybe [] imageTags mainImage
   where
@@ -150,33 +167,24 @@ ogType WebSite = "website"
 ogType WebPage = "website"
 
 -- | The JSON-LD script tag for a page
-jsonLD :: SiteConfig -> SocialKind -> Maybe MainImage -> Metadata -> String -> String
-jsonLD cfg kind mainImage metadata url =
-    "<script type=\"application/ld+json\">" ++ escapeJson (encode (jsonObject cfg kind mainImage metadata url)) ++ "</script>"
-  where
-    encode = LT.unpack . LTE.decodeUtf8 . encodingToLazyByteString . pairs
-
-    escapeJson = concatMap escapeJsonChar
-
-    escapeJsonChar '<' = "\\u003c"
-    escapeJsonChar '>' = "\\u003e"
-    escapeJsonChar '&' = "\\u0026"
-    escapeJsonChar character = [character]
+jsonLD :: SiteConfig -> SocialKind -> PageMeta -> Maybe MainImage -> String
+jsonLD cfg kind pageMeta mainImage =
+    "<script type=\"application/ld+json\">" ++ JsonLd.render (jsonObject cfg kind pageMeta mainImage) ++ "</script>"
 
 -- | The JSON-LD object for a page
-jsonObject :: SiteConfig -> SocialKind -> Maybe MainImage -> Metadata -> String -> Series
-jsonObject cfg kind mainImage metadata url = case kind of
+jsonObject :: SiteConfig -> SocialKind -> PageMeta -> Maybe MainImage -> Series
+jsonObject cfg kind pageMeta mainImage = case kind of
     Article ->
         context
             <> "@type" .= ("Article" :: String)
-            <> "headline" .= titleOf metadata
-            <> optionalField "description" (descriptionOf metadata)
-            <> "mainEntityOfPage" .= object ["@type" .= ("WebPage" :: String), "@id" .= url]
+            <> "headline" .= pageMetaTitle pageMeta
+            <> optionalField "description" (pageMetaDescription pageMeta)
+            <> "mainEntityOfPage" .= object ["@type" .= ("WebPage" :: String), "@id" .= pageMetaUrl pageMeta]
             <> "datePublished" .= published
             <> "dateModified" .= modified
             <> "author" .= person
             <> "publisher" .= organization
-            <> "inLanguage" .= languageOf metadata
+            <> "inLanguage" .= pageMetaLanguage pageMeta
             <> imageSeries
     WebSite ->
         context
@@ -185,15 +193,15 @@ jsonObject cfg kind mainImage metadata url = case kind of
             <> "description" .= siteDescription cfg
             <> "url" .= (baseUrl cfg ++ "/")
             <> "author" .= person
-            <> "inLanguage" .= languageOf metadata
+            <> "inLanguage" .= pageMetaLanguage pageMeta
             <> imageSeries
     WebPage ->
         context
             <> "@type" .= ("WebPage" :: String)
-            <> "name" .= titleOf metadata
-            <> optionalField "description" (descriptionOf metadata)
-            <> "url" .= url
-            <> "inLanguage" .= languageOf metadata
+            <> "name" .= pageMetaTitle pageMeta
+            <> optionalField "description" (pageMetaDescription pageMeta)
+            <> "url" .= pageMetaUrl pageMeta
+            <> "inLanguage" .= pageMetaLanguage pageMeta
             <> imageSeries
   where
     context = "@context" .= ("https://schema.org" :: String)
@@ -202,8 +210,8 @@ jsonObject cfg kind mainImage metadata url = case kind of
 
     imageSeries = optionalField "image" (absoluteImageUrl cfg . src <$> mainImage)
 
-    published = maybe "" isoDate (lookupKey Date metadata)
-    modified = maybe published isoDate (lookupKey LastModifiedAt metadata)
+    published = maybe "" isoDate (pageMetaPublished pageMeta)
+    modified = maybe published isoDate (pageMetaModified pageMeta)
 
 -- | Appends a time to a date-only @YYYY-MM-DD@ value
 isoDate :: String -> String

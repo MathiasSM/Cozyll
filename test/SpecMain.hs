@@ -10,6 +10,7 @@ import Cozyll.ContentSpec qualified as Content
 import Cozyll.DataSpec qualified as Data
 import Cozyll.FeedSpec qualified as Feed
 import Cozyll.HtmlSpec qualified as Html
+import Cozyll.JsonLdSpec qualified as JsonLd
 import Cozyll.LanguageSpec qualified as Language
 import Cozyll.MetadataSpec qualified as Metadata
 import Cozyll.NavSpec qualified as Nav
@@ -35,6 +36,7 @@ main =
             , Data.tests
             , Feed.tests
             , Html.tests
+            , JsonLd.tests
             , Language.tests
             , Metadata.tests
             , Nav.tests
