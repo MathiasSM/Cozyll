@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/MathiasSM/Cozyll/master/schema/authors.schema.json",
+  "title": "Authors",
+  "description": "All authors, as a map keyed by author id (the slug used in `author:` front matter).",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "required": ["name"],
+    "properties": {
+      "name": {
+        "type": "string",
+        "description": "The author's full name."
+      },
+      "type": {
+        "type": "string",
+        "enum": ["person", "organization"],
+        "default": "person",
+        "description": "Whether the author is a person or an organization."
+      },
+      "siteDefault": {
+        "type": "boolean",
+        "default": false,
+        "description": "Marks the site's default author (exactly one author must set this)."
+      },
+      "displayName": {
+        "type": "string",
+        "description": "A shorter name for the DOM (bylines, author page heading)."
+      },
+      "description": {
+        "type": "string",
+        "description": "A short bio."
+      },
+      "profileImage": {
+        "type": "string",
+        "description": "Site-relative path to the author's image."
+      },
+      "links": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Profile URLs (sameAs)."
+      },
+      "addCopyrightNotice": {
+        "type": "boolean",
+        "default": false,
+        "description": "Opt into a per-post copyright notice."
+      }
+    }
+  }
+}

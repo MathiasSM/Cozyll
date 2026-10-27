@@ -14,6 +14,7 @@ where
 
 import Control.Monad (forM, forM_)
 import Cozyll.Config (Env (Example), SiteConfig (..), siteConfiguration)
+import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Website (loadWebsite)
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.Rules (rules)
@@ -38,9 +39,10 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsFile, writeBinaryFile)
 
 -- | Builds a 'SiteConfig' from a parsed @website.yaml@ (no environment overrides)
-mkSiteConfig :: Web.Website -> [FilePath] -> SiteConfig
-mkSiteConfig website contentTemplateNames =
+mkSiteConfig :: Web.Website -> [Author.Author] -> [FilePath] -> SiteConfig
+mkSiteConfig website authors contentTemplateNames =
     let site = Web.websiteSite website
+        defaultAuthor' = either (error . unlines) id (Author.defaultAuthor authors)
      in SiteConfig
             { siteName = Web.siteName site
             , siteDescription = Web.siteDescription site
@@ -49,6 +51,8 @@ mkSiteConfig website contentTemplateNames =
             , siteDomain = Web.siteDomain site
             , siteAlternateNames = Web.siteAlternateNames site
             , siteLogo = Web.siteLogo site
+            , siteAuthors = authors
+            , siteDefaultAuthor = defaultAuthor'
             , mathjaxVersion = Web.mathjaxVersion (Web.websiteMathjax website)
             , highlightStyle = Web.highlightStyle (Web.websiteHighlight website)
             , contentDir = "content"
@@ -73,7 +77,8 @@ buildSiteSnapshot root = do
     -- The example content's own website.yaml drives the build, so the golden output does not depend on the environment
     website <- loadWebsite (root </> "example-content")
     contentTemplateNames <- discoverContentTemplateNames (root </> "example-content" </> "templates")
-    let cfg = mkSiteConfig website contentTemplateNames
+    authors <- Author.loadAuthors (root </> "example-content")
+    let cfg = mkSiteConfig website authors contentTemplateNames
     createDirectoryIfMissing True buildDir
     copyTree (root </> "templates") (buildDir </> "templates")
     copyTree (root </> "assets") (buildDir </> "assets")

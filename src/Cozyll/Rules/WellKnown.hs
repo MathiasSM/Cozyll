@@ -1,8 +1,9 @@
 -- | Generates the site's well-known and metadata files (robots.txt, funding.json, …) from @website.yaml@
 module Cozyll.Rules.WellKnown (processWellKnownFiles) where
 
-import Cozyll.Config (SiteConfig, baseUrl, siteAuthor, siteName, socialsFile)
+import Cozyll.Config (SiteConfig, baseUrl, siteDefaultAuthor, siteName, socialsFile)
 import Cozyll.Content (requireSocials)
+import Cozyll.Domain.Author (authorName)
 import Cozyll.Domain.Social (Social (..))
 import Cozyll.Domain.Website (
     Contact (..),
@@ -39,7 +40,7 @@ processWellKnownFiles cfg website = do
     createFile "manifest.webmanifest" (manifestTxt (siteName cfg) (websiteManifest website))
     createFile ".well-known/security.txt" (securityTxt url (contactPage contact) (websiteSecurity website))
     createFile ".well-known/funding-manifest-urls" (fundingManifestUrls url)
-    createFile "funding.json" (fundingJson (siteAuthor cfg) url (websiteFunding website))
+    createFile "funding.json" (fundingJson (authorName (siteDefaultAuthor cfg)) url (websiteFunding website))
     createFileCompiler ".well-known/trust.txt" $ do
         socials <- socialHrefs cfg
         pure (trustTxt url (contactPage contact) socials (websiteTrust website))

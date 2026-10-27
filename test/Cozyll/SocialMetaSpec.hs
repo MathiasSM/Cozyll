@@ -18,6 +18,7 @@ import Cozyll.Context.SocialMeta (
  )
 import Cozyll.Domain.Website (HighlightStyle (Pygments))
 import Cozyll.Domain.Website qualified as Web
+import Cozyll.TestUtils (mkAuthor)
 import Cozyll.Yaml (decodeYaml)
 import Data.Aeson (Value (String))
 import Data.Aeson.Key qualified as AesonKey
@@ -43,6 +44,8 @@ mkConfig =
         , siteDomain = "example.com"
         , siteAlternateNames = []
         , siteLogo = Nothing
+        , siteAuthors = [mkAuthor ""]
+        , siteDefaultAuthor = mkAuthor ""
         , mathjaxVersion = ""
         , highlightStyle = Pygments
         , contentDir = "content"

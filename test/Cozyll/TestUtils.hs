@@ -6,9 +6,12 @@ module Cozyll.TestUtils (
     set,
     without,
     day,
+    mkAuthor,
 )
 where
 
+import Cozyll.Domain.Author (Author (..), AuthorType (..))
+import Data.Aeson.KeyMap qualified as KeyMap
 import Data.Time (Day, fromGregorian)
 
 {- | Key/value pairs for building YAML (project files, post front matter).
@@ -40,3 +43,20 @@ without keys = filter ((`notElem` keys) . fst)
 -- | A date from year, month and day
 day :: Integer -> Int -> Int -> Day
 day = fromGregorian
+
+-- | A minimal site-default author for fixtures
+mkAuthor :: String -> Author
+mkAuthor name =
+    Author
+        { authorId = "example"
+        , authorName = name
+        , authorType = Person
+        , authorSiteDefault = True
+        , authorDisplayName = Nothing
+        , authorDescription = Nothing
+        , authorProfileImage = Nothing
+        , authorLinks = []
+        , authorAddCopyrightNotice = False
+        , authorExtra = []
+        , authorRaw = KeyMap.empty
+        }

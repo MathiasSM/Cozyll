@@ -5,6 +5,7 @@ module Main (main) where
 
 import Cozyll.AccessibilitySpec qualified as Accessibility
 import Cozyll.AsideSpec qualified as Aside
+import Cozyll.AuthorSpec qualified as Author
 import Cozyll.CleanURLSpec qualified as CleanURL
 import Cozyll.ContentSpec qualified as Content
 import Cozyll.DataSpec qualified as Data
@@ -31,6 +32,7 @@ main =
             "unit"
             [ Accessibility.tests
             , Aside.tests
+            , Author.tests
             , CleanURL.tests
             , Content.tests
             , Data.tests

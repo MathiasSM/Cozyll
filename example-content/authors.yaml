@@ -1,0 +1,19 @@
+# Example authors for the self-documenting example content.
+#
+# A map keyed by author id; the id is the slug used in `author:` front matter.
+# Exactly one author must set `siteDefault: true`.
+example:
+  name: Example Author
+  type: person
+  siteDefault: true
+  displayName: Example
+  description: The author of the example content.
+  profileImage: images/photos/og-home.png
+  links:
+    - https://example.com
+  addCopyrightNotice: true
+
+example-org:
+  name: Example Labs
+  type: organization
+  description: The organization behind the example content.

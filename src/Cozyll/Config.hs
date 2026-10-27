@@ -39,9 +39,11 @@ module Cozyll.Config (
 
     -- ** Data files
     socialsFile,
+    authorsFile,
 )
 where
 
+import Cozyll.Domain.Author (Author)
 import Cozyll.Domain.Website (HighlightStyle)
 import Data.String (fromString)
 import Hakyll (Configuration (ignoreFile), Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, (.||.))
@@ -72,6 +74,10 @@ data SiteConfig = SiteConfig
     -- ^ Alternate site names, exposed as @site-alternateNames@ (JSON-LD only for now)
     , siteLogo :: Maybe String
     -- ^ Site-relative path to the raster logo (e.g. @images/logo.png@), for JSON-LD
+    , siteAuthors :: [Author]
+    -- ^ Every author, in @authors.yaml@ file order
+    , siteDefaultAuthor :: Author
+    -- ^ The author marked @siteDefault: true@
     , mathjaxVersion :: String
     {- ^ MathJax CDN version (from @mathjax:@ in @website.yaml@), exposed as @mathjax-version@
 
@@ -116,7 +122,7 @@ mediaDir cfg = contentDir cfg </> "media"
 (@website.yaml@ is loaded separately by "Cozyll.Domain.Website")
 -}
 requiredContent :: SiteConfig -> [FilePath]
-requiredContent cfg = [contentDir cfg </> "socials.yaml"]
+requiredContent cfg = [contentDir cfg </> "socials.yaml", contentDir cfg </> "authors.yaml"]
 
 -- | The group whose items are the projects (its index page lists `projects/`)
 projectsGroup :: String
@@ -169,6 +175,10 @@ postSnapshot group = "published-" ++ group
 -- | The data files (YAML) read by contexts
 socialsFile :: SiteConfig -> Identifier
 socialsFile cfg = fromFilePath $ contentDir cfg </> "socials.yaml"
+
+-- | The authors file (a map keyed by author id)
+authorsFile :: SiteConfig -> Identifier
+authorsFile cfg = fromFilePath $ contentDir cfg </> "authors.yaml"
 
 -- | Templates every kind of page goes through
 siteTemplate, minimalTemplate, pageTemplate, postTemplate :: SiteConfig -> Identifier
