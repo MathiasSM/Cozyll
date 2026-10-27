@@ -17,7 +17,9 @@
         "description": { "type": "string", "description": "Short site description." },
         "author": { "type": "string", "description": "Site author, used in metadata." },
         "copyrightYear": { "type": "integer", "description": "The copyright year shown in the footer." },
-        "domain": { "type": "string", "description": "The site's domain, without scheme." }
+        "domain": { "type": "string", "description": "The site's domain, without scheme." },
+        "alternateName": { "type": "array", "description": "Alternate site names.", "items": { "type": "string" } },
+        "logo": { "type": "string", "description": "Site-relative path to the raster logo (e.g. images/logo.png)." }
       }
     },
     "contact": {

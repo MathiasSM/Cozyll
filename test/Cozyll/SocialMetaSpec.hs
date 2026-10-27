@@ -17,13 +17,15 @@ import Cozyll.Context.SocialMeta (
     titleOf,
  )
 import Cozyll.Domain.Website (HighlightStyle (Pygments))
+import Cozyll.Domain.Website qualified as Web
+import Cozyll.Yaml (decodeYaml)
 import Data.Aeson (Value (String))
 import Data.Aeson.Key qualified as AesonKey
 import Data.Aeson.KeyMap qualified as KeyMap
 import Data.Text (Text)
 import Hakyll (Metadata, defaultHakyllReaderOptions)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (testCase, (@?=))
+import Test.Tasty.HUnit (assertFailure, testCase, (@?=))
 import Text.Pandoc (Pandoc, readMarkdown, runPure)
 
 -- | Front matter with string values, as Hakyll stores it
@@ -39,6 +41,8 @@ mkConfig =
         , siteAuthor = ""
         , siteCopyrightYear = 0
         , siteDomain = "example.com"
+        , siteAlternateNames = []
+        , siteLogo = Nothing
         , mathjaxVersion = ""
         , highlightStyle = Pygments
         , contentDir = "content"
@@ -69,6 +73,7 @@ tests =
         , ogTypeTests
         , titleOfTests
         , descriptionOfTests
+        , siteParsingTests
         ]
 
 mainImageOfTests :: TestTree
@@ -219,3 +224,40 @@ descriptionOfTests =
         , testCase "treats an empty description as absent" $
             descriptionOf (metadataOf [("description", "")]) @?= Nothing
         ]
+
+siteParsingTests :: TestTree
+siteParsingTests =
+    testGroup
+        "Site FromJSON"
+        [ testCase "parses alternateName and logo" $
+            case decodeYaml siteWithExtras of
+                Left problems -> assertFailure (unlines problems)
+                Right site -> do
+                    Web.siteAlternateNames site @?= ["Ex", "example.com"]
+                    Web.siteLogo site @?= Just "images/logo.png"
+        , testCase "defaults alternateName and logo when absent" $
+            case decodeYaml siteMinimal of
+                Left problems -> assertFailure (unlines problems)
+                Right site -> do
+                    Web.siteAlternateNames site @?= []
+                    Web.siteLogo site @?= Nothing
+        ]
+  where
+    siteWithExtras =
+        unlines
+            [ "name: Example"
+            , "description: An example site"
+            , "author: Example Author"
+            , "copyrightYear: 2020"
+            , "domain: example.com"
+            , "alternateName: [Ex, example.com]"
+            , "logo: images/logo.png"
+            ]
+    siteMinimal =
+        unlines
+            [ "name: Example"
+            , "description: An example site"
+            , "author: Example Author"
+            , "copyrightYear: 2020"
+            , "domain: example.com"
+            ]
