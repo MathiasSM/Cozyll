@@ -18,7 +18,8 @@ module Cozyll.Context.SocialMeta (
     descriptionOf,
 ) where
 
-import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteAuthor, siteDescription, siteLogo, siteName)
+import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLogo, siteName)
+import Cozyll.Domain.Author (authorName)
 import Cozyll.JsonLd qualified as JsonLd
 import Cozyll.Metadata (Key (..), lookupKey)
 import Data.Aeson (ToJSON, object, (.=))
@@ -207,7 +208,7 @@ jsonObject cfg kind pageMeta mainImage = case kind of
             <> imageSeries
   where
     context = "@context" .= ("https://schema.org" :: String)
-    person = object ["@type" .= ("Person" :: String), "name" .= siteAuthor cfg]
+    person = object ["@type" .= ("Person" :: String), "name" .= authorName (siteDefaultAuthor cfg)]
     organization =
         object $
             [ "@type" .= ("Organization" :: String)
