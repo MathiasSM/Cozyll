@@ -66,6 +66,8 @@ data SiteConfig = SiteConfig
     -- ^ Site tagline, exposed as @site-description@
     , siteCopyrightYear :: Int
     -- ^ Copyright year, exposed as @site-copyrightYear@
+    , siteCurrentYear :: Int
+    -- ^ The build year, exposed as @site-copyrightRange@ (the end of the range)
     , siteDomain :: String
     -- ^ Domain without scheme, exposed as @site-domain@
     , siteAlternateNames :: [String]

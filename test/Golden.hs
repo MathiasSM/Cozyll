@@ -47,6 +47,7 @@ mkSiteConfig website authors contentTemplateNames =
             { siteTitle = Web.siteTitle site
             , siteDescription = Web.siteDescription site
             , siteCopyrightYear = Web.siteCopyrightYear site
+            , siteCurrentYear = 2021
             , siteDomain = Web.siteDomain site
             , siteAlternateNames = Web.siteAlternateNames site
             , siteLogo = Web.siteLogo site

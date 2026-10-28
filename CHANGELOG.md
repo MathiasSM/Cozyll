@@ -36,6 +36,9 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Changed
 
+- The footer now reads `© <site.title> <firstYear>–<currentYear>`: `copyrightYear`
+  is the first year and the build year is the end of the range (a single year
+  when they are equal).
 - `site.name` and `site.author` collapse into a single required `site.title`
   (breaking): `$site-name$`/`$site-author$` become `$site-title$`, and the
   `SITE_NAME`/`SITE_AUTHOR` env overrides become `SITE_TITLE`.

@@ -10,6 +10,7 @@ import Cozyll.CleanURLSpec qualified as CleanURL
 import Cozyll.ContentSpec qualified as Content
 import Cozyll.DataSpec qualified as Data
 import Cozyll.FeedSpec qualified as Feed
+import Cozyll.FormatSpec qualified as Format
 import Cozyll.HtmlSpec qualified as Html
 import Cozyll.JsonLdSpec qualified as JsonLd
 import Cozyll.LanguageSpec qualified as Language
@@ -37,6 +38,7 @@ main =
             , Content.tests
             , Data.tests
             , Feed.tests
+            , Format.tests
             , Html.tests
             , JsonLd.tests
             , Language.tests
