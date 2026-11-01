@@ -4,11 +4,11 @@ module Cozyll.Rules.SinglePages (Page (..), page, processPage, pageCompiler) whe
 import Cozyll.CleanURL (pathRoute)
 import Cozyll.Compile (applyTemplates, finish, runPandoc)
 import Cozyll.Config (SiteConfig, minimalTemplate, pageTemplate, pagesPattern, siteEnv)
-import Cozyll.Content (isHidden, isTemplated)
+import Cozyll.Content (isHidden, isIndex, isTemplated)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (PageKind (WebSite), pageKindOf, pageMetaOf, socialMetaContext)
+import Cozyll.Context.SocialMeta (PageItem, PageKind (CollectionPage, WebSite), pageKindOf, pageMetaOf, socialMetaContext)
 import Cozyll.Metadata (Key (Home), lookupKey)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
@@ -34,15 +34,17 @@ data Page = Page
     -- ^ Context for the page body and its templates
     , pageTemplates :: [Identifier]
     -- ^ Extra templates, applied between the minimal and page templates
+    , pageListItems :: Compiler [PageItem]
+    -- ^ The items this page lists, for the ItemList / hasPart structured data
     }
 
 -- | A page with the minimal context and no extra templates
 page :: SiteConfig -> String -> Page
-page cfg name = Page{pageName = name, pageContext = return (globalContext cfg), pageTemplates = []}
+page cfg name = Page{pageName = name, pageContext = return (globalContext cfg), pageTemplates = [], pageListItems = return []}
 
 -- | Compiles a standalone page's body (shared by 'processPage' and the dev example pages)
 pageCompiler :: SiteConfig -> Page -> Compiler (Item String)
-pageCompiler cfg Page{pageName, pageContext, pageTemplates} = do
+pageCompiler cfg Page{pageName, pageContext, pageTemplates, pageListItems} = do
     ctx <- pageContext
     templated <- isTemplated
     body <- getResourceString >>= (if templated then applyContentAsTemplate cfg ctx else return)
@@ -50,15 +52,17 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates} = do
     underlying <- getUnderlying
     metadata <- getMetadata underlying
     kind <- pageKind metadata
+    items <- pageListItems
     let ctx' = asideContext tocHtml <> ctx
         pageMeta = pageMetaOf cfg metadata
     applyTemplates ctx' ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
-        >>= finish cfg (socialMetaContext cfg kind [] pageMeta mainImg <> navContext cfg pageName <> ctx')
+        >>= finish cfg (socialMetaContext cfg kind [] items pageMeta mainImg <> navContext cfg pageName <> ctx')
 
--- | The page's structured-data kind: home is a @WebSite@, anything else comes from @schemaType:@
+-- | The page's structured-data kind: home is a @WebSite@, a group index a @CollectionPage@, anything else from @schemaType:@
 pageKind :: Metadata -> Compiler PageKind
 pageKind metadata
     | lookupKey Home metadata == Just "true" = pure WebSite
+    | isIndex metadata = pure CollectionPage
     | otherwise = case pageKindOf metadata of
         Right kind -> pure kind
         Left unknown ->
