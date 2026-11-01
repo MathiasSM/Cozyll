@@ -74,10 +74,8 @@ data Key
       ImagesToggle
     | -- | A social account's username/handle.
       Username
-    | -- | Show this social account on the about page.
-      ShowAbout
-    | -- | Show this social account on the contact page.
-      ShowContact
+    | -- | Whether to show this social account (shown by default; @_show: false@ hides it).
+      Show
     | -- | A project's end date (optional).
       EndDate
     | -- | A project's showcase priority (lower sorts first).
@@ -115,8 +113,7 @@ keyName key = case key of
     Author -> "author"
     SchemaType -> "schemaType"
     ShortDescription -> "shortDescription"
-    ShowAbout -> "showAbout"
-    ShowContact -> "showContact"
+    Show -> "_show"
     Sitemap -> "sitemap"
     StartDate -> "startDate"
     Status -> "status"
