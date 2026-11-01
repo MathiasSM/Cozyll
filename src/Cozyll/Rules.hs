@@ -11,7 +11,7 @@ import Cozyll.Rules.Redirects (processRedirects)
 import Cozyll.Rules.Showcase (processShowcaseGroup)
 import Cozyll.Rules.SinglePages (page, processPage)
 import Cozyll.Rules.Sitemap (processSitemap)
-import Cozyll.Rules.Validate (validateNavEntries)
+import Cozyll.Rules.Validate (validateAuthorRefs, validateNavEntries)
 import Cozyll.Rules.WellKnown (processWellKnownFiles)
 import Cozyll.Theme (rewritingTemplateCompiler)
 import Hakyll (Rules, compile, match)
@@ -21,6 +21,7 @@ rules :: SiteConfig -> Website -> Rules ()
 rules cfg website = do
     match (templatePattern cfg) $ compile (rewritingTemplateCompiler cfg)
     validateNavEntries cfg
+    validateAuthorRefs cfg
     processAssets cfg
     processWellKnownFiles cfg website
     standalone <- discoverStandalonePages cfg

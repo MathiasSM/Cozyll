@@ -3,6 +3,7 @@ title: "A tour of the example content"
 date: 2024-02-20
 description: "A longer post that mixes prose, tables, code, and footnotes."
 path: /prose/tour
+author: [example, example-org]
 ---
 
 This post is a longer, flowing piece of prose. It exists because most of the other posts in the example content are short demonstrations that jump straight from one construct to the next, while real writing is mostly paragraphs.

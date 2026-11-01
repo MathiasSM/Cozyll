@@ -51,7 +51,7 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates} = do
         pageMeta = pageMetaOf cfg metadata
         kind = if lookupKey Home metadata == Just "true" then WebSite else WebPage
     applyTemplates ctx' ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
-        >>= finish cfg (socialMetaContext cfg kind pageMeta mainImg <> navContext cfg pageName <> ctx')
+        >>= finish cfg (socialMetaContext cfg kind [] pageMeta mainImg <> navContext cfg pageName <> ctx')
 
 -- | Processes a standalone page, routed by its `path:` front matter
 processPage :: SiteConfig -> Page -> Rules ()

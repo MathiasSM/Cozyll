@@ -11,7 +11,6 @@ import Cozyll.Metadata (Key (..), keyName, lookupKey)
 import Data.Maybe (isJust)
 import Data.Text qualified as T
 import Hakyll (
-    Compiler,
     Context,
     Metadata,
     boolFieldM,

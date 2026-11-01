@@ -157,6 +157,8 @@ Authors live in `content/authors.yaml`, a map keyed by author id (the slug used 
 - `addCopyrightNotice: true` — opt into a per-post copyright notice.
 - Any other scalar field is exposed to templates as-is.
 
+A post references its authors with `author: <id>` or `author: [<id>, <id>]` front matter; without it, the post falls back to the site-default author. The resolved authors are available in templates as `$for(author)$` (each with `$id$`, `$name$`, `$displayName$`, `$path$`, `$url$`, `$description$`, `$profileImage$`, `$type$`, and `$for(links)$`).
+
 ## Frontmatter
 
 See `src/Cozyll/Metadata.hs` or its documentation for a full list of supported fields. Other fields become available as part of the page/post's context, which you may use in templates or templates markup.

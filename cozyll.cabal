@@ -49,6 +49,7 @@ library
                   , Cozyll.Content
                   , Cozyll.Context
                   , Cozyll.Context.Aside
+                  , Cozyll.Context.Author
                   , Cozyll.Context.Data
                   , Cozyll.Context.Feed
                   , Cozyll.Context.Language

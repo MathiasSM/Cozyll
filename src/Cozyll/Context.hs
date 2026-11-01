@@ -2,6 +2,7 @@
 module Cozyll.Context (globalContext) where
 
 import Cozyll.Config (SiteConfig)
+import Cozyll.Context.Author (authorContext)
 import Cozyll.Context.Data (dataContext)
 import Cozyll.Context.Feed (feedsContext)
 import Cozyll.Context.Language (languageContext)
@@ -23,6 +24,7 @@ globalContext cfg =
         <> dataContext cfg
         <> languageContext
         <> feedsContext cfg
+        <> authorContext cfg
         <> mathContext
         <> defaultContext
 

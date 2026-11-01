@@ -3,10 +3,11 @@ module Cozyll.Metadata (
     Key (..),
     keyName,
     lookupKey,
+    lookupKeyList,
 )
 where
 
-import Hakyll (Metadata, lookupString)
+import Hakyll (Metadata, lookupString, lookupStringList)
 
 {- | Every known front-matter key the content may use. A user may add more fields to
 any given file's frontmatter, to use the value within that page's context
@@ -31,6 +32,8 @@ data Key
       ShareDescription
     | -- | Overrides 'Title' in social metadata (open graph and JSON-LD).
       ShareTitle
+    | -- | The post's author(s): an id (or list of ids) from @authors.yaml@.
+      Author
     | -- | An icon name, resolved to @images/icons/<name>.svg@.
       Icon
     | -- | The item's language (@en@, @es@, or @ja@; defaults to @en@).
@@ -107,6 +110,7 @@ keyName key = case key of
     Priority -> "priority"
     ShareDescription -> "shareDescription"
     ShareTitle -> "shareTitle"
+    Author -> "author"
     ShortDescription -> "shortDescription"
     ShowAbout -> "showAbout"
     ShowContact -> "showContact"
@@ -123,3 +127,9 @@ keyName key = case key of
 -- | Looks up a key's value as a string
 lookupKey :: Key -> Metadata -> Maybe String
 lookupKey = lookupString . keyName
+
+-- | Looks up a key's value as a list of strings, falling back to a single string
+lookupKeyList :: Key -> Metadata -> Maybe [String]
+lookupKeyList key metadata = case lookupStringList (keyName key) metadata of
+    Just values -> Just values
+    Nothing -> pure <$> lookupKey key metadata
