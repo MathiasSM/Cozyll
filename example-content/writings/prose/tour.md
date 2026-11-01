@@ -49,4 +49,4 @@ And a quote, for good measure:
 
 ## Where to go next
 
-From here, the other groups show the remaining features in detail: the [languages](/languages/) posts for ruby and CJK, the [tables](/tables/) posts for table syntax, and the [elements](/elements/) posts for raw HTML and controls.
+From here, the other groups show the remaining features in detail: the [languages](/languages) posts for ruby and CJK, the [tables](/tables) posts for table syntax, and the [elements](/elements) posts for raw HTML and controls.

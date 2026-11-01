@@ -41,7 +41,7 @@ Text can be *emphasized*, **strong**, ~~deleted~~, or shown as `inline code`.
 
 ## Links
 
-Links can point [to a page](/prose/), [to a section](#emphasis), [to an external site](https://example.com), or [to an email](mailto:example@example.com).
+Links can point [to a page](/prose), [to a section](#emphasis), [to an external site](https://example.com), or [to an email](mailto:example@example.com).
 
 ## Blockquotes
 

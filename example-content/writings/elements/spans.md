@@ -9,7 +9,7 @@ Inline elements can carry attributes.
 
 ## Inline spans
 
-A bracketed span: [this one]{.example-note}. A link with a class: [a link](/prose/){.example-note}.
+A bracketed span: [this one]{.example-note}. A link with a class: [a link](/prose){.example-note}.
 
 ## Header identifiers
 

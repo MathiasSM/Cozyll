@@ -76,7 +76,7 @@ defaultAuthor authors = case [author | author <- authors, authorSiteDefault auth
 
 -- | The canonical URL path of an author's page
 authorUrlPath :: Author -> FilePath
-authorUrlPath author = "/authors/" ++ authorId author ++ "/"
+authorUrlPath author = "/authors/" ++ authorId author
 
 -- | How an author type is spelled in the DOM
 authorTypeName :: AuthorType -> String
