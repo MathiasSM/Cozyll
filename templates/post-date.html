@@ -1,9 +1,5 @@
-<div class="post-date-header">
-  $if(author)$<span class="post-authors">$for(author)$<a href="$path$">$displayName$</a>$sep$, $endfor$</span><span> · </span>$endif$
+<div class="post-date-header" lang="$language$">
+  $if(author)$<span class="post-authors">$if(linkAuthors)$$for(author)$<a href="$path$">$displayName$</a>$sep$, $endfor$$else$$for(author)$$displayName$$sep$, $endfor$$endif$</span><span> · </span>$endif$
   <time datetime="$date$">$date$</time>
-  $if(lang-es)$
-    $if(lastModifiedAt)$<span> (Actualizado: <time datetime="$lastModifiedAt$">$lastModifiedAt$</time>)</span>$endif$
-  $else$
-    $if(lastModifiedAt)$<span> (Updated: <time datetime="$lastModifiedAt$">$lastModifiedAt$</time>)</span>$endif$
-  $endif$
+  $if(lastModifiedAt)$<span> $t("post.updated")$: <time datetime="$lastModifiedAt$">$lastModifiedAt$</time></span>$endif$
 </div>

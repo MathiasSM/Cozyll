@@ -1,7 +1,7 @@
 -- | Rules for the assets: styles, media, and tables
 module Cozyll.Rules.Assets (processAssets) where
 
-import Cozyll.Config (SiteConfig, assetsDir, contentCssPattern, dataPattern, dataSchemaPattern, highlightStyle, mediaDir, socialsPattern)
+import Cozyll.Config (SiteConfig, assetsDir, contentCssPattern, dataPattern, dataSchemaPattern, highlightStyle, localizationPattern, mediaDir, socialsPattern)
 import Cozyll.Domain.Website (toPandocStyle)
 import Cozyll.Rules.Favicon (faviconRules)
 import Data.List (stripPrefix)
@@ -50,7 +50,7 @@ processAssets cfg = do
 -- | Makes the data files (YAML) and their schemas loadable; they are not routed
 processDataFiles :: SiteConfig -> Rules ()
 processDataFiles cfg = do
-    match (socialsPattern cfg .||. dataPattern cfg) $ compile getResourceString
+    match (socialsPattern cfg .||. localizationPattern cfg .||. dataPattern cfg) $ compile getResourceString
     match (dataSchemaPattern cfg) $ compile getResourceString
 
 -- | Compress all CSS as one file

@@ -11,6 +11,7 @@ import Cozyll.Context.Author (authorPageContext, authorPages, authorPosts, displ
 import Cozyll.Context.Nav (navContext)
 import Cozyll.Context.SocialMeta (MainImage (..), PageKind (ProfilePage), PageMeta (..), pageItemOf, socialMetaContext)
 import Cozyll.Domain.Author (Author (..), authorUrlPath)
+import Cozyll.Localization (ogLocaleFor)
 import Hakyll (
     Identifier,
     Rules,
@@ -51,6 +52,7 @@ processAuthorPage cfg author = create [authorPageIdentifier cfg author] $ do
                     }
             mainImage = MainImage <$> authorProfileImage author <*> pure displayName
             ctx = authorPageContext cfg author <> listField "posts" (globalContext cfg) (return posts) <> globalContext cfg
+        ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
         makeItem ""
             >>= applyTemplates ctx [minimalTemplate cfg, resolveTemplate cfg "author.html"]
-            >>= finish cfg (socialMetaContext cfg ProfilePage [author] items pageMeta mainImage <> navContext cfg "authors" <> ctx)
+            >>= finish cfg (socialMetaContext cfg ProfilePage [author] items pageMeta mainImage ogLocale <> navContext cfg "authors" <> ctx)

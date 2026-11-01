@@ -20,6 +20,7 @@ module Cozyll.Config (
     postsPattern,
     projectsPattern,
     socialsPattern,
+    localizationPattern,
     dataPattern,
     dataSchemaPattern,
     templatePattern,
@@ -40,6 +41,7 @@ module Cozyll.Config (
     -- ** Data files
     socialsFile,
     authorsFile,
+    localizationFile,
 )
 where
 
@@ -117,7 +119,7 @@ mediaDir cfg = contentDir cfg </> "media"
 (@website.yaml@ is loaded separately by "Cozyll.Domain.Website")
 -}
 requiredContent :: SiteConfig -> [FilePath]
-requiredContent cfg = [contentDir cfg </> "socials.yaml", contentDir cfg </> "authors.yaml"]
+requiredContent cfg = [contentDir cfg </> "socials.yaml", contentDir cfg </> "authors.yaml", contentDir cfg </> "localization.yaml"]
 
 -- | The group whose items are the projects (its index page lists `projects/`)
 projectsGroup :: String
@@ -142,6 +144,10 @@ projectsPattern cfg = fromString $ contentDir cfg </> "projects" </> "*.yaml"
 -- | The single socials file (a list of accounts)
 socialsPattern :: SiteConfig -> Pattern
 socialsPattern cfg = fromString $ contentDir cfg </> "socials.yaml"
+
+-- | The localization file (a map of id → {locale → string})
+localizationPattern :: SiteConfig -> Pattern
+localizationPattern cfg = fromString $ contentDir cfg </> "localization.yaml"
 
 -- | Where generic data files (any YAML) live
 dataDir :: SiteConfig -> FilePath
@@ -174,6 +180,10 @@ socialsFile cfg = fromFilePath $ contentDir cfg </> "socials.yaml"
 -- | The authors file (a map keyed by author id)
 authorsFile :: SiteConfig -> Identifier
 authorsFile cfg = fromFilePath $ contentDir cfg </> "authors.yaml"
+
+-- | The localization file (a map of id → {locale → string}, plus reserved keys)
+localizationFile :: SiteConfig -> Identifier
+localizationFile cfg = fromFilePath $ contentDir cfg </> "localization.yaml"
 
 -- | Templates every kind of page goes through
 siteTemplate, minimalTemplate, pageTemplate, postTemplate :: SiteConfig -> Identifier

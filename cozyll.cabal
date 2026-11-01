@@ -71,6 +71,7 @@ library
                   , Cozyll.Format
                   , Cozyll.Html
                   , Cozyll.JsonLd
+                  , Cozyll.Localization
                   , Cozyll.Metadata
                   , Cozyll.Rules
                   , Cozyll.Rules.Assets
