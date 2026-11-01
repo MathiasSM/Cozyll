@@ -3,7 +3,7 @@ module Cozyll.Rules.PostGroup (processPostGroup) where
 
 import Cozyll.CleanURL (pathRoute)
 import Cozyll.Compile (applyTemplates, finish, runPandoc)
-import Cozyll.Config (SiteConfig, minimalTemplate, postSnapshot, postTemplate, postsPattern, resolveTemplate, siteEnv)
+import Cozyll.Config (SiteConfig, contentTemplate, postSnapshot, postTemplate, postsPattern, resolveTemplate, siteEnv)
 import Cozyll.Content (isHidden, isTemplated, requirePost)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
@@ -69,7 +69,7 @@ processPostGroupItems cfg groupName =
                         ctx' = asideContext tocHtml <> globalContext cfg <> boolField "linkAuthors" (const True)
                     ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
                     saveSnapshot (postSnapshot groupName) item'
-                        >>= applyTemplates ctx' [minimalTemplate cfg, postTemplate cfg]
+                        >>= applyTemplates ctx' [contentTemplate cfg, postTemplate cfg]
                         >>= finish cfg (socialMetaContext cfg Article authors [] pageMeta mainImg ogLocale <> navContext cfg groupName <> ctx')
 
 -- | Build context for archive page

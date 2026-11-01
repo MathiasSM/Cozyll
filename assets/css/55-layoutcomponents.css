@@ -93,7 +93,7 @@
     }
 
     /* Control toggles: see templates/controls--*-toggle.html */
-    .ruby-toggle, .class-toggle {
+    .ruby-toggle, .images-toggle {
       padding:.5rem;
       background: var(--color-surface);
       &:hover {

@@ -33,7 +33,7 @@ module Cozyll.Config (
 
     -- ** Templates
     siteTemplate,
-    minimalTemplate,
+    contentTemplate,
     pageTemplate,
     postTemplate,
     resolveTemplate,
@@ -186,9 +186,9 @@ localizationFile :: SiteConfig -> Identifier
 localizationFile cfg = fromFilePath $ contentDir cfg </> "localization.yaml"
 
 -- | Templates every kind of page goes through
-siteTemplate, minimalTemplate, pageTemplate, postTemplate :: SiteConfig -> Identifier
+siteTemplate, contentTemplate, pageTemplate, postTemplate :: SiteConfig -> Identifier
 siteTemplate cfg = resolveTemplate cfg "site.html"
-minimalTemplate cfg = resolveTemplate cfg "minimal.html"
+contentTemplate cfg = resolveTemplate cfg "content.html"
 pageTemplate cfg = resolveTemplate cfg "as-page.html"
 postTemplate cfg = resolveTemplate cfg "as-post.html"
 

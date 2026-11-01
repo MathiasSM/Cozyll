@@ -8,9 +8,8 @@
 
 # The site's identity.
 site:
-  name: Example
+  title: Example
   description: Example description
-  author: John Doe
   copyrightYear: 2013
   domain: example.com
   alternateName: ["Cozyll Example"]

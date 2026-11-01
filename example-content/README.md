@@ -25,7 +25,7 @@ Structure
 - `media/` — the logo (for favicons) and icons inlined into templates and data
   files.
 - `templates/` — content-provided templates: one override of a vendored
-  template (`minimal.html`, which adds a class), and new partials used via
+  template (`content.html`, which adds a class), and new partials used via
   `$partial(...)$`.
 - `css/` — additional styles. New classes only; nothing vendored is overridden.
 
