@@ -4,11 +4,13 @@ module Cozyll.Context.Author (
     authorItemContext,
     authorContext,
     authorPages,
+    copyrightYears,
 ) where
 
 import Cozyll.Config (SiteConfig, baseUrl, siteAuthors, siteDefaultAuthor)
 import Cozyll.Context.SocialMeta (absoluteImageUrl)
 import Cozyll.Domain.Author (Author (..), authorTypeName, authorUrlPath)
+import Cozyll.Format (yearRange)
 import Cozyll.Metadata qualified as Meta
 import Data.List (find, nubBy)
 import Data.Maybe (fromMaybe, mapMaybe)
@@ -16,11 +18,13 @@ import Hakyll (
     Context,
     Item (..),
     Metadata,
+    boolFieldM,
     field,
     fromFilePath,
     getMetadata,
     listFieldWith,
  )
+import Text.Read (readMaybe)
 
 -- | The authors of a post: its @author:@ ids, or the site-default author
 resolveAuthors :: SiteConfig -> Metadata -> [Author]
@@ -50,12 +54,44 @@ authorItemContext cfg =
 
 -- | The per-post author list, resolved from the page's own metadata
 authorContext :: SiteConfig -> Context String
-authorContext cfg = listFieldWith "author" (authorItemContext cfg) resolveFor
+authorContext cfg =
+    listFieldWith "author" (authorItemContext cfg) resolveFor
+        <> boolFieldM "postCopyright" isPostCopyright
+        <> field "postCopyrightYears" postCopyrightYears
+        <> listFieldWith "postCopyrightHolders" holderContext postCopyrightHolders
   where
     resolveFor item = do
         metadata <- getMetadata (itemIdentifier item)
         pure (map authorItem (resolveAuthors cfg metadata))
     authorItem author = Item (fromFilePath (authorId author)) author
+
+    isPostCopyright item = do
+        metadata <- getMetadata (itemIdentifier item)
+        pure (any authorAddCopyrightNotice (resolveAuthors cfg metadata))
+
+    postCopyrightYears item = do
+        metadata <- getMetadata (itemIdentifier item)
+        pure (copyrightYears metadata)
+
+    postCopyrightHolders item = do
+        metadata <- getMetadata (itemIdentifier item)
+        pure (map authorItem (filter authorAddCopyrightNotice (resolveAuthors cfg metadata)))
+
+-- | The fields of one copyright holder (a bare name)
+holderContext :: Context Author
+holderContext = field "name" (return . authorName . itemBody)
+
+-- | The copyright years of a post: @date@ to @lastModifiedAt@, as a range
+copyrightYears :: Metadata -> String
+copyrightYears metadata = case Meta.lookupKey Meta.Date metadata of
+    Nothing -> ""
+    Just date -> case readMaybe (take 4 date) of
+        Nothing -> ""
+        Just firstYear ->
+            let lastYear = case Meta.lookupKey Meta.LastModifiedAt metadata of
+                    Nothing -> firstYear
+                    Just modified -> fromMaybe firstYear (readMaybe (take 4 modified))
+             in yearRange firstYear lastYear
 
 -- | Every author, in @authors.yaml@ file order
 authorPages :: SiteConfig -> [Author]

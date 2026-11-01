@@ -2,7 +2,7 @@
 module Cozyll.AuthorSpec (tests) where
 
 import Cozyll.Config (Env (Dev), SiteConfig (..))
-import Cozyll.Context.Author (resolveAuthors)
+import Cozyll.Context.Author (copyrightYears, resolveAuthors)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, defaultAuthor, parseAuthorsYaml)
 import Cozyll.Domain.Website (HighlightStyle (Pygments))
 import Cozyll.Metadata qualified as Meta
@@ -24,6 +24,8 @@ tests =
         , authorUrlPathTests
         , resolveAuthorsTests
         , lookupKeyListTests
+        , copyrightYearsTests
+        , postCopyrightTests
         ]
 
 parseTests :: TestTree
@@ -176,6 +178,32 @@ lookupKeyListTests =
 stringList :: [String] -> Value
 stringList = toJSON
 
+copyrightYearsTests :: TestTree
+copyrightYearsTests =
+    testGroup
+        "copyrightYears"
+        [ testCase "is a single year without lastModifiedAt" $
+            copyrightYears (metadataOf [("date", String "2024-02-20")]) @?= "2024"
+        , testCase "is a single year when lastModifiedAt matches" $
+            copyrightYears (metadataOf [("date", String "2024-02-20"), ("lastModifiedAt", String "2024-02-20")]) @?= "2024"
+        , testCase "is a range when lastModifiedAt differs" $
+            copyrightYears (metadataOf [("date", String "2024-02-20"), ("lastModifiedAt", String "2026-03-01")]) @?= "2024–2026"
+        , testCase "is empty without a date" $
+            copyrightYears (metadataOf []) @?= ""
+        ]
+
+postCopyrightTests :: TestTree
+postCopyrightTests =
+    testGroup
+        "postCopyright"
+        [ testCase "names only the opted-in authors" $
+            map authorName (filter authorAddCopyrightNotice (resolveAuthors cfg (metadataOf [("author", stringList ["example", "example-org"])])))
+                @?= ["Example Author"]
+        , testCase "is false when no author opts in" $
+            any authorAddCopyrightNotice (resolveAuthors cfg (metadataOf [("author", String "example-org")]))
+                @?= False
+        ]
+
 -- | Front matter with string values, as Hakyll stores it
 metadataOf :: [(Text, Value)] -> Metadata
 metadataOf = KeyMap.fromList . map (\(key, value) -> (AesonKey.fromText key, value))
@@ -205,7 +233,7 @@ cfg =
         }
 
 exampleAuthor :: Author
-exampleAuthor = author' "example" "Example Author" True
+exampleAuthor = (author' "example" "Example Author" True){authorAddCopyrightNotice = True}
 
 orgAuthor :: Author
 orgAuthor = author' "example-org" "Example Labs" False

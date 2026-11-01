@@ -9,6 +9,9 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Added
 
+- An opt-in per-post copyright notice (`addCopyrightNotice: true` on an author):
+  a `© <authors> <years>` line at the end of the post, years from `date` to
+  `lastModifiedAt`, shown only on the post page (not in lists or feeds).
 - `author:` front matter (an id or list of ids from `authors.yaml`) resolves to
   per-post authors, shown as bylines and used in JSON-LD; posts without it fall
   back to the site-default author.
