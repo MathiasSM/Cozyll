@@ -3,7 +3,7 @@ module Cozyll.Rules.SinglePages (Page (..), page, processPage, pageCompiler) whe
 
 import Cozyll.CleanURL (pathRoute)
 import Cozyll.Compile (applyTemplates, finish, runPandoc)
-import Cozyll.Config (SiteConfig, minimalTemplate, pageTemplate, pagesPattern, siteEnv)
+import Cozyll.Config (SiteConfig, contentTemplate, pageTemplate, pagesPattern, siteEnv)
 import Cozyll.Content (isHidden, isIndex, isTemplated)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
@@ -57,7 +57,7 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates, pageListItems} = do
     let ctx' = asideContext tocHtml <> ctx
         pageMeta = pageMetaOf cfg metadata
     ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
-    applyTemplates ctx' ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
+    applyTemplates ctx' ([contentTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
         >>= finish cfg (socialMetaContext cfg kind [] items pageMeta mainImg ogLocale <> navContext cfg pageName <> ctx')
 
 -- | The page's structured-data kind: home is a @WebSite@, a group index a @CollectionPage@, anything else from @schemaType:@

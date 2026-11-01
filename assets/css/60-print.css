@@ -16,7 +16,7 @@
   .site-footer {display:none}
 
   .main-article  {padding: 0 1em;max-width:none;margin:0 auto;font-size:1em;}
-  .main-article > div  { column-count:2; column-fill: auto; height:100%}
+  .main-article > .content  { column-count:2; column-fill: auto; height:100%}
   .main-article a[href^=http]::after { content: " [" attr(href) "] "; }
 
   .site-header svg, .site-header svg * {fill: var(--color-border);}

@@ -5,7 +5,7 @@ module Cozyll.Rules.AuthorPages (
 ) where
 
 import Cozyll.Compile (applyTemplates, finish)
-import Cozyll.Config (SiteConfig, baseUrl, minimalTemplate, resolveTemplate)
+import Cozyll.Config (SiteConfig, baseUrl, resolveTemplate)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Author (authorPageContext, authorPages, authorPosts, displayNameOf)
 import Cozyll.Context.Nav (navContext)
@@ -54,5 +54,5 @@ processAuthorPage cfg author = create [authorPageIdentifier cfg author] $ do
             ctx = authorPageContext cfg author <> listField "posts" (globalContext cfg) (return posts) <> globalContext cfg
         ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
         makeItem ""
-            >>= applyTemplates ctx [minimalTemplate cfg, resolveTemplate cfg "author.html"]
+            >>= applyTemplates ctx [resolveTemplate cfg "author.html"]
             >>= finish cfg (socialMetaContext cfg ProfilePage [author] items pageMeta mainImage ogLocale <> navContext cfg "authors" <> ctx)
