@@ -7,6 +7,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 
+## [3.0.0.0] - 2026-11-01
+
 ### Added
 
 - Author pages are `ProfilePage` nodes (with the author as `mainEntity` and
@@ -19,7 +21,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   (`WebPage`, `AboutPage`, `ContactPage`, `CollectionPage`, `ProfilePage`).
   Articles also emit `article:published_time`/`article:modified_time`, and an
   opted-in post carries `copyrightNotice`/`copyrightHolder`.
-- Author profile pages at `/authors/<id>/`, listing each author's posts and
+- Author profile pages at `/authors/<id>`, listing each author's posts and
   included in `sitemap.xml`; articles credit their authors by profile URL
   (`article:author` and JSON-LD `author[].url`).
 - An opt-in per-post copyright notice (`addCopyrightNotice: true` on an author):
@@ -52,6 +54,15 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   and description.
 - A `#main-image` image attribute that marks an image as the page's Open Graph /
   JSON-LD image.
+- A required `localization.yaml` (`{id: {locale: string}}`) plus a `t("id")`
+  template function for localized strings; a lookup resolves the page language
+  and falls back `xx-YY` → `xx`, failing the build when a string a template
+  consumes is missing. A reserved `_ogLocaleDefaultRegion` key supplies each
+  language's `og:locale` (fails when a used language lacks one).
+- An open `Language` model: `language:` accepts any 2-letter ISO 639-1 code plus
+  an optional region (e.g. `pt-BR`), replacing the hardcoded `en`/`es`/`ja` enum,
+  so any locale is supported. Date, project-date, and control labels are
+  localized through `t("id")` (dates stay `YYYY-MM-DD`).
 
 ### Changed
 
@@ -75,6 +86,13 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   structured data, for posts, the home page, and standalone pages.
 - Extracted the pure JSON-LD building blocks into a new `Cozyll.JsonLd`
   module (no behaviour change).
+- Social accounts use a single `_show` flag — shown by default, hidden with
+  `_show: false` — replacing `showContact`/`showAbout` and the
+  `socials-contact`/`socials-about` lists with one `socials` list (breaking).
+- The `minimal.html` wrapper is now `content.html` (a classed content wrapper);
+  the images toggle class is `images-toggle` (was `class-toggle`); social links
+  use `rel="me"` with a hidden decorative icon and no redundant `title`; and
+  menu entries carry their `lang` attribute.
 
 ### Removed
 
@@ -82,6 +100,13 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   superseded by `example-content/`.
 - Twitter card tags, along with the `site.twitterHandle` configuration field and
   the `TWITTER_HANDLE` environment override.
+
+### Fixed
+
+- Author page URLs are slash-less (`/authors/<id>`) and JSON-LD author `@id`s
+  use a `#person`/`#organization` fragment.
+- Unknown `SITE_ENV` values now fail the build (previously they silently fell
+  back to `prod`).
 
 ## [2.0.0.0] - 2026-10-23
 
@@ -248,7 +273,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v2.0.0.0...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.0...master
+[3.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v2.0.0.0...v3.0.0.0
 [2.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v1.0.0.0...v2.0.0.0
 [1.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v0.5.0.0...v1.0.0.0
 [0.5.0.0]: https://github.com/MathiasSM/Cozyll/compare/v0.4.0.2...v0.5.0.0

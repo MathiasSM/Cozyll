@@ -3,7 +3,7 @@
 [![Haskell](https://img.shields.io/badge/Haskell-5e5086?logo=haskell&logoColor=white)](https://www.haskell.org/)
 [![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](https://github.com/MathiasSM/Cozyll/blob/master/LICENSE.txt)
 [![GitHub release](https://img.shields.io/github/v/release/MathiasSM/Cozyll)](https://github.com/MathiasSM/Cozyll/releases/latest)
-[![Hackage](https://img.shields.io/hackage/v/mathiassm?label=Hackage)](https://hackage.haskell.org/package/cozyll)
+[![Hackage](https://img.shields.io/hackage/v/cozyll?label=Hackage)](https://hackage.haskell.org/package/cozyll)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/MathiasSM/Cozyll/_ci.yml?label=CI)](https://github.com/MathiasSM/Cozyll/actions/workflows/_ci.yml)
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/MathiasSM/Cozyll/codeql.yml?label=CodeQL)](https://github.com/MathiasSM/Cozyll/actions/workflows/codeql.yml)
@@ -159,7 +159,7 @@ Authors live in `content/authors.yaml`, a map keyed by author id (the slug used 
 
 A post references its authors with `author: <id>` or `author: [<id>, <id>]` front matter; without it, the post falls back to the site-default author. The resolved authors are available in templates as `$for(author)$` (each with `$id$`, `$name$`, `$displayName$`, `$path$`, `$url$`, `$description$`, `$profileImage$`, `$type$`, and `$for(links)$`).
 
-Every author also gets a profile page at `/authors/<id>/` (included in `sitemap.xml`), showing their display name (or name), description, profile image, links, and every post they authored — a post without `author:` counts for the site-default author. The page's canonical URL and `og:url` are `https://<domain>/authors/<id>/`, and its `og:image` is the profile image when one is set.
+Every author also gets a profile page at `/authors/<id>` (included in `sitemap.xml`), showing their display name (or name), description, profile image, links, and every post they authored — a post without `author:` counts for the site-default author. The page's canonical URL and `og:url` are `https://<domain>/authors/<id>`, and its `og:image` is the profile image when one is set.
 
 ## Frontmatter
 
@@ -173,7 +173,7 @@ Open Graph tags and JSON-LD structured data are emitted on posts, the home page,
 - `#main-image` on an image (`![alt](src){#main-image}`) marks it as the Open Graph / JSON-LD image; its URL is resolved to an absolute one.
 - `schemaType` sets a standalone page's schema.org type: one of `WebPage` (the default), `AboutPage`, `ContactPage`, `CollectionPage`, or `ProfilePage`. Any other value fails the build.
 
-The JSON-LD is a schema.org `@graph` with stable `@id`s: the home page carries the `WebSite` entity (`#website`), the site's `Organization` (`#organization`), and the site-default author; posts are `BlogPosting` nodes (`<page>#article`) whose `author` entries are the post's authors, credited by profile URL; standalone pages are the page's `schemaType` (linking to the site via `isPartOf`). Group index pages are `CollectionPage` nodes whose `mainEntity` is an `ItemList` mirroring the visible list (the showcase has no list, so no `ItemList`). Author pages are `ProfilePage` nodes with the author's entity as `mainEntity` and `hasPart` listing their posts. Author entities live at `https://<domain>/authors/<id>/#person` (`#organization` for organizations). Articles also emit `article:author` and their published/modified timestamps, and an opted-in post carries `copyrightNotice`/`copyrightHolder`.
+The JSON-LD is a schema.org `@graph` with stable `@id`s: the home page carries the `WebSite` entity (`#website`), the site's `Organization` (`#organization`), and the site-default author; posts are `BlogPosting` nodes (`<page>#article`) whose `author` entries are the post's authors, credited by profile URL; standalone pages are the page's `schemaType` (linking to the site via `isPartOf`). Group index pages are `CollectionPage` nodes whose `mainEntity` is an `ItemList` mirroring the visible list (the showcase has no list, so no `ItemList`). Author pages are `ProfilePage` nodes with the author's entity as `mainEntity` and `hasPart` listing their posts. Author entities live at `https://<domain>/authors/<id>#person` (`#organization` for organizations). Articles also emit `article:author` and their published/modified timestamps, and an opted-in post carries `copyrightNotice`/`copyrightHolder`.
 
 ## Adding a control (toggle)
 
