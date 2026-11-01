@@ -32,7 +32,7 @@ Note: build commands check for required content before running.
 -}
 cli :: IO ()
 cli = do
-    env <- parseEnv <$> lookupEnv "SITE_ENV"
+    env <- parseEnv =<< lookupEnv "SITE_ENV"
     let contentDir = contentDirFor env
     -- 1. Parse args
     args <- getArgs
@@ -41,7 +41,7 @@ cli = do
     website <- Web.loadWebsite contentDir
     unless ("clean" `elem` args) (Web.validateSecurityExpiration website)
     -- 3. Check content exists
-    cfg <- loadSiteConfig contentDir website
+    cfg <- loadSiteConfig env contentDir website
     unless ("clean" `elem` args) (ensureContentExists cfg)
     -- 4. Run command
     hakyllWith siteConfiguration (rules cfg website)
@@ -62,10 +62,9 @@ ensureContentExists cfg = do
         $ "Missing required content:\n" ++ unlines (map ("  " ++) missing)
 
 -- | Builds the site configuration from @website.yaml@, with env variables overrides.
-loadSiteConfig :: FilePath -> Web.Website -> IO SiteConfig
-loadSiteConfig contentDir website = do
+loadSiteConfig :: Env -> FilePath -> Web.Website -> IO SiteConfig
+loadSiteConfig env contentDir website = do
     let site = Web.websiteSite website
-    env <- parseEnv <$> lookupEnv "SITE_ENV"
     title <- override "SITE_TITLE" (Web.siteTitle site)
     description <- override "SITE_DESCRIPTION" (Web.siteDescription site)
     year <- override "SITE_COPYRIGHT_YEAR" (Web.siteCopyrightYear site)
@@ -111,14 +110,15 @@ loadSiteConfig contentDir website = do
             Nothing -> pure (Web.highlightStyle section)
             Just name -> maybe (die $ "unknown HIGHLIGHT_STYLE \"" ++ name ++ "\"") pure (Web.parseHighlightStyle name)
 
-{- | Parses @SITE_ENV@ (@dev@, @example@, or @prod@; defaults to 'Prod').
-TODO: Let's have a stricter parse; unknown values should fail
+{- | Parses @SITE_ENV@ (@dev@, @example@, or @prod@). Unset defaults to 'Prod'; any
+other value fails the build.
 -}
-parseEnv :: Maybe String -> Env
-parseEnv (Just "prod") = Prod
-parseEnv (Just "dev") = Dev
-parseEnv (Just "example") = Example
-parseEnv _ = Prod
+parseEnv :: Maybe String -> IO Env
+parseEnv Nothing = pure Prod
+parseEnv (Just "prod") = pure Prod
+parseEnv (Just "dev") = pure Dev
+parseEnv (Just "example") = pure Example
+parseEnv (Just other) = die $ "unknown SITE_ENV \"" ++ other ++ "\" (expected prod, dev, or example)"
 
 -- | The content directory an environment builds (@example@ builds the example content)
 contentDirFor :: Env -> FilePath
