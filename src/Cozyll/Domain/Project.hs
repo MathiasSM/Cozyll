@@ -42,7 +42,12 @@ data Project = Project
     }
     deriving (Eq, Show)
 
--- | Parses a project, reporting every problem (not just the first)
+{- | Parses a project, reporting every problem (not just the first).
+
+The parser is tolerant: any key it does not model is ignored rather than rejected, so
+extra, unknown fields in a project YAML never break the build. @team@ and @priority@ are
+legacy fields, accepted but optional (and not exposed to templates).
+-}
 parseProject :: Object -> Either [String] Project
 parseProject o =
     runCheck

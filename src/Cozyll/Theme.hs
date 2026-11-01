@@ -24,7 +24,12 @@ import Hakyll (
 import System.Directory (doesDirectoryExist, doesFileExist, listDirectory)
 import System.FilePath.Posix (addTrailingPathSeparator, (</>))
 
--- | Lists the template names a content dir provides (empty when the dir is absent).
+{- | Lists the template names a content dir provides (empty when the dir is absent).
+
+Discovery is top-level only: @listDirectory@ is intentionally non-recursive, matching
+'Cozyll.Config.templatePattern' (a @/*@ glob), so templates in nested directories are
+neither discovered nor shadowable.
+-}
 discoverContentTemplateNames :: FilePath -> IO [FilePath]
 discoverContentTemplateNames dir = do
     present <- doesDirectoryExist dir

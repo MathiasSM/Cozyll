@@ -18,6 +18,9 @@ overrides either, file by file:
 - `content/css/*.css` is concatenated after the vendored styles, so it overrides
   them through the cascade.
 
+Overrides are discovered only at the top level of `content/templates/` (the lookup is
+non-recursive); a template in a nested directory is not shadowable.
+
 Templates read a fixed set of fields (the site identity, `nav`, `socials-*`,
 `posts`, `projects`, `feeds`, `math`, and the data-file names under
 `content/data/`); the vendored templates are the reference for that contract.
