@@ -9,13 +9,15 @@ import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Author (resolveAuthors)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (PageItem, PageKind (Article), pageItemOf, pageMetaOf, socialMetaContext)
+import Cozyll.Context.SocialMeta (PageItem, PageKind (Article), PageMeta (pageMetaLanguage), pageItemOf, pageMetaOf, socialMetaContext)
+import Cozyll.Localization (ogLocaleFor)
 import Cozyll.Rules.SinglePages (Page (..), page, processPage)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
     Compiler,
     Context,
     Rules,
+    boolField,
     compile,
     getMetadata,
     getResourceString,
@@ -64,10 +66,11 @@ processPostGroupItems cfg groupName =
                     metadata <- getUnderlying >>= getMetadata
                     let pageMeta = pageMetaOf cfg metadata
                         authors = resolveAuthors cfg metadata
-                        ctx' = asideContext tocHtml <> globalContext cfg
+                        ctx' = asideContext tocHtml <> globalContext cfg <> boolField "linkAuthors" (const True)
+                    ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
                     saveSnapshot (postSnapshot groupName) item'
                         >>= applyTemplates ctx' [minimalTemplate cfg, postTemplate cfg]
-                        >>= finish cfg (socialMetaContext cfg Article authors [] pageMeta mainImg <> navContext cfg groupName <> ctx')
+                        >>= finish cfg (socialMetaContext cfg Article authors [] pageMeta mainImg ogLocale <> navContext cfg groupName <> ctx')
 
 -- | Build context for archive page
 getCtx :: SiteConfig -> String -> Compiler (Context String)

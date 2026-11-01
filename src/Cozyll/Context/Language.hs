@@ -3,19 +3,8 @@ module Cozyll.Context.Language (languageContext) where
 
 import Cozyll.Content (requireLanguage)
 import Cozyll.Domain.Language (languageCode)
-import Hakyll (Context, Item (itemIdentifier), field, noResult)
+import Hakyll (Context, Item (itemIdentifier), field)
 
--- | Sets a language variable for choosing strings and using in html
+-- | Exposes the page's language code (for @lang=@ attributes and lookups)
 languageContext :: Context a
-languageContext =
-    mconcat $
-        field "language" (fmap languageCode . itemLanguage)
-            : [field ("lang-" ++ languageCode lang) (isLanguage lang) | lang <- [minBound .. maxBound]]
-  where
-    itemLanguage = requireLanguage . itemIdentifier
-
-    isLanguage lang item = do
-        itemLang <- itemLanguage item
-        if itemLang == lang
-            then return $ languageCode lang
-            else noResult "No lang"
+languageContext = field "language" (fmap languageCode . requireLanguage . itemIdentifier)

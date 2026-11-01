@@ -17,16 +17,16 @@ tests =
         "parsePostYaml"
         [ testCase "accepts a post with only title, date and path" $
             parse validPost
-                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" En Nothing False)
+                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" (Language "en") Nothing False)
         , testCase "reads language, last modification and draft" $
             parse (set "language" "es" $ set "lastModifiedAt" "2027-01-02" $ set "draft" "true" validPost)
-                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" Es (Just (day 2027 1 2)) True)
+                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" (Language "es") (Just (day 2027 1 2)) True)
         , testCase "rejects a lastModifiedAt before the date" $
             parse (set "lastModifiedAt" "2026-09-01" validPost)
                 @?= Left ["lastModifiedAt: is before date"]
         , testCase "allows a lastModifiedAt on the date" $
             parse (set "lastModifiedAt" "2026-10-06" validPost)
-                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" En (Just (day 2026 10 6)) False)
+                @?= Right (Post "A post" (day 2026 10 6) "/blog/a-post" (Language "en") (Just (day 2026 10 6)) False)
         , testCase "ignores keys it doesn't model, even empty ones" $
             parse (set "description" "" $ set "TOC" "true" validPost)
                 @?= parse validPost
@@ -37,16 +37,16 @@ tests =
         , testCase "rejects a date that doesn't exist" $
             parse (set "date" "2026-13-45" validPost)
                 @?= Left ["date: could not parse date: invalid day:(2026,13,45)"]
-        , testCase "rejects an unknown language" $
-            parse (set "language" "fr" validPost)
-                @?= Left ["language: unknown language \"fr\" (expected en, es, ja)"]
+        , testCase "rejects a malformed language" $
+            parse (set "language" "xyz" validPost)
+                @?= Left ["language: expected a 2-letter ISO 639-1 code with an optional region, got \"xyz\""]
         , testCase "reports every problem at once, in field order" $
-            parse (set "language" "fr" $ set "date" "2026-13-45" $ without ["title", "path"] validPost)
+            parse (set "language" "xyz" $ set "date" "2026-13-45" $ without ["title", "path"] validPost)
                 @?= Left
                     [ "title: missing"
                     , "date: could not parse date: invalid day:(2026,13,45)"
                     , "path: missing"
-                    , "language: unknown language \"fr\" (expected en, es, ja)"
+                    , "language: expected a 2-letter ISO 639-1 code with an optional region, got \"xyz\""
                     ]
         ]
   where

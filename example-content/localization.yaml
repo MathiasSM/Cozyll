@@ -1,0 +1,28 @@
+# Localized strings, read by the `t("id")` template function and for og:locale.
+# Locale keys are free-form; the generator only requires the ones pages consume.
+# `en` is the fallback *language selection*, never a lookup fallback.
+aside.controls:
+  en: Controls
+  es: Controles
+  ja: コントロール
+
+post.updated:
+  en: Updated
+  es: Actualizado
+  ja: 更新済み
+
+project.started:
+  en: Started on
+  es: Iniciado en
+  ja: 開始日
+
+project.finished:
+  en: Finished
+  es: Terminado en
+  ja: 完了日
+
+# Reserved: each used language's full og:locale (xx_YY). Required for every page.
+_ogLocaleDefaultRegion:
+  en: en_US
+  es: es_ES
+  ja: ja_JP

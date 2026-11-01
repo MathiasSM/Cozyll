@@ -8,7 +8,8 @@ import Cozyll.Content (isHidden, isIndex, isTemplated)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (PageItem, PageKind (CollectionPage, WebSite), pageKindOf, pageMetaOf, socialMetaContext)
+import Cozyll.Context.SocialMeta (PageItem, PageKind (CollectionPage, WebSite), PageMeta (pageMetaLanguage), pageKindOf, pageMetaOf, socialMetaContext)
+import Cozyll.Localization (ogLocaleFor)
 import Cozyll.Metadata (Key (Home), lookupKey)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
@@ -55,8 +56,9 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates, pageListItems} = do
     items <- pageListItems
     let ctx' = asideContext tocHtml <> ctx
         pageMeta = pageMetaOf cfg metadata
+    ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
     applyTemplates ctx' ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
-        >>= finish cfg (socialMetaContext cfg kind [] items pageMeta mainImg <> navContext cfg pageName <> ctx')
+        >>= finish cfg (socialMetaContext cfg kind [] items pageMeta mainImg ogLocale <> navContext cfg pageName <> ctx')
 
 -- | The page's structured-data kind: home is a @WebSite@, a group index a @CollectionPage@, anything else from @schemaType:@
 pageKind :: Metadata -> Compiler PageKind

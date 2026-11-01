@@ -12,7 +12,6 @@ import Cozyll.Context.SocialMeta (
     descriptionOf,
     isoDate,
     jsonLD,
-    localeOf,
     mainImageOf,
     ogType,
     pageKindOf,
@@ -77,7 +76,6 @@ tests =
         , absoluteUrlTests
         , absoluteImageUrlTests
         , isoDateTests
-        , localeOfTests
         , ogTypeTests
         , titleOfTests
         , descriptionOfTests
@@ -186,16 +184,6 @@ isoDateTests =
             isoDate "2024-02-10" @?= "2024-02-10T00:00:00"
         , testCase "keeps a value that already has a time" $
             isoDate "2024-02-10T12:34:56" @?= "2024-02-10T12:34:56"
-        ]
-
-localeOfTests :: TestTree
-localeOfTests =
-    testGroup
-        "localeOf"
-        [ testCase "maps en to en_US" $ localeOf "en" @?= "en_US"
-        , testCase "maps es to es_ES" $ localeOf "es" @?= "es_ES"
-        , testCase "maps ja to ja_JP" $ localeOf "ja" @?= "ja_JP"
-        , testCase "defaults an unknown language to en_US" $ localeOf "fr" @?= "en_US"
         ]
 
 ogTypeTests :: TestTree

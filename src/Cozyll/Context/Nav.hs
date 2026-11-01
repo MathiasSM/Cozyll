@@ -4,7 +4,7 @@ module Cozyll.Context.Nav (navContext) where
 import Control.Monad (filterM)
 import Cozyll.Config (SiteConfig, pagesPattern, siteEnv)
 import Cozyll.Content (isHidden, requireNav)
-import Cozyll.Domain.Language (Language (En), languageCode)
+import Cozyll.Domain.Language (languageCode)
 import Cozyll.Domain.Nav (NavEntry (..))
 import Data.List (sortOn)
 import Data.Maybe (catMaybes)
@@ -39,7 +39,7 @@ navContext cfg current = listField "nav" entryContext (navItems cfg)
 
     -- The menu sits in an English header, so only other languages need marking
     inOtherLanguage language
-        | language == En = noResult "English"
+        | languageCode language == "en" = noResult "English"
         | otherwise = return $ languageCode language
 
 navItems :: SiteConfig -> Compiler [Item NavEntry]

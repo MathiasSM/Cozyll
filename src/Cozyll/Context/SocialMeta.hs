@@ -13,7 +13,6 @@ module Cozyll.Context.SocialMeta (
     absoluteUrl,
     absoluteImageUrl,
     isoDate,
-    localeOf,
     ogType,
     titleOf,
     descriptionOf,
@@ -23,9 +22,11 @@ module Cozyll.Context.SocialMeta (
 import Control.Applicative ((<|>))
 import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLogo, siteTitle)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorName, authorSchemaType, authorUrlPath)
+import Cozyll.Domain.Language qualified as L
 import Cozyll.Format (yearRange)
 import Cozyll.JsonLd qualified as JsonLd
 import Cozyll.Metadata (Key (..), lookupKey)
+import Cozyll.Yaml (Check (runCheck))
 import Data.Aeson (ToJSON, object, (.=))
 import Data.Aeson.Encoding (Series)
 import Data.Aeson.Key qualified as AesonKey
@@ -133,9 +134,9 @@ mainImageOf doc =
         | otherwise = T.unpack caption
 
 -- | Fields @opengraph@ and @jsonld@ describing a page, from metadata the caller has already read
-socialMetaContext :: SiteConfig -> PageKind -> [Author] -> [PageItem] -> PageMeta -> Maybe MainImage -> Context String
-socialMetaContext cfg kind authors items pageMeta mainImage =
-    constField "opengraph" (openGraph cfg kind authors pageMeta mainImage)
+socialMetaContext :: SiteConfig -> PageKind -> [Author] -> [PageItem] -> PageMeta -> Maybe MainImage -> String -> Context String
+socialMetaContext cfg kind authors items pageMeta mainImage ogLocale =
+    constField "opengraph" (openGraph cfg kind authors pageMeta mainImage ogLocale)
         <> constField "jsonld" (jsonLD cfg kind authors items pageMeta mainImage)
 
 -- | The absolute URL of an item: its @path:@, or else the site root
@@ -158,8 +159,8 @@ absoluteImageUrl cfg image
     lowered = map toLower image
 
 -- | The Open Graph tags for a page, one per line
-openGraph :: SiteConfig -> PageKind -> [Author] -> PageMeta -> Maybe MainImage -> String
-openGraph cfg kind authors pageMeta mainImage =
+openGraph :: SiteConfig -> PageKind -> [Author] -> PageMeta -> Maybe MainImage -> String -> String
+openGraph cfg kind authors pageMeta mainImage ogLocale =
     intercalate "\n" $
         [ meta "og:type" (ogType kind)
         , meta "og:url" (pageMetaUrl pageMeta)
@@ -167,7 +168,7 @@ openGraph cfg kind authors pageMeta mainImage =
         ]
             <> maybe [] (\description -> [meta "og:description" description]) (pageMetaDescription pageMeta)
             <> [ meta "og:site_name" (siteTitle cfg)
-               , meta "og:locale" (localeOf (pageMetaLanguage pageMeta))
+               , meta "og:locale" ogLocale
                ]
             <> articleTags
             <> maybe [] imageTags mainImage
@@ -426,17 +427,11 @@ nonEmpty :: Maybe String -> Maybe String
 nonEmpty (Just "") = Nothing
 nonEmpty value = value
 
--- TODO:Make language be always locale, so we don't hardcode a short list of languages
-
--- | The item's language code (English by default)
+-- | The item's normalized language code (English by default)
 languageOf :: Metadata -> String
-languageOf metadata = fromMaybe "en" (lookupKey Language metadata)
-
--- | The Open Graph locale for a language code
-localeOf :: String -> String
-localeOf "es" = "es_ES"
-localeOf "ja" = "ja_JP"
-localeOf _ = "en_US"
+languageOf metadata = case runCheck (L.languageOf metadata) of
+    Right lang -> L.languageCode lang
+    Left _ -> "en"
 
 -- | The first 'Just' value in a list
 firstJust :: [Maybe a] -> Maybe a

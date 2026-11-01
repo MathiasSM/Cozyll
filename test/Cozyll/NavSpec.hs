@@ -17,10 +17,10 @@ tests =
     testGroup
         "parseNavYaml"
         [ testCase "reads label, order, path and language (English unless stated)" $
-            parse navPage @?= Right (Just (NavEntry "Blog" 2 "/blog" En))
+            parse navPage @?= Right (Just (NavEntry "Blog" 2 "/blog" (Language "en")))
         , testCase "keeps HTML in the label and reads the language" $
             parse (set "nav" "'<i>Es</i>critos'" $ set "language" "es" navPage)
-                @?= Right (Just (NavEntry "<i>Es</i>critos" 2 "/blog" Es))
+                @?= Right (Just (NavEntry "<i>Es</i>critos" 2 "/blog" (Language "es")))
         , testCase "gives no entry to a page without a nav label" $
             parse (without ["nav", "navOrder"] navPage) @?= Right Nothing
         , testCase "needs an order when there is a label" $

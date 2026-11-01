@@ -48,4 +48,4 @@ getProjectsCtx cfg = do
     items <- loadAll (projectsPattern cfg)
     projects <- mapM (\item -> Item (itemIdentifier item) <$> requireProject item) items
     let ordered = sortOn (showcaseKey . itemBody) projects
-    return $ listField "projects" projectContext (return ordered) <> globalContext cfg
+    return $ listField "projects" (projectContext cfg) (return ordered) <> globalContext cfg

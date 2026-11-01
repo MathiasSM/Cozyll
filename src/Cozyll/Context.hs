@@ -8,6 +8,7 @@ import Cozyll.Context.Feed (feedsContext)
 import Cozyll.Context.Language (languageContext)
 import Cozyll.Context.Site (siteContext)
 import Cozyll.Context.Social (socialMediaContext)
+import Cozyll.Localization (translationsContext)
 import Data.List (isInfixOf)
 import Hakyll (
     Context,
@@ -23,6 +24,7 @@ globalContext cfg =
         <> socialMediaContext cfg
         <> dataContext cfg
         <> languageContext
+        <> translationsContext cfg
         <> feedsContext cfg
         <> authorContext cfg
         <> mathContext
