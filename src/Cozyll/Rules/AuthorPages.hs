@@ -9,7 +9,7 @@ import Cozyll.Config (SiteConfig, baseUrl, minimalTemplate, resolveTemplate)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Author (authorPageContext, authorPages, authorPosts, displayNameOf)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (MainImage (..), PageKind (WebPage), PageMeta (..), socialMetaContext)
+import Cozyll.Context.SocialMeta (MainImage (..), PageKind (ProfilePage), PageMeta (..), pageItemOf, socialMetaContext)
 import Cozyll.Domain.Author (Author (..), authorUrlPath)
 import Hakyll (
     Identifier,
@@ -38,6 +38,7 @@ processAuthorPage cfg author = create [authorPageIdentifier cfg author] $ do
     route idRoute
     compile $ do
         posts <- authorPosts cfg author
+        items <- mapM (pageItemOf cfg) posts
         let displayName = displayNameOf author
             pageMeta =
                 PageMeta
@@ -52,4 +53,4 @@ processAuthorPage cfg author = create [authorPageIdentifier cfg author] $ do
             ctx = authorPageContext cfg author <> listField "posts" (globalContext cfg) (return posts) <> globalContext cfg
         makeItem ""
             >>= applyTemplates ctx [minimalTemplate cfg, resolveTemplate cfg "author.html"]
-            >>= finish cfg (socialMetaContext cfg WebPage [author] pageMeta mainImage <> navContext cfg "authors" <> ctx)
+            >>= finish cfg (socialMetaContext cfg ProfilePage [author] items pageMeta mainImage <> navContext cfg "authors" <> ctx)

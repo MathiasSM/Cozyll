@@ -9,6 +9,10 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Added
 
+- Author pages are `ProfilePage` nodes (with the author as `mainEntity` and
+  `hasPart` mirroring the listed posts) and group index pages are
+  `CollectionPage` nodes whose `mainEntity` is an `ItemList` in DOM order (the
+  showcase index has no `ItemList`).
 - schema.org `@graph` structured data: the home page carries the `WebSite`,
   `Organization`, and default-author entities with stable `@id`s, posts are
   `BlogPosting` nodes, and standalone pages can set a whitelisted `schemaType`

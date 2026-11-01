@@ -9,7 +9,7 @@ import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Author (resolveAuthors)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (PageKind (Article), pageMetaOf, socialMetaContext)
+import Cozyll.Context.SocialMeta (PageItem, PageKind (Article), pageItemOf, pageMetaOf, socialMetaContext)
 import Cozyll.Rules.SinglePages (Page (..), page, processPage)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
@@ -38,7 +38,13 @@ processPostGroup cfg groupName = do
 -- | Builds the group index page as an archive page
 processPostGroupIndex :: SiteConfig -> String -> Rules ()
 processPostGroupIndex cfg groupName =
-    processPage cfg (page cfg groupName){pageContext = getCtx cfg groupName, pageTemplates = [resolveTemplate cfg "with-posts.html"]}
+    processPage
+        cfg
+        (page cfg groupName)
+            { pageContext = getCtx cfg groupName
+            , pageTemplates = [resolveTemplate cfg "with-posts.html"]
+            , pageListItems = getItems cfg groupName
+            }
 
 {- | Builds each item/post page
 
@@ -61,10 +67,16 @@ processPostGroupItems cfg groupName =
                         ctx' = asideContext tocHtml <> globalContext cfg
                     saveSnapshot (postSnapshot groupName) item'
                         >>= applyTemplates ctx' [minimalTemplate cfg, postTemplate cfg]
-                        >>= finish cfg (socialMetaContext cfg Article authors pageMeta mainImg <> navContext cfg groupName <> ctx')
+                        >>= finish cfg (socialMetaContext cfg Article authors [] pageMeta mainImg <> navContext cfg groupName <> ctx')
 
 -- | Build context for archive page
 getCtx :: SiteConfig -> String -> Compiler (Context String)
 getCtx cfg groupName = do
     posts <- recentFirst =<< loadAllSnapshots (postsPattern cfg groupName) (postSnapshot groupName)
     return $ listField "posts" (globalContext cfg) (return posts) <> globalContext cfg
+
+-- | The items an archive page lists, for its ItemList structured data
+getItems :: SiteConfig -> String -> Compiler [PageItem]
+getItems cfg groupName = do
+    posts <- recentFirst =<< loadAllSnapshots (postsPattern cfg groupName) (postSnapshot groupName)
+    mapM (pageItemOf cfg) posts

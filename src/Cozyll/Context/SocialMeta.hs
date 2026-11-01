@@ -3,7 +3,9 @@ module Cozyll.Context.SocialMeta (
     PageKind (..),
     MainImage (..),
     PageMeta (..),
+    PageItem (..),
     pageMetaOf,
+    pageItemOf,
     mainImageOf,
     socialMetaContext,
     jsonLD,
@@ -31,7 +33,7 @@ import Data.Char (toLower)
 import Data.List (intercalate, isPrefixOf)
 import Data.Maybe (fromMaybe)
 import Data.Text qualified as T
-import Hakyll (Context, Metadata, constField)
+import Hakyll (Compiler, Context, Item (..), Metadata, constField, getMetadata, itemIdentifier)
 import Text.Pandoc (Block (Figure), Inline (Image), Pandoc)
 import Text.Pandoc.Shared (stringify)
 import Text.Pandoc.Walk (query)
@@ -62,6 +64,27 @@ data PageMeta = PageMeta
     -- ^ @YYYY-MM-DD@
     }
     deriving (Eq, Show)
+
+-- | A page listed by a collection (its public URL, title, and publication date)
+data PageItem = PageItem
+    { pageItemUrl :: String
+    -- ^ Absolute
+    , pageItemName :: String
+    , pageItemPublished :: Maybe String
+    -- ^ @YYYY-MM-DD@
+    }
+    deriving (Eq, Show)
+
+-- | The list fields of an item: its public URL, title, and publication date
+pageItemOf :: SiteConfig -> Item String -> Compiler PageItem
+pageItemOf cfg item = do
+    metadata <- getMetadata (itemIdentifier item)
+    pure
+        PageItem
+            { pageItemUrl = maybe "" (absoluteUrl cfg) (lookupKey Path metadata)
+            , pageItemName = fromMaybe "" (lookupKey Title metadata)
+            , pageItemPublished = lookupKey Date metadata
+            }
 
 -- | Reads everything the social metadata needs, once, from an item's metadata
 pageMetaOf :: SiteConfig -> Metadata -> PageMeta
@@ -110,10 +133,10 @@ mainImageOf doc =
         | otherwise = T.unpack caption
 
 -- | Fields @opengraph@ and @jsonld@ describing a page, from metadata the caller has already read
-socialMetaContext :: SiteConfig -> PageKind -> [Author] -> PageMeta -> Maybe MainImage -> Context String
-socialMetaContext cfg kind authors pageMeta mainImage =
+socialMetaContext :: SiteConfig -> PageKind -> [Author] -> [PageItem] -> PageMeta -> Maybe MainImage -> Context String
+socialMetaContext cfg kind authors items pageMeta mainImage =
     constField "opengraph" (openGraph cfg kind authors pageMeta mainImage)
-        <> constField "jsonld" (jsonLD cfg kind authors pageMeta mainImage)
+        <> constField "jsonld" (jsonLD cfg kind authors items pageMeta mainImage)
 
 -- | The absolute URL of an item: its @path:@, or else the site root
 pageUrl :: SiteConfig -> Metadata -> String
@@ -197,18 +220,18 @@ pageKindOf metadata = case lookupKey SchemaType metadata of
         ]
 
 -- | The JSON-LD script tag for a page
-jsonLD :: SiteConfig -> PageKind -> [Author] -> PageMeta -> Maybe MainImage -> String
-jsonLD cfg kind authors pageMeta mainImage =
-    "<script type=\"application/ld+json\">" ++ JsonLd.render (JsonLd.graph (jsonNodes cfg kind authors pageMeta mainImage)) ++ "</script>"
+jsonLD :: SiteConfig -> PageKind -> [Author] -> [PageItem] -> PageMeta -> Maybe MainImage -> String
+jsonLD cfg kind authors items pageMeta mainImage =
+    "<script type=\"application/ld+json\">" ++ JsonLd.render (JsonLd.graph (jsonNodes cfg kind authors items pageMeta mainImage)) ++ "</script>"
 
 -- | The JSON-LD nodes of a page's @\@graph@
-jsonNodes :: SiteConfig -> PageKind -> [Author] -> PageMeta -> Maybe MainImage -> [JsonLd.Node]
-jsonNodes cfg kind authors pageMeta mainImage = case kind of
+jsonNodes :: SiteConfig -> PageKind -> [Author] -> [PageItem] -> PageMeta -> Maybe MainImage -> [JsonLd.Node]
+jsonNodes cfg kind authors items pageMeta mainImage = case kind of
     Article -> [articleNode]
     WebSite -> [websiteNode, organizationNode, defaultAuthorNode]
     WebPage -> [pageNode "WebPage"]
-    ProfilePage -> [pageNode "ProfilePage"]
-    CollectionPage -> [pageNode "CollectionPage"]
+    ProfilePage -> pageNode "ProfilePage" <> profileData : map authorEntityNode authors
+    CollectionPage -> [pageNode "CollectionPage" <> collectionData]
     AboutPage -> [pageNode "AboutPage"]
     ContactPage -> [pageNode "ContactPage"]
   where
@@ -247,14 +270,16 @@ jsonNodes cfg kind authors pageMeta mainImage = case kind of
             <> "url" .= origin cfg
             <> optionalField "logo" (absoluteImageUrl cfg <$> siteLogo cfg)
 
-    defaultAuthorNode =
-        "@type" .= authorSchemaType (authorType defaultAuthor)
-            <> "@id" .= entityId cfg defaultAuthor
-            <> "name" .= authorName defaultAuthor
-            <> "url" .= absoluteUrl cfg (authorUrlPath defaultAuthor)
-            <> optionalField "description" (authorDescription defaultAuthor)
-            <> optionalField (entityImageField defaultAuthor) (absoluteImageUrl cfg <$> authorProfileImage defaultAuthor)
-            <> optionalField "sameAs" (nonEmptyList (authorLinks defaultAuthor))
+    defaultAuthorNode = authorEntityNode defaultAuthor
+
+    authorEntityNode author =
+        "@type" .= authorSchemaType (authorType author)
+            <> "@id" .= entityId cfg author
+            <> "name" .= authorName author
+            <> "url" .= absoluteUrl cfg (authorUrlPath author)
+            <> optionalField "description" (authorDescription author)
+            <> optionalField (entityImageField author) (absoluteImageUrl cfg <$> authorProfileImage author)
+            <> optionalField "sameAs" (nonEmptyList (authorLinks author))
 
     pageNode name =
         "@type" .= (name :: String)
@@ -265,6 +290,42 @@ jsonNodes cfg kind authors pageMeta mainImage = case kind of
             <> "inLanguage" .= pageMetaLanguage pageMeta
             <> "isPartOf" .= websiteStub
             <> imageSeries
+
+    -- \| The @mainEntity@ of a profile page (its person/organization) and the posts it lists
+    profileData = case authors of
+        (author : _) -> "mainEntity" .= JsonLd.idRef (entityId cfg author) <> hasPartSeries
+        [] -> mempty
+
+    hasPartSeries
+        | null items = mempty
+        | otherwise = "hasPart" .= map hasPartNode items
+
+    hasPartNode item =
+        object $
+            [ "@type" .= ("BlogPosting" :: String)
+            , "@id" .= JsonLd.articleId (pageItemUrl item)
+            , "url" .= pageItemUrl item
+            , "name" .= pageItemName item
+            ]
+                ++ maybe [] ((\date -> ["datePublished" .= isoDate date])) (pageItemPublished item)
+
+    -- \| The @mainEntity@ of a collection page: an @ItemList@ of its items, when it has any
+    collectionData
+        | null items = mempty
+        | otherwise =
+            "mainEntity"
+                .= object
+                    [ "@type" .= ("ItemList" :: String)
+                    , "numberOfItems" .= length items
+                    , "itemListElement" .= zipWith elementNode [1 :: Int ..] items
+                    ]
+
+    elementNode position item =
+        object
+            [ "@type" .= ("ListItem" :: String)
+            , "position" .= position
+            , "url" .= pageItemUrl item
+            ]
 
     websiteStub =
         object

@@ -4,6 +4,7 @@ module Cozyll.SocialMetaSpec (tests) where
 import Cozyll.Config (Env (Dev), SiteConfig (..))
 import Cozyll.Context.SocialMeta (
     MainImage (..),
+    PageItem (..),
     PageKind (..),
     PageMeta (..),
     absoluteImageUrl,
@@ -289,16 +290,16 @@ jsonLdTests =
     testGroup
         "jsonLD"
         [ testCase "wraps every page in a @context + @graph document" $
-            assertContains "{\"@context\":\"https://schema.org\",\"@graph\":[" (jsonLD mkConfig WebPage [] pageMeta Nothing)
+            assertContains "{\"@context\":\"https://schema.org\",\"@graph\":[" (jsonLD mkConfig WebPage [] [] pageMeta Nothing)
         , testCase "home has WebSite, Organization, and the default author" $ do
-            let json = jsonLD mkConfig WebSite [] homeMeta Nothing
+            let json = jsonLD mkConfig WebSite [] [] homeMeta Nothing
             assertContains "\"@type\":\"WebSite\",\"@id\":\"https://example.com/#website\"" json
             assertContains "\"publisher\":{\"@id\":\"https://example.com/#organization\"}" json
             assertContains "\"mainEntity\":{\"@id\":\"https://example.com/authors/example/#person\"}" json
             assertContains "\"@type\":\"Organization\",\"@id\":\"https://example.com/#organization\"" json
             assertContains "\"@type\":\"Person\",\"@id\":\"https://example.com/authors/example/#person\"" json
         , testCase "posts are BlogPosting with author, publisher, and url" $ do
-            let json = jsonLD mkConfig Article [exampleAuthor] postMeta (Just (MainImage "images/a.png" "alt"))
+            let json = jsonLD mkConfig Article [exampleAuthor] [] postMeta (Just (MainImage "images/a.png" "alt"))
             assertContains "\"@type\":\"BlogPosting\",\"@id\":\"https://example.com/prose/tour#article\"" json
             assertContains "\"mainEntityOfPage\":{\"@id\":\"https://example.com/prose/tour\"" json
             assertContains "\"author\":[{\"@id\":\"https://example.com/authors/example/#person\",\"@type\":\"Person\"" json
@@ -306,15 +307,41 @@ jsonLdTests =
             assertContains "\"publisher\":{\"@id\":\"https://example.com/#organization\",\"@type\":\"Organization\",\"name\":\"site\"}" json
             assertContains "\"image\":\"https://example.com/images/a.png\"" json
         , testCase "posts carry the copyright only when an author opted in" $ do
-            let optedIn = jsonLD mkConfig Article [exampleAuthor] postMeta Nothing
-                optedOut = jsonLD mkConfig Article [exampleAuthor{authorAddCopyrightNotice = False}] postMeta Nothing
+            let optedIn = jsonLD mkConfig Article [exampleAuthor] [] postMeta Nothing
+                optedOut = jsonLD mkConfig Article [exampleAuthor{authorAddCopyrightNotice = False}] [] postMeta Nothing
             assertContains "\"copyrightNotice\":\"© Example Author 2024–2026\"" optedIn
             assertContains "\"copyrightHolder\":[{\"@id\":\"https://example.com/authors/example/#person\"" optedIn
             assertNotContains "copyrightNotice" optedOut
         , testCase "standalone pages are a WebPage inside the site" $ do
-            let json = jsonLD mkConfig AboutPage [] pageMeta Nothing
+            let json = jsonLD mkConfig AboutPage [] [] pageMeta Nothing
             assertContains "\"@type\":\"AboutPage\",\"@id\":\"https://example.com/about\"" json
             assertContains "\"isPartOf\":{\"@id\":\"https://example.com/#website\",\"@type\":\"WebSite\"" json
+        , testCase "profile pages link their author and list their posts" $ do
+            let items =
+                    [ PageItem "https://example.com/prose/tour" "A tour" (Just "2024-02-20")
+                    , PageItem "https://example.com/prose/lists" "Lists" (Just "2024-01-20")
+                    ]
+                json = jsonLD mkConfig ProfilePage [exampleAuthor] items (pageMeta{pageMetaUrl = "https://example.com/authors/example/"}) Nothing
+            assertContains "\"@type\":\"ProfilePage\",\"@id\":\"https://example.com/authors/example/\"" json
+            assertContains "\"mainEntity\":{\"@id\":\"https://example.com/authors/example/#person\"}" json
+            assertContains "\"hasPart\":[{\"@id\":\"https://example.com/prose/tour#article\",\"@type\":\"BlogPosting\"" json
+            assertContains "\"name\":\"A tour\",\"url\":\"https://example.com/prose/tour\"" json
+            assertContains "\"datePublished\":\"2024-02-20T00:00:00\"" json
+        , testCase "collection pages emit an ItemList in list order" $ do
+            let items =
+                    [ PageItem "https://example.com/prose/tour" "" Nothing
+                    , PageItem "https://example.com/prose/lists" "" Nothing
+                    ]
+                json = jsonLD mkConfig CollectionPage [] items (pageMeta{pageMetaUrl = "https://example.com/prose"}) Nothing
+            assertContains "\"@type\":\"CollectionPage\"" json
+            assertContains "\"@type\":\"ItemList\"" json
+            assertContains "\"numberOfItems\":2" json
+            assertContains "\"position\":1,\"url\":\"https://example.com/prose/tour\"" json
+            assertContains "\"position\":2,\"url\":\"https://example.com/prose/lists\"" json
+        , testCase "an empty collection has no ItemList" $ do
+            let json = jsonLD mkConfig CollectionPage [] [] (pageMeta{pageMetaUrl = "https://example.com/showcase"}) Nothing
+            assertContains "\"@type\":\"CollectionPage\"" json
+            assertNotContains "ItemList" json
         ]
 
 -- | A page's metadata, as the tests build it
