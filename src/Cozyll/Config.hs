@@ -46,8 +46,8 @@ where
 import Cozyll.Domain.Author (Author)
 import Cozyll.Domain.Website (HighlightStyle)
 import Data.String (fromString)
-import Hakyll (Configuration (ignoreFile), Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, (.||.))
-import System.FilePath.Posix (takeFileName, (<.>), (</>))
+import Hakyll (Configuration, Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, (.||.))
+import System.FilePath.Posix ((<.>), (</>))
 
 {- | The build environment: 'Dev' shows drafts for the real content, 'Example'
 builds the example content as the whole site, and 'Prod' is the production
@@ -101,14 +101,9 @@ data SiteConfig = SiteConfig
     -- ^ The build environment (see 'Env')
     }
 
-{- | Hakyll's default configuration, except that `.well-known` folders are not ignored
-(Hakyll skips every dot-folder, but `assets/static/.well-known/` must be published)
-TODO: Review if condition is correct, or even needed
--}
+-- | Hakyll's default configuration
 siteConfiguration :: Configuration
-siteConfiguration = defaultConfiguration{ignoreFile = ignore}
-  where
-    ignore path = takeFileName path /= ".well-known" && ignoreFile defaultConfiguration path
+siteConfiguration = defaultConfiguration
 
 -- | Public origin of the site, without trailing slash
 baseUrl :: SiteConfig -> String
