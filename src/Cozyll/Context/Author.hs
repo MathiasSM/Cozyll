@@ -3,26 +3,37 @@ module Cozyll.Context.Author (
     resolveAuthors,
     authorItemContext,
     authorContext,
+    authorPageContext,
     authorPages,
+    authorPosts,
+    authoredBy,
+    displayNameOf,
     copyrightYears,
 ) where
 
-import Cozyll.Config (SiteConfig, baseUrl, siteAuthors, siteDefaultAuthor)
+import Control.Monad (filterM)
+import Cozyll.Config (SiteConfig, baseUrl, postSnapshot, postsPattern, projectsGroup, siteAuthors, siteDefaultAuthor)
 import Cozyll.Context.SocialMeta (absoluteImageUrl)
+import Cozyll.Discover (discoverGroups)
 import Cozyll.Domain.Author (Author (..), authorTypeName, authorUrlPath)
 import Cozyll.Format (yearRange)
 import Cozyll.Metadata qualified as Meta
 import Data.List (find, nubBy)
 import Data.Maybe (fromMaybe, mapMaybe)
 import Hakyll (
+    Compiler,
     Context,
     Item (..),
     Metadata,
     boolFieldM,
+    constField,
     field,
     fromFilePath,
     getMetadata,
+    listField,
     listFieldWith,
+    loadAllSnapshots,
+    recentFirst,
  )
 import Text.Read (readMaybe)
 
@@ -96,6 +107,34 @@ copyrightYears metadata = case Meta.lookupKey Meta.Date metadata of
 -- | Every author, in @authors.yaml@ file order
 authorPages :: SiteConfig -> [Author]
 authorPages = siteAuthors
+
+{- | Every post authored by this author (a post without @author:@ belongs to the
+site-default author), newest first within each group
+-}
+authorPosts :: SiteConfig -> Author -> Compiler [Item String]
+authorPosts cfg author = do
+    groups <- filter (/= projectsGroup) <$> discoverGroups cfg
+    posts <- mapM (\group -> recentFirst =<< loadAllSnapshots (postsPattern cfg group) (postSnapshot group)) groups
+    filterM (fmap (authoredBy cfg author) . getMetadata . itemIdentifier) (concat posts)
+
+-- | Whether a post's metadata lists this author
+authoredBy :: SiteConfig -> Author -> Metadata -> Bool
+authoredBy cfg author metadata = any ((== authorId author) . authorId) (resolveAuthors cfg metadata)
+
+-- | An author's own fields, for their profile page
+authorPageContext :: SiteConfig -> Author -> Context String
+authorPageContext cfg author =
+    constField "title" displayName
+        <> constField "path" (authorUrlPath author)
+        <> constField "name" (authorName author)
+        <> constField "displayName" displayName
+        <> constField "url" (authorUrl cfg author)
+        <> constField "type" (authorTypeName (authorType author))
+        <> constField "profileImage" (maybe "" (absoluteImageUrl cfg) (authorProfileImage author))
+        <> maybe mempty (constField "description") (authorDescription author)
+        <> listField "links" linkItemContext (return (map linkItem (authorLinks author)))
+  where
+    displayName = displayNameOf author
 
 -- | The display name, falling back to the full name
 displayNameOf :: Author -> String

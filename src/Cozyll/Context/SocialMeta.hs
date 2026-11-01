@@ -17,7 +17,7 @@ module Cozyll.Context.SocialMeta (
 ) where
 
 import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLogo, siteTitle)
-import Cozyll.Domain.Author (Author (..), authorName, authorSchemaType)
+import Cozyll.Domain.Author (Author (..), authorName, authorSchemaType, authorUrlPath)
 import Cozyll.JsonLd qualified as JsonLd
 import Cozyll.Metadata (Key (..), lookupKey)
 import Data.Aeson (ToJSON, object, (.=))
@@ -106,7 +106,7 @@ mainImageOf doc =
 -- | Fields @opengraph@ and @jsonld@ describing a page, from metadata the caller has already read
 socialMetaContext :: SiteConfig -> SocialKind -> [Author] -> PageMeta -> Maybe MainImage -> Context String
 socialMetaContext cfg kind authors pageMeta mainImage =
-    constField "opengraph" (openGraph cfg kind pageMeta mainImage)
+    constField "opengraph" (openGraph cfg kind authors pageMeta mainImage)
         <> constField "jsonld" (jsonLD cfg kind authors pageMeta mainImage)
 
 -- | The absolute URL of an item: its @path:@, or else the site root
@@ -129,8 +129,8 @@ absoluteImageUrl cfg image
     lowered = map toLower image
 
 -- | The Open Graph tags for a page, one per line
-openGraph :: SiteConfig -> SocialKind -> PageMeta -> Maybe MainImage -> String
-openGraph cfg kind pageMeta mainImage =
+openGraph :: SiteConfig -> SocialKind -> [Author] -> PageMeta -> Maybe MainImage -> String
+openGraph cfg kind authors pageMeta mainImage =
     intercalate "\n" $
         [ meta "og:type" (ogType kind)
         , meta "og:url" (pageMetaUrl pageMeta)
@@ -140,10 +140,16 @@ openGraph cfg kind pageMeta mainImage =
             <> [ meta "og:site_name" (siteTitle cfg)
                , meta "og:locale" (localeOf (pageMetaLanguage pageMeta))
                ]
+            <> articleTags
             <> maybe [] imageTags mainImage
   where
     meta property content =
         "<meta property=\"" ++ property ++ "\" content=\"" ++ escapeAttr content ++ "\" />"
+
+    -- \| Articles credit each of their authors by profile URL
+    articleTags = case kind of
+        Article -> [meta "article:author" (absoluteUrl cfg (authorUrlPath author)) | author <- authors]
+        _ -> []
 
     imageTags image =
         meta "og:image" (absoluteImageUrl cfg (src image))
@@ -208,11 +214,12 @@ jsonObject cfg kind authors pageMeta mainImage = case kind of
     context = "@context" .= ("https://schema.org" :: String)
     person = object ["@type" .= ("Person" :: String), "name" .= authorName (siteDefaultAuthor cfg)]
     authorField [author] = "author" .= authorNode author
-    authorField authors' = "author" .= map authorNode authors'
+    authorField postAuthors = "author" .= map authorNode postAuthors
     authorNode author =
         object
             [ "@type" .= authorSchemaType (authorType author)
             , "name" .= authorName author
+            , "url" .= absoluteUrl cfg (authorUrlPath author)
             ]
     organization =
         object $

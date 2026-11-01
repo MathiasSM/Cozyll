@@ -5,6 +5,7 @@ import Cozyll.Config (SiteConfig, projectsGroup, templatePattern)
 import Cozyll.Discover (discoverGroups, discoverStandalonePages)
 import Cozyll.Domain.Website (Website)
 import Cozyll.Rules.Assets (processAssets)
+import Cozyll.Rules.AuthorPages (processAuthorPages)
 import Cozyll.Rules.Feed (processFeeds)
 import Cozyll.Rules.PostGroup (processPostGroup)
 import Cozyll.Rules.Redirects (processRedirects)
@@ -28,6 +29,7 @@ rules cfg website = do
     mapM_ (processPage cfg . page cfg) standalone
     groups <- discoverGroups cfg
     mapM_ (processGroup cfg) groups
+    processAuthorPages cfg
     processFeeds cfg website
     processSitemap cfg
     processRedirects cfg
