@@ -9,7 +9,7 @@ import Cozyll.Config (SiteConfig, baseUrl, minimalTemplate, resolveTemplate)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Author (authorPageContext, authorPages, authorPosts, displayNameOf)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (MainImage (..), PageMeta (..), SocialKind (WebPage), socialMetaContext)
+import Cozyll.Context.SocialMeta (MainImage (..), PageKind (WebPage), PageMeta (..), socialMetaContext)
 import Cozyll.Domain.Author (Author (..), authorUrlPath)
 import Hakyll (
     Identifier,

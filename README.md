@@ -171,6 +171,9 @@ Open Graph tags and JSON-LD structured data are emitted on posts, the home page,
 
 - `shareTitle` and `shareDescription` override the social title and description (which otherwise fall back to `title` and `description`).
 - `#main-image` on an image (`![alt](src){#main-image}`) marks it as the Open Graph / JSON-LD image; its URL is resolved to an absolute one.
+- `schemaType` sets a standalone page's schema.org type: one of `WebPage` (the default), `AboutPage`, `ContactPage`, `CollectionPage`, or `ProfilePage`. Any other value fails the build.
+
+The JSON-LD is a schema.org `@graph` with stable `@id`s: the home page carries the `WebSite` entity (`#website`), the site's `Organization` (`#organization`), and the site-default author; posts are `BlogPosting` nodes (`<page>#article`) whose `author` entries are the post's authors, credited by profile URL; standalone pages are the page's `schemaType` (linking to the site via `isPartOf`). Author entities live at `https://<domain>/authors/<id>/#person` (`#organization` for organizations). Articles also emit `article:author` and their published/modified timestamps, and an opted-in post carries `copyrightNotice`/`copyrightHolder`.
 
 ## Adding a control (toggle)
 

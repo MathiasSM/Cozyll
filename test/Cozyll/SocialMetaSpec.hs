@@ -4,18 +4,21 @@ module Cozyll.SocialMetaSpec (tests) where
 import Cozyll.Config (Env (Dev), SiteConfig (..))
 import Cozyll.Context.SocialMeta (
     MainImage (..),
+    PageKind (..),
     PageMeta (..),
-    SocialKind (..),
     absoluteImageUrl,
     absoluteUrl,
     descriptionOf,
     isoDate,
+    jsonLD,
     localeOf,
     mainImageOf,
     ogType,
+    pageKindOf,
     pageMetaOf,
     titleOf,
  )
+import Cozyll.Domain.Author (Author (..))
 import Cozyll.Domain.Website (HighlightStyle (Pygments))
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.TestUtils (mkAuthor)
@@ -23,10 +26,11 @@ import Cozyll.Yaml (decodeYaml)
 import Data.Aeson (Value (String))
 import Data.Aeson.Key qualified as AesonKey
 import Data.Aeson.KeyMap qualified as KeyMap
+import Data.List (isInfixOf)
 import Data.Text (Text)
 import Hakyll (Metadata, defaultHakyllReaderOptions)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertFailure, testCase, (@?=))
+import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
 import Text.Pandoc (Pandoc, readMarkdown, runPure)
 
 -- | Front matter with string values, as Hakyll stores it
@@ -76,6 +80,8 @@ tests =
         , ogTypeTests
         , titleOfTests
         , descriptionOfTests
+        , pageKindOfTests
+        , jsonLdTests
         , siteParsingTests
         ]
 
@@ -198,6 +204,8 @@ ogTypeTests =
         [ testCase "articles are article" $ ogType Article @?= "article"
         , testCase "sites are website" $ ogType WebSite @?= "website"
         , testCase "pages are website" $ ogType WebPage @?= "website"
+        , testCase "profile pages are website" $ ogType ProfilePage @?= "website"
+        , testCase "collection pages are website" $ ogType CollectionPage @?= "website"
         ]
 
 titleOfTests :: TestTree
@@ -262,3 +270,87 @@ siteParsingTests =
             , "copyrightYear: 2020"
             , "domain: example.com"
             ]
+
+pageKindOfTests :: TestTree
+pageKindOfTests =
+    testGroup
+        "pageKindOf"
+        [ testCase "defaults to WebPage" $ pageKindOf (metadataOf []) @?= Right WebPage
+        , testCase "accepts a whitelisted schemaType" $
+            pageKindOf (metadataOf [("schemaType", "AboutPage")]) @?= Right AboutPage
+        , testCase "accepts ProfilePage" $
+            pageKindOf (metadataOf [("schemaType", "ProfilePage")]) @?= Right ProfilePage
+        , testCase "rejects an unknown schemaType" $
+            pageKindOf (metadataOf [("schemaType", "Blog")]) @?= Left "Blog"
+        ]
+
+jsonLdTests :: TestTree
+jsonLdTests =
+    testGroup
+        "jsonLD"
+        [ testCase "wraps every page in a @context + @graph document" $
+            assertContains "{\"@context\":\"https://schema.org\",\"@graph\":[" (jsonLD mkConfig WebPage [] pageMeta Nothing)
+        , testCase "home has WebSite, Organization, and the default author" $ do
+            let json = jsonLD mkConfig WebSite [] homeMeta Nothing
+            assertContains "\"@type\":\"WebSite\",\"@id\":\"https://example.com/#website\"" json
+            assertContains "\"publisher\":{\"@id\":\"https://example.com/#organization\"}" json
+            assertContains "\"mainEntity\":{\"@id\":\"https://example.com/authors/example/#person\"}" json
+            assertContains "\"@type\":\"Organization\",\"@id\":\"https://example.com/#organization\"" json
+            assertContains "\"@type\":\"Person\",\"@id\":\"https://example.com/authors/example/#person\"" json
+        , testCase "posts are BlogPosting with author, publisher, and url" $ do
+            let json = jsonLD mkConfig Article [exampleAuthor] postMeta (Just (MainImage "images/a.png" "alt"))
+            assertContains "\"@type\":\"BlogPosting\",\"@id\":\"https://example.com/prose/tour#article\"" json
+            assertContains "\"mainEntityOfPage\":{\"@id\":\"https://example.com/prose/tour\"" json
+            assertContains "\"author\":[{\"@id\":\"https://example.com/authors/example/#person\",\"@type\":\"Person\"" json
+            assertContains "\"url\":\"https://example.com/authors/example/\"" json
+            assertContains "\"publisher\":{\"@id\":\"https://example.com/#organization\",\"@type\":\"Organization\",\"name\":\"site\"}" json
+            assertContains "\"image\":\"https://example.com/images/a.png\"" json
+        , testCase "posts carry the copyright only when an author opted in" $ do
+            let optedIn = jsonLD mkConfig Article [exampleAuthor] postMeta Nothing
+                optedOut = jsonLD mkConfig Article [exampleAuthor{authorAddCopyrightNotice = False}] postMeta Nothing
+            assertContains "\"copyrightNotice\":\"© Example Author 2024–2026\"" optedIn
+            assertContains "\"copyrightHolder\":[{\"@id\":\"https://example.com/authors/example/#person\"" optedIn
+            assertNotContains "copyrightNotice" optedOut
+        , testCase "standalone pages are a WebPage inside the site" $ do
+            let json = jsonLD mkConfig AboutPage [] pageMeta Nothing
+            assertContains "\"@type\":\"AboutPage\",\"@id\":\"https://example.com/about\"" json
+            assertContains "\"isPartOf\":{\"@id\":\"https://example.com/#website\",\"@type\":\"WebSite\"" json
+        ]
+
+-- | A page's metadata, as the tests build it
+pageMeta :: PageMeta
+pageMeta =
+    PageMeta
+        { pageMetaTitle = "T"
+        , pageMetaDescription = Just "D"
+        , pageMetaUrl = "https://example.com/about"
+        , pageMetaLanguage = "en"
+        , pageMetaPublished = Just "2024-02-20"
+        , pageMetaModified = Just "2026-03-01"
+        }
+
+-- | A post's metadata
+postMeta :: PageMeta
+postMeta = pageMeta{pageMetaTitle = "A post", pageMetaUrl = "https://example.com/prose/tour"}
+
+-- | The home page's metadata
+homeMeta :: PageMeta
+homeMeta = pageMeta{pageMetaTitle = "site", pageMetaUrl = "https://example.com/"}
+
+-- | An author with every optional field set
+exampleAuthor :: Author
+exampleAuthor =
+    (mkAuthor "Example Author")
+        { authorDescription = Just "Bio"
+        , authorProfileImage = Just "images/a.png"
+        , authorLinks = ["https://example.com"]
+        , authorAddCopyrightNotice = True
+        }
+
+assertContains :: String -> String -> IO ()
+assertContains needle haystack =
+    assertBool ("expected " ++ show needle ++ " in " ++ haystack) (needle `isInfixOf` haystack)
+
+assertNotContains :: String -> String -> IO ()
+assertNotContains needle haystack =
+    assertBool ("did not expect " ++ show needle ++ " in " ++ haystack) (not (needle `isInfixOf` haystack))

@@ -1,5 +1,6 @@
 ---
 title: "Contact"
+schemaType: ContactPage
 description: "How to reach the example author."
 path: "/contact"
 nav: Contact

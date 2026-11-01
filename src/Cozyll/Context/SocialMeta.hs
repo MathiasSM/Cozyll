@@ -1,11 +1,12 @@
 -- | Open Graph and JSON-LD metadata for posts, the home page, and standalone pages
 module Cozyll.Context.SocialMeta (
-    SocialKind (..),
+    PageKind (..),
     MainImage (..),
     PageMeta (..),
     pageMetaOf,
     mainImageOf,
     socialMetaContext,
+    jsonLD,
     pageUrl,
     absoluteUrl,
     absoluteImageUrl,
@@ -14,10 +15,13 @@ module Cozyll.Context.SocialMeta (
     ogType,
     titleOf,
     descriptionOf,
+    pageKindOf,
 ) where
 
+import Control.Applicative ((<|>))
 import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLogo, siteTitle)
-import Cozyll.Domain.Author (Author (..), authorName, authorSchemaType, authorUrlPath)
+import Cozyll.Domain.Author (Author (..), AuthorType (..), authorName, authorSchemaType, authorUrlPath)
+import Cozyll.Format (yearRange)
 import Cozyll.JsonLd qualified as JsonLd
 import Cozyll.Metadata (Key (..), lookupKey)
 import Data.Aeson (ToJSON, object, (.=))
@@ -31,9 +35,11 @@ import Hakyll (Context, Metadata, constField)
 import Text.Pandoc (Block (Figure), Inline (Image), Pandoc)
 import Text.Pandoc.Shared (stringify)
 import Text.Pandoc.Walk (query)
+import Text.Read (readMaybe)
 
 -- | What kind of page the social metadata describes
-data SocialKind = Article | WebSite | WebPage
+data PageKind = Article | WebSite | WebPage | ProfilePage | CollectionPage | AboutPage | ContactPage
+    deriving (Eq, Show)
 
 -- | The image a page designates as its main (social) image
 data MainImage = MainImage
@@ -104,7 +110,7 @@ mainImageOf doc =
         | otherwise = T.unpack caption
 
 -- | Fields @opengraph@ and @jsonld@ describing a page, from metadata the caller has already read
-socialMetaContext :: SiteConfig -> SocialKind -> [Author] -> PageMeta -> Maybe MainImage -> Context String
+socialMetaContext :: SiteConfig -> PageKind -> [Author] -> PageMeta -> Maybe MainImage -> Context String
 socialMetaContext cfg kind authors pageMeta mainImage =
     constField "opengraph" (openGraph cfg kind authors pageMeta mainImage)
         <> constField "jsonld" (jsonLD cfg kind authors pageMeta mainImage)
@@ -129,7 +135,7 @@ absoluteImageUrl cfg image
     lowered = map toLower image
 
 -- | The Open Graph tags for a page, one per line
-openGraph :: SiteConfig -> SocialKind -> [Author] -> PageMeta -> Maybe MainImage -> String
+openGraph :: SiteConfig -> PageKind -> [Author] -> PageMeta -> Maybe MainImage -> String
 openGraph cfg kind authors pageMeta mainImage =
     intercalate "\n" $
         [ meta "og:type" (ogType kind)
@@ -146,10 +152,16 @@ openGraph cfg kind authors pageMeta mainImage =
     meta property content =
         "<meta property=\"" ++ property ++ "\" content=\"" ++ escapeAttr content ++ "\" />"
 
-    -- \| Articles credit each of their authors by profile URL
+    -- \| Articles credit each of their authors by profile URL and carry their dates
     articleTags = case kind of
-        Article -> [meta "article:author" (absoluteUrl cfg (authorUrlPath author)) | author <- authors]
+        Article ->
+            [meta "article:author" (absoluteUrl cfg (authorUrlPath author)) | author <- authors]
+                <> maybeList (fmap isoDate (pageMetaPublished pageMeta)) (meta "article:published_time")
+                <> maybeList (fmap isoDate (pageMetaModified pageMeta <|> pageMetaPublished pageMeta)) (meta "article:modified_time")
         _ -> []
+
+    maybeList (Just value) tag = [tag value]
+    maybeList Nothing _ = []
 
     imageTags image =
         meta "og:image" (absoluteImageUrl cfg (src image))
@@ -165,68 +177,136 @@ escapeAttr = concatMap escapeChar
     escapeChar '"' = "&quot;"
     escapeChar character = [character]
 
--- | The @og:type@ of a page: per ogp.me, @article@ for posts and @website@ for home and standalone pages
-ogType :: SocialKind -> String
+-- | The @og:type@ of a page: per ogp.me, @article@ for posts and @website@ for every other page
+ogType :: PageKind -> String
 ogType Article = "article"
-ogType WebSite = "website"
-ogType WebPage = "website"
+ogType _ = "website"
+
+-- | The page kind declared by @schemaType:@ (default @WebPage@), or the unknown value
+pageKindOf :: Metadata -> Either String PageKind
+pageKindOf metadata = case lookupKey SchemaType metadata of
+    Nothing -> Right WebPage
+    Just value -> maybe (Left value) Right (lookup value kinds)
+  where
+    kinds =
+        [ ("WebPage", WebPage)
+        , ("AboutPage", AboutPage)
+        , ("ContactPage", ContactPage)
+        , ("CollectionPage", CollectionPage)
+        , ("ProfilePage", ProfilePage)
+        ]
 
 -- | The JSON-LD script tag for a page
-jsonLD :: SiteConfig -> SocialKind -> [Author] -> PageMeta -> Maybe MainImage -> String
+jsonLD :: SiteConfig -> PageKind -> [Author] -> PageMeta -> Maybe MainImage -> String
 jsonLD cfg kind authors pageMeta mainImage =
-    "<script type=\"application/ld+json\">" ++ JsonLd.render (jsonObject cfg kind authors pageMeta mainImage) ++ "</script>"
+    "<script type=\"application/ld+json\">" ++ JsonLd.render (JsonLd.graph (jsonNodes cfg kind authors pageMeta mainImage)) ++ "</script>"
 
--- | The JSON-LD object for a page
-jsonObject :: SiteConfig -> SocialKind -> [Author] -> PageMeta -> Maybe MainImage -> Series
-jsonObject cfg kind authors pageMeta mainImage = case kind of
-    Article ->
-        context
-            <> "@type" .= ("Article" :: String)
+-- | The JSON-LD nodes of a page's @\@graph@
+jsonNodes :: SiteConfig -> PageKind -> [Author] -> PageMeta -> Maybe MainImage -> [JsonLd.Node]
+jsonNodes cfg kind authors pageMeta mainImage = case kind of
+    Article -> [articleNode]
+    WebSite -> [websiteNode, organizationNode, defaultAuthorNode]
+    WebPage -> [pageNode "WebPage"]
+    ProfilePage -> [pageNode "ProfilePage"]
+    CollectionPage -> [pageNode "CollectionPage"]
+    AboutPage -> [pageNode "AboutPage"]
+    ContactPage -> [pageNode "ContactPage"]
+  where
+    defaultAuthor = siteDefaultAuthor cfg
+
+    articleNode =
+        "@type" .= ("BlogPosting" :: String)
+            <> "@id" .= JsonLd.articleId (pageMetaUrl pageMeta)
             <> "headline" .= pageMetaTitle pageMeta
             <> optionalField "description" (pageMetaDescription pageMeta)
+            <> "url" .= pageMetaUrl pageMeta
             <> "mainEntityOfPage" .= object ["@type" .= ("WebPage" :: String), "@id" .= pageMetaUrl pageMeta]
             <> "datePublished" .= published
             <> "dateModified" .= modified
-            <> authorField authors
-            <> "publisher" .= organization
-            <> "inLanguage" .= pageMetaLanguage pageMeta
+            <> "author" .= map authorNode authors
+            <> "publisher" .= publisher
             <> imageSeries
-    WebSite ->
-        context
-            <> "@type" .= ("WebSite" :: String)
+            <> "inLanguage" .= pageMetaLanguage pageMeta
+            <> copyrightSeries
+
+    websiteNode =
+        "@type" .= ("WebSite" :: String)
+            <> "@id" .= JsonLd.websiteId (origin cfg)
+            <> "url" .= origin cfg
             <> "name" .= siteTitle cfg
-            <> "description" .= siteDescription cfg
-            <> "url" .= (baseUrl cfg ++ "/")
             <> optionalField "alternateName" (nonEmptyList (siteAlternateNames cfg))
-            <> "author" .= person
-            <> "publisher" .= organization
+            <> "description" .= siteDescription cfg
             <> "inLanguage" .= pageMetaLanguage pageMeta
-            <> imageSeries
-    WebPage ->
-        context
-            <> "@type" .= ("WebPage" :: String)
+            <> "publisher" .= JsonLd.idRef (JsonLd.organizationId (origin cfg))
+            <> "mainEntity" .= JsonLd.idRef (entityId cfg defaultAuthor)
+
+    organizationNode =
+        "@type" .= ("Organization" :: String)
+            <> "@id" .= JsonLd.organizationId (origin cfg)
+            <> "name" .= siteTitle cfg
+            <> "url" .= origin cfg
+            <> optionalField "logo" (absoluteImageUrl cfg <$> siteLogo cfg)
+
+    defaultAuthorNode =
+        "@type" .= authorSchemaType (authorType defaultAuthor)
+            <> "@id" .= entityId cfg defaultAuthor
+            <> "name" .= authorName defaultAuthor
+            <> "url" .= absoluteUrl cfg (authorUrlPath defaultAuthor)
+            <> optionalField "description" (authorDescription defaultAuthor)
+            <> optionalField (entityImageField defaultAuthor) (absoluteImageUrl cfg <$> authorProfileImage defaultAuthor)
+            <> optionalField "sameAs" (nonEmptyList (authorLinks defaultAuthor))
+
+    pageNode name =
+        "@type" .= (name :: String)
+            <> "@id" .= pageMetaUrl pageMeta
+            <> "url" .= pageMetaUrl pageMeta
             <> "name" .= pageMetaTitle pageMeta
             <> optionalField "description" (pageMetaDescription pageMeta)
-            <> "url" .= pageMetaUrl pageMeta
             <> "inLanguage" .= pageMetaLanguage pageMeta
+            <> "isPartOf" .= websiteStub
             <> imageSeries
-  where
-    context = "@context" .= ("https://schema.org" :: String)
-    person = object ["@type" .= ("Person" :: String), "name" .= authorName (siteDefaultAuthor cfg)]
-    authorField [author] = "author" .= authorNode author
-    authorField postAuthors = "author" .= map authorNode postAuthors
+
+    websiteStub =
+        object
+            [ "@type" .= ("WebSite" :: String)
+            , "@id" .= JsonLd.websiteId (origin cfg)
+            , "name" .= siteTitle cfg
+            , "url" .= origin cfg
+            ]
+
     authorNode author =
         object
             [ "@type" .= authorSchemaType (authorType author)
+            , "@id" .= entityId cfg author
             , "name" .= authorName author
             , "url" .= absoluteUrl cfg (authorUrlPath author)
             ]
-    organization =
+
+    publisher =
         object $
             [ "@type" .= ("Organization" :: String)
+            , "@id" .= JsonLd.organizationId (origin cfg)
             , "name" .= siteTitle cfg
             ]
                 ++ maybe [] ((\logo -> ["logo" .= logo]) . absoluteImageUrl cfg) (siteLogo cfg)
+
+    -- \| The copyright fields, only when one of the post's authors opted in
+    copyrightSeries
+        | null holders = mempty
+        | otherwise =
+            optionalField "copyrightNotice" notice
+                <> "copyrightHolder" .= map authorNode holders
+      where
+        holders = filter authorAddCopyrightNotice authors
+        notice = case copyrightSpan of
+            "" -> Nothing
+            span' -> Just ("© " ++ intercalate ", " (map authorName holders) ++ " " ++ span')
+
+    -- \| The years the notice covers: @date@ to @lastModifiedAt@, collapsing when equal
+    copyrightSpan = case (yearOf =<< pageMetaPublished pageMeta, yearOf =<< pageMetaModified pageMeta) of
+        (Just first, Just lastModified) -> yearRange first lastModified
+        (Just first, Nothing) -> show first
+        (Nothing, _) -> ""
 
     nonEmptyList [] = Nothing
     nonEmptyList values = Just values
@@ -235,6 +315,28 @@ jsonObject cfg kind authors pageMeta mainImage = case kind of
 
     published = maybe "" isoDate (pageMetaPublished pageMeta)
     modified = maybe published isoDate (pageMetaModified pageMeta)
+
+-- | The site origin with a trailing slash, as the JSON-LD identifiers expect
+origin :: SiteConfig -> String
+origin cfg = baseUrl cfg ++ "/"
+
+-- | The @\@id@ of an author's entity, by their type
+entityId :: SiteConfig -> Author -> String
+entityId cfg author = origin cfg ++ "authors/" ++ authorId author ++ "/#" ++ fragment
+  where
+    fragment = case authorType author of
+        Person -> "person"
+        Organization -> "organization"
+
+-- | @image@ for a person, @logo@ for an organization
+entityImageField :: Author -> AesonKey.Key
+entityImageField author = case authorType author of
+    Person -> "image"
+    Organization -> "logo"
+
+-- | The year of a @YYYY-MM-DD@ value
+yearOf :: String -> Maybe Int
+yearOf = readMaybe . take 4
 
 -- | Appends a time to a date-only @YYYY-MM-DD@ value
 isoDate :: String -> String

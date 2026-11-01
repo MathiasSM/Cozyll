@@ -1,6 +1,7 @@
 ---
 templated: true
 title: "About"
+schemaType: AboutPage
 description: "About the example content."
 path: "/about"
 nav: About

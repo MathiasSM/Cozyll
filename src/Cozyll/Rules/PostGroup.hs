@@ -9,7 +9,7 @@ import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Author (resolveAuthors)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (SocialKind (Article), pageMetaOf, socialMetaContext)
+import Cozyll.Context.SocialMeta (PageKind (Article), pageMetaOf, socialMetaContext)
 import Cozyll.Rules.SinglePages (Page (..), page, processPage)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (

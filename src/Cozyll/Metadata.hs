@@ -34,6 +34,8 @@ data Key
       ShareTitle
     | -- | The post's author(s): an id (or list of ids) from @authors.yaml@.
       Author
+    | -- | The schema.org type of a standalone page (@WebPage@ by default).
+      SchemaType
     | -- | An icon name, resolved to @images/icons/<name>.svg@.
       Icon
     | -- | The item's language (@en@, @es@, or @ja@; defaults to @en@).
@@ -111,6 +113,7 @@ keyName key = case key of
     ShareDescription -> "shareDescription"
     ShareTitle -> "shareTitle"
     Author -> "author"
+    SchemaType -> "schemaType"
     ShortDescription -> "shortDescription"
     ShowAbout -> "showAbout"
     ShowContact -> "showContact"
