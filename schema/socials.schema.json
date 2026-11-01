@@ -21,15 +21,10 @@
         "type": "string",
         "description": "Handle shown on the link."
       },
-      "showContact": {
+      "_show": {
         "type": "boolean",
-        "default": false,
-        "description": "Whether to show the account in the contact section."
-      },
-      "showAbout": {
-        "type": "boolean",
-        "default": false,
-        "description": "Whether to show the account on the home page."
+        "default": true,
+        "description": "Whether to show the account in the social links. Omit or set true to show; _show: false hides."
       }
     }
   }

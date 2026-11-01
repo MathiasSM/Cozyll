@@ -21,12 +21,7 @@ import System.FilePath.Posix ((</>))
 
 -- | The social accounts, in the lists read by the social templates
 socialMediaContext :: SiteConfig -> Context a
-socialMediaContext cfg =
-    mconcat
-        [ socialsField "socials-all" (const True)
-        , socialsField "socials-contact" socialShowContact
-        , socialsField "socials-about" socialShowAbout
-        ]
+socialMediaContext cfg = socialsField "socials" socialShow
   where
     socialsField name keep =
         listField name (socialContext $ mediaDir cfg) $ listItems (socialsFile cfg) requireSocials keep
