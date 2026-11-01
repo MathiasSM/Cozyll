@@ -159,6 +159,8 @@ Authors live in `content/authors.yaml`, a map keyed by author id (the slug used 
 
 A post references its authors with `author: <id>` or `author: [<id>, <id>]` front matter; without it, the post falls back to the site-default author. The resolved authors are available in templates as `$for(author)$` (each with `$id$`, `$name$`, `$displayName$`, `$path$`, `$url$`, `$description$`, `$profileImage$`, `$type$`, and `$for(links)$`).
 
+Every author also gets a profile page at `/authors/<id>/` (included in `sitemap.xml`), showing their display name (or name), description, profile image, links, and every post they authored — a post without `author:` counts for the site-default author. The page's canonical URL and `og:url` are `https://<domain>/authors/<id>/`, and its `og:image` is the profile image when one is set.
+
 ## Frontmatter
 
 See `src/Cozyll/Metadata.hs` or its documentation for a full list of supported fields. Other fields become available as part of the page/post's context, which you may use in templates or templates markup.

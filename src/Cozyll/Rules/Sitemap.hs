@@ -6,7 +6,9 @@ import Cozyll.CleanURL (cleanIndexHtmls)
 import Cozyll.Config (SiteConfig, pagesPattern, postsPattern, resolveTemplate)
 import Cozyll.Content (isSitemapExcluded)
 import Cozyll.Context (globalContext)
+import Cozyll.Context.Author (authorPages)
 import Cozyll.Discover (discoverGroups)
+import Cozyll.Rules.AuthorPages (authorPageIdentifier)
 import Hakyll (
     Compiler,
     Item,
@@ -17,6 +19,7 @@ import Hakyll (
     idRoute,
     itemIdentifier,
     listField,
+    load,
     loadAll,
     loadAndApplyTemplate,
     makeItem,
@@ -24,7 +27,7 @@ import Hakyll (
     route,
  )
 
--- | Builds sitemap.xml from the standalone pages and every post group
+-- | Builds sitemap.xml from the standalone pages, every post group, and the author pages
 processSitemap :: SiteConfig -> Rules ()
 processSitemap cfg = create ["sitemap.xml"] $ do
     route idRoute
@@ -32,7 +35,8 @@ processSitemap cfg = create ["sitemap.xml"] $ do
         groups <- discoverGroups cfg
         posts <- mapM (\group -> recentFirst =<< loadAll (postsPattern cfg group)) groups
         pages <- loadAll $ pagesPattern cfg "*"
-        let allItems = filterM isIndexable (pages <> concat posts)
+        authors <- mapM (load . authorPageIdentifier cfg) (authorPages cfg)
+        let allItems = filterM isIndexable (pages <> concat posts <> authors)
             sitemapCtx = listField "entries" (globalContext cfg) allItems <> globalContext cfg
         makeItem ""
             >>= loadAndApplyTemplate (resolveTemplate cfg "sitemap.xml") sitemapCtx

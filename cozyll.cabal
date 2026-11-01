@@ -74,6 +74,7 @@ library
                   , Cozyll.Metadata
                   , Cozyll.Rules
                   , Cozyll.Rules.Assets
+                  , Cozyll.Rules.AuthorPages
                   , Cozyll.Rules.Favicon
                   , Cozyll.Rules.Feed
                   , Cozyll.Rules.PostGroup

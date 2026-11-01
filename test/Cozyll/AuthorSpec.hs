@@ -2,7 +2,7 @@
 module Cozyll.AuthorSpec (tests) where
 
 import Cozyll.Config (Env (Dev), SiteConfig (..))
-import Cozyll.Context.Author (copyrightYears, resolveAuthors)
+import Cozyll.Context.Author (authoredBy, copyrightYears, resolveAuthors)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, defaultAuthor, parseAuthorsYaml)
 import Cozyll.Domain.Website (HighlightStyle (Pygments))
 import Cozyll.Metadata qualified as Meta
@@ -26,6 +26,7 @@ tests =
         , lookupKeyListTests
         , copyrightYearsTests
         , postCopyrightTests
+        , authoredByTests
         ]
 
 parseTests :: TestTree
@@ -201,6 +202,25 @@ postCopyrightTests =
                 @?= ["Example Author"]
         , testCase "is false when no author opts in" $
             any authorAddCopyrightNotice (resolveAuthors cfg (metadataOf [("author", String "example-org")]))
+                @?= False
+        ]
+
+authoredByTests :: TestTree
+authoredByTests =
+    testGroup
+        "authoredBy"
+        [ testCase "accepts an explicitly listed author" $
+            authoredBy cfg exampleAuthor (metadataOf [("author", String "example")])
+                @?= True
+        , testCase "accepts any author of a multi-author post" $
+            authoredBy cfg orgAuthor (metadataOf [("author", stringList ["example", "example-org"])])
+                @?= True
+        , testCase "assigns a post without authors to the site default" $
+            authoredBy cfg exampleAuthor (metadataOf []) @?= True
+        , testCase "does not assign a post without authors to other authors" $
+            authoredBy cfg orgAuthor (metadataOf []) @?= False
+        , testCase "rejects an author the post does not list" $
+            authoredBy cfg orgAuthor (metadataOf [("author", String "example")])
                 @?= False
         ]
 

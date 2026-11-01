@@ -9,6 +9,9 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Added
 
+- Author profile pages at `/authors/<id>/`, listing each author's posts and
+  included in `sitemap.xml`; articles credit their authors by profile URL
+  (`article:author` and JSON-LD `author[].url`).
 - An opt-in per-post copyright notice (`addCopyrightNotice: true` on an author):
   a `© <authors> <years>` line at the end of the post, years from `date` to
   `lastModifiedAt`, shown only on the post page (not in lists or feeds).
