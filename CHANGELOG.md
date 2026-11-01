@@ -9,6 +9,12 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Added
 
+- schema.org `@graph` structured data: the home page carries the `WebSite`,
+  `Organization`, and default-author entities with stable `@id`s, posts are
+  `BlogPosting` nodes, and standalone pages can set a whitelisted `schemaType`
+  (`WebPage`, `AboutPage`, `ContactPage`, `CollectionPage`, `ProfilePage`).
+  Articles also emit `article:published_time`/`article:modified_time`, and an
+  opted-in post carries `copyrightNotice`/`copyrightHolder`.
 - Author profile pages at `/authors/<id>/`, listing each author's posts and
   included in `sitemap.xml`; articles credit their authors by profile URL
   (`article:author` and JSON-LD `author[].url`).

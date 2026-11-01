@@ -8,7 +8,7 @@ import Cozyll.Content (isHidden, isTemplated)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (SocialKind (WebPage, WebSite), pageMetaOf, socialMetaContext)
+import Cozyll.Context.SocialMeta (PageKind (WebSite), pageKindOf, pageMetaOf, socialMetaContext)
 import Cozyll.Metadata (Key (Home), lookupKey)
 import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
@@ -16,6 +16,7 @@ import Hakyll (
     Context,
     Identifier,
     Item,
+    Metadata,
     Rules,
     compile,
     getMetadata,
@@ -46,12 +47,25 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates} = do
     templated <- isTemplated
     body <- getResourceString >>= (if templated then applyContentAsTemplate cfg ctx else return)
     (item', tocHtml, mainImg) <- runPandoc body
-    metadata <- getUnderlying >>= getMetadata
+    underlying <- getUnderlying
+    metadata <- getMetadata underlying
+    kind <- pageKind metadata
     let ctx' = asideContext tocHtml <> ctx
         pageMeta = pageMetaOf cfg metadata
-        kind = if lookupKey Home metadata == Just "true" then WebSite else WebPage
     applyTemplates ctx' ([minimalTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
         >>= finish cfg (socialMetaContext cfg kind [] pageMeta mainImg <> navContext cfg pageName <> ctx')
+
+-- | The page's structured-data kind: home is a @WebSite@, anything else comes from @schemaType:@
+pageKind :: Metadata -> Compiler PageKind
+pageKind metadata
+    | lookupKey Home metadata == Just "true" = pure WebSite
+    | otherwise = case pageKindOf metadata of
+        Right kind -> pure kind
+        Left unknown ->
+            fail $
+                "unknown schemaType \""
+                    ++ unknown
+                    ++ "\" (expected WebPage, AboutPage, ContactPage, CollectionPage, or ProfilePage)"
 
 -- | Processes a standalone page, routed by its `path:` front matter
 processPage :: SiteConfig -> Page -> Rules ()
