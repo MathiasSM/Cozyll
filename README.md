@@ -154,7 +154,7 @@ Authors live in `content/authors.yaml`, a map keyed by author id (the slug used 
 - `description` — a short bio.
 - `profileImage` — a site-relative path to the author's image.
 - `links` — a list of profile URLs.
-- `addCopyrightNotice: true` — opt into a per-post copyright notice.
+- `addCopyrightNotice: true` — opt into a per-post copyright notice (a `© <authors> <years>` line at the end of the post, years from `date` to `lastModifiedAt`; not shown in lists or feeds).
 - Any other scalar field is exposed to templates as-is.
 
 A post references its authors with `author: <id>` or `author: [<id>, <id>]` front matter; without it, the post falls back to the site-default author. The resolved authors are available in templates as `$for(author)$` (each with `$id$`, `$name$`, `$displayName$`, `$path$`, `$url$`, `$description$`, `$profileImage$`, `$type$`, and `$for(links)$`).
