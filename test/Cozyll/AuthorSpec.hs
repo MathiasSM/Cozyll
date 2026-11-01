@@ -1,8 +1,17 @@
--- | Tests for the authors.yaml parser
+-- | Tests for the authors.yaml parser and author resolution
 module Cozyll.AuthorSpec (tests) where
 
+import Cozyll.Config (Env (Dev), SiteConfig (..))
+import Cozyll.Context.Author (resolveAuthors)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, defaultAuthor, parseAuthorsYaml)
+import Cozyll.Domain.Website (HighlightStyle (Pygments))
+import Cozyll.Metadata qualified as Meta
+import Data.Aeson (Value (..), toJSON)
+import Data.Aeson.Key qualified as AesonKey
+import Data.Aeson.KeyMap qualified as KeyMap
 import Data.List (isInfixOf)
+import Data.Text (Text)
+import Hakyll (Metadata)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
 
@@ -13,6 +22,8 @@ tests =
         [ parseTests
         , defaultAuthorTests
         , authorUrlPathTests
+        , resolveAuthorsTests
+        , lookupKeyListTests
         ]
 
 parseTests :: TestTree
@@ -127,3 +138,90 @@ happyAuthor =
         , "  addCopyrightNotice: true"
         , "  jobTitle: Engineer"
         ]
+
+resolveAuthorsTests :: TestTree
+resolveAuthorsTests =
+    testGroup
+        "resolveAuthors"
+        [ testCase "resolves a list of ids in order" $
+            map authorId (resolveAuthors cfg (metadataOf [("author", stringList ["example", "example-org"])]))
+                @?= ["example", "example-org"]
+        , testCase "resolves a scalar id" $
+            map authorId (resolveAuthors cfg (metadataOf [("author", String "example-org")]))
+                @?= ["example-org"]
+        , testCase "falls back to the site-default author" $
+            map authorId (resolveAuthors cfg (metadataOf []))
+                @?= ["example"]
+        , testCase "skips unknown ids" $
+            map authorId (resolveAuthors cfg (metadataOf [("author", stringList ["example", "nobody"])]))
+                @?= ["example"]
+        , testCase "deduplicates repeated ids" $
+            map authorId (resolveAuthors cfg (metadataOf [("author", stringList ["example", "example"])]))
+                @?= ["example"]
+        ]
+
+lookupKeyListTests :: TestTree
+lookupKeyListTests =
+    testGroup
+        "lookupKeyList"
+        [ testCase "reads a list" $
+            Meta.lookupKeyList Meta.Author (metadataOf [("author", stringList ["a", "b"])]) @?= Just ["a", "b"]
+        , testCase "reads a scalar as a single-element list" $
+            Meta.lookupKeyList Meta.Author (metadataOf [("author", String "a")]) @?= Just ["a"]
+        , testCase "is Nothing when absent" $
+            Meta.lookupKeyList Meta.Author (metadataOf []) @?= Nothing
+        ]
+
+-- | A list of strings as a JSON array
+stringList :: [String] -> Value
+stringList = toJSON
+
+-- | Front matter with string values, as Hakyll stores it
+metadataOf :: [(Text, Value)] -> Metadata
+metadataOf = KeyMap.fromList . map (\(key, value) -> (AesonKey.fromText key, value))
+
+-- | A 'SiteConfig' with two authors (example is the default)
+cfg :: SiteConfig
+cfg =
+    SiteConfig
+        { siteTitle = "site"
+        , siteDescription = ""
+        , siteCopyrightYear = 0
+        , siteCurrentYear = 2021
+        , siteDomain = "example.com"
+        , siteAlternateNames = []
+        , siteLogo = Nothing
+        , siteAuthors = [exampleAuthor, orgAuthor]
+        , siteDefaultAuthor = exampleAuthor
+        , mathjaxVersion = ""
+        , highlightStyle = Pygments
+        , contentDir = "content"
+        , assetsDir = "assets"
+        , templatesDir = "templates"
+        , contentTemplatesDir = "content/templates"
+        , contentCssDir = "content/css"
+        , contentTemplateNames = []
+        , siteEnv = Dev
+        }
+
+exampleAuthor :: Author
+exampleAuthor = author' "example" "Example Author" True
+
+orgAuthor :: Author
+orgAuthor = author' "example-org" "Example Labs" False
+
+author' :: String -> String -> Bool -> Author
+author' id' name siteDefault =
+    Author
+        { authorId = id'
+        , authorName = name
+        , authorType = Person
+        , authorSiteDefault = siteDefault
+        , authorDisplayName = Nothing
+        , authorDescription = Nothing
+        , authorProfileImage = Nothing
+        , authorLinks = []
+        , authorAddCopyrightNotice = False
+        , authorExtra = []
+        , authorRaw = KeyMap.empty
+        }

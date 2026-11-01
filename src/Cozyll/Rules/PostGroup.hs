@@ -7,6 +7,7 @@ import Cozyll.Config (SiteConfig, minimalTemplate, postSnapshot, postTemplate, p
 import Cozyll.Content (isHidden, isTemplated, requirePost)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
+import Cozyll.Context.Author (resolveAuthors)
 import Cozyll.Context.Nav (navContext)
 import Cozyll.Context.SocialMeta (SocialKind (Article), pageMetaOf, socialMetaContext)
 import Cozyll.Rules.SinglePages (Page (..), page, processPage)
@@ -56,10 +57,11 @@ processPostGroupItems cfg groupName =
                 >>= \(item', tocHtml, mainImg) -> do
                     metadata <- getUnderlying >>= getMetadata
                     let pageMeta = pageMetaOf cfg metadata
+                        authors = resolveAuthors cfg metadata
                         ctx' = asideContext tocHtml <> globalContext cfg
                     saveSnapshot (postSnapshot groupName) item'
                         >>= applyTemplates ctx' [minimalTemplate cfg, postTemplate cfg]
-                        >>= finish cfg (socialMetaContext cfg Article pageMeta mainImg <> navContext cfg groupName <> ctx')
+                        >>= finish cfg (socialMetaContext cfg Article authors pageMeta mainImg <> navContext cfg groupName <> ctx')
 
 -- | Build context for archive page
 getCtx :: SiteConfig -> String -> Compiler (Context String)

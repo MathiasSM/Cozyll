@@ -1,4 +1,9 @@
 <div class="post-date-header">
+  $if(author)$<span class="post-authors">$for(author)$<a href="$path$">$displayName$</a>$sep$, $endfor$</span><span> · </span>$endif$
   <time datetime="$date$">$date$</time>
-  $if(lastModifiedAt)$<span> (Updated on <time datetime="$lastModifiedAt$">$lastModifiedAt$</time>)</span>$endif$
+  $if(lang-es)$
+    $if(lastModifiedAt)$<span> (Actualizado: <time datetime="$lastModifiedAt$">$lastModifiedAt$</time>)</span>$endif$
+  $else$
+    $if(lastModifiedAt)$<span> (Updated: <time datetime="$lastModifiedAt$">$lastModifiedAt$</time>)</span>$endif$
+  $endif$
 </div>

@@ -6,6 +6,8 @@ module Cozyll.Domain.Author (
     loadAuthors,
     defaultAuthor,
     authorUrlPath,
+    authorTypeName,
+    authorSchemaType,
 ) where
 
 import Control.Monad (unless)
@@ -75,6 +77,16 @@ defaultAuthor authors = case [author | author <- authors, authorSiteDefault auth
 -- | The canonical URL path of an author's page
 authorUrlPath :: Author -> FilePath
 authorUrlPath author = "/authors/" ++ authorId author ++ "/"
+
+-- | How an author type is spelled in the DOM
+authorTypeName :: AuthorType -> String
+authorTypeName Person = "person"
+authorTypeName Organization = "organization"
+
+-- | How an author type is spelled in schema.org JSON-LD
+authorSchemaType :: AuthorType -> String
+authorSchemaType Person = "Person"
+authorSchemaType Organization = "Organization"
 
 -- | Parses one author object, prefixed by its id
 parseAuthor :: Key -> Value -> Either [String] Author

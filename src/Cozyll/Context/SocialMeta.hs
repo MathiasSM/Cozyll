@@ -17,7 +17,7 @@ module Cozyll.Context.SocialMeta (
 ) where
 
 import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLogo, siteTitle)
-import Cozyll.Domain.Author (authorName)
+import Cozyll.Domain.Author (Author (..), authorName, authorSchemaType)
 import Cozyll.JsonLd qualified as JsonLd
 import Cozyll.Metadata (Key (..), lookupKey)
 import Data.Aeson (ToJSON, object, (.=))
@@ -104,10 +104,10 @@ mainImageOf doc =
         | otherwise = T.unpack caption
 
 -- | Fields @opengraph@ and @jsonld@ describing a page, from metadata the caller has already read
-socialMetaContext :: SiteConfig -> SocialKind -> PageMeta -> Maybe MainImage -> Context String
-socialMetaContext cfg kind pageMeta mainImage =
+socialMetaContext :: SiteConfig -> SocialKind -> [Author] -> PageMeta -> Maybe MainImage -> Context String
+socialMetaContext cfg kind authors pageMeta mainImage =
     constField "opengraph" (openGraph cfg kind pageMeta mainImage)
-        <> constField "jsonld" (jsonLD cfg kind pageMeta mainImage)
+        <> constField "jsonld" (jsonLD cfg kind authors pageMeta mainImage)
 
 -- | The absolute URL of an item: its @path:@, or else the site root
 pageUrl :: SiteConfig -> Metadata -> String
@@ -166,13 +166,13 @@ ogType WebSite = "website"
 ogType WebPage = "website"
 
 -- | The JSON-LD script tag for a page
-jsonLD :: SiteConfig -> SocialKind -> PageMeta -> Maybe MainImage -> String
-jsonLD cfg kind pageMeta mainImage =
-    "<script type=\"application/ld+json\">" ++ JsonLd.render (jsonObject cfg kind pageMeta mainImage) ++ "</script>"
+jsonLD :: SiteConfig -> SocialKind -> [Author] -> PageMeta -> Maybe MainImage -> String
+jsonLD cfg kind authors pageMeta mainImage =
+    "<script type=\"application/ld+json\">" ++ JsonLd.render (jsonObject cfg kind authors pageMeta mainImage) ++ "</script>"
 
 -- | The JSON-LD object for a page
-jsonObject :: SiteConfig -> SocialKind -> PageMeta -> Maybe MainImage -> Series
-jsonObject cfg kind pageMeta mainImage = case kind of
+jsonObject :: SiteConfig -> SocialKind -> [Author] -> PageMeta -> Maybe MainImage -> Series
+jsonObject cfg kind authors pageMeta mainImage = case kind of
     Article ->
         context
             <> "@type" .= ("Article" :: String)
@@ -181,7 +181,7 @@ jsonObject cfg kind pageMeta mainImage = case kind of
             <> "mainEntityOfPage" .= object ["@type" .= ("WebPage" :: String), "@id" .= pageMetaUrl pageMeta]
             <> "datePublished" .= published
             <> "dateModified" .= modified
-            <> "author" .= person
+            <> authorField authors
             <> "publisher" .= organization
             <> "inLanguage" .= pageMetaLanguage pageMeta
             <> imageSeries
@@ -207,6 +207,13 @@ jsonObject cfg kind pageMeta mainImage = case kind of
   where
     context = "@context" .= ("https://schema.org" :: String)
     person = object ["@type" .= ("Person" :: String), "name" .= authorName (siteDefaultAuthor cfg)]
+    authorField [author] = "author" .= authorNode author
+    authorField authors' = "author" .= map authorNode authors'
+    authorNode author =
+        object
+            [ "@type" .= authorSchemaType (authorType author)
+            , "name" .= authorName author
+            ]
     organization =
         object $
             [ "@type" .= ("Organization" :: String)

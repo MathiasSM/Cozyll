@@ -9,6 +9,9 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Added
 
+- `author:` front matter (an id or list of ids from `authors.yaml`) resolves to
+  per-post authors, shown as bylines and used in JSON-LD; posts without it fall
+  back to the site-default author.
 - `authors.yaml` (a map keyed by author id) with a required site-default author,
   now the source of author metadata for feeds, `funding.json`, and JSON-LD.
 - `site.logo` and `site.alternateName` in `website.yaml`, published and surfaced
