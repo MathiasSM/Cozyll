@@ -38,7 +38,7 @@
     <updated>2024-06-04T00:00:00Z</updated>
     <content type="html"><![CDATA[<p>Inline elements can carry attributes.</p>
 <h2 id="inline-spans">Inline spans</h2>
-<p>A bracketed span: <span class="example-note">this one</span>. A link with a class: <a href="https://example.com/prose/" class="example-note">a link</a>.</p>
+<p>A bracketed span: <span class="example-note">this one</span>. A link with a class: <a href="https://example.com/prose" class="example-note">a link</a>.</p>
 <h2 id="header-identifiers">Header identifiers</h2>
 <p>A heading can carry a custom identifier. Jump to <a href="#custom-id">the custom section</a>.</p>
 <h3 id="custom-id">A custom section</h3>

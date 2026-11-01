@@ -29,7 +29,7 @@ identifierTests =
         , testCase "organizationId appends the organization fragment" $
             organizationId "https://example.com/" @?= "https://example.com/#organization"
         , testCase "authorId points at the author's person node" $
-            authorId "https://example.com/" "mathias" @?= "https://example.com/authors/mathias/#person"
+            authorId "https://example.com/" "mathias" @?= "https://example.com/authors/mathias#person"
         , testCase "articleId appends the article fragment" $
             articleId "https://example.com/prose/tour/" @?= "https://example.com/prose/tour/#article"
         ]

@@ -107,7 +107,7 @@ authorUrlPathTests =
         "authorUrlPath"
         [ testCase "is the author page path" $ do
             author <- oneAuthor happyAuthor
-            authorUrlPath author @?= "/authors/example/"
+            authorUrlPath author @?= "/authors/example"
         ]
 
 -- | Parses a single-author document and returns the author

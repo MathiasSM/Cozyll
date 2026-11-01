@@ -44,7 +44,7 @@ organizationId base = base ++ "#organization"
 
 -- | The identifier of an author's @Person@ node (see 'websiteId')
 authorId :: String -> String -> String
-authorId base author = base ++ "authors/" ++ author ++ "/#person"
+authorId base author = base ++ "authors/" ++ author ++ "#person"
 
 -- | The identifier of a page's @Article@ node
 articleId :: String -> String

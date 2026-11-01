@@ -295,22 +295,22 @@ jsonLdTests =
             let json = jsonLD mkConfig WebSite [] [] homeMeta Nothing
             assertContains "\"@type\":\"WebSite\",\"@id\":\"https://example.com/#website\"" json
             assertContains "\"publisher\":{\"@id\":\"https://example.com/#organization\"}" json
-            assertContains "\"mainEntity\":{\"@id\":\"https://example.com/authors/example/#person\"}" json
+            assertContains "\"mainEntity\":{\"@id\":\"https://example.com/authors/example#person\"}" json
             assertContains "\"@type\":\"Organization\",\"@id\":\"https://example.com/#organization\"" json
-            assertContains "\"@type\":\"Person\",\"@id\":\"https://example.com/authors/example/#person\"" json
+            assertContains "\"@type\":\"Person\",\"@id\":\"https://example.com/authors/example#person\"" json
         , testCase "posts are BlogPosting with author, publisher, and url" $ do
             let json = jsonLD mkConfig Article [exampleAuthor] [] postMeta (Just (MainImage "images/a.png" "alt"))
             assertContains "\"@type\":\"BlogPosting\",\"@id\":\"https://example.com/prose/tour#article\"" json
             assertContains "\"mainEntityOfPage\":{\"@id\":\"https://example.com/prose/tour\"" json
-            assertContains "\"author\":[{\"@id\":\"https://example.com/authors/example/#person\",\"@type\":\"Person\"" json
-            assertContains "\"url\":\"https://example.com/authors/example/\"" json
+            assertContains "\"author\":[{\"@id\":\"https://example.com/authors/example#person\",\"@type\":\"Person\"" json
+            assertContains "\"url\":\"https://example.com/authors/example\"" json
             assertContains "\"publisher\":{\"@id\":\"https://example.com/#organization\",\"@type\":\"Organization\",\"name\":\"site\"}" json
             assertContains "\"image\":\"https://example.com/images/a.png\"" json
         , testCase "posts carry the copyright only when an author opted in" $ do
             let optedIn = jsonLD mkConfig Article [exampleAuthor] [] postMeta Nothing
                 optedOut = jsonLD mkConfig Article [exampleAuthor{authorAddCopyrightNotice = False}] [] postMeta Nothing
             assertContains "\"copyrightNotice\":\"© Example Author 2024–2026\"" optedIn
-            assertContains "\"copyrightHolder\":[{\"@id\":\"https://example.com/authors/example/#person\"" optedIn
+            assertContains "\"copyrightHolder\":[{\"@id\":\"https://example.com/authors/example#person\"" optedIn
             assertNotContains "copyrightNotice" optedOut
         , testCase "standalone pages are a WebPage inside the site" $ do
             let json = jsonLD mkConfig AboutPage [] [] pageMeta Nothing
@@ -321,9 +321,9 @@ jsonLdTests =
                     [ PageItem "https://example.com/prose/tour" "A tour" (Just "2024-02-20")
                     , PageItem "https://example.com/prose/lists" "Lists" (Just "2024-01-20")
                     ]
-                json = jsonLD mkConfig ProfilePage [exampleAuthor] items (pageMeta{pageMetaUrl = "https://example.com/authors/example/"}) Nothing
-            assertContains "\"@type\":\"ProfilePage\",\"@id\":\"https://example.com/authors/example/\"" json
-            assertContains "\"mainEntity\":{\"@id\":\"https://example.com/authors/example/#person\"}" json
+                json = jsonLD mkConfig ProfilePage [exampleAuthor] items (pageMeta{pageMetaUrl = "https://example.com/authors/example"}) Nothing
+            assertContains "\"@type\":\"ProfilePage\",\"@id\":\"https://example.com/authors/example\"" json
+            assertContains "\"mainEntity\":{\"@id\":\"https://example.com/authors/example#person\"}" json
             assertContains "\"hasPart\":[{\"@id\":\"https://example.com/prose/tour#article\",\"@type\":\"BlogPosting\"" json
             assertContains "\"name\":\"A tour\",\"url\":\"https://example.com/prose/tour\"" json
             assertContains "\"datePublished\":\"2024-02-20T00:00:00\"" json

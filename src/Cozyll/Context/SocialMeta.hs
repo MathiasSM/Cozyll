@@ -383,7 +383,7 @@ origin cfg = baseUrl cfg ++ "/"
 
 -- | The @\@id@ of an author's entity, by their type
 entityId :: SiteConfig -> Author -> String
-entityId cfg author = origin cfg ++ "authors/" ++ authorId author ++ "/#" ++ fragment
+entityId cfg author = origin cfg ++ "authors/" ++ authorId author ++ "#" ++ fragment
   where
     fragment = case authorType author of
         Person -> "person"

@@ -70,7 +70,7 @@
 <figcaption aria-hidden="true">Example post</figcaption>
 </figure>
 <h2 id="where-to-go-next">Where to go next</h2>
-<p>From here, the other groups show the remaining features in detail: the <a href="https://example.com/languages/">languages</a> posts for ruby and CJK, the <a href="https://example.com/tables/">tables</a> posts for table syntax, and the <a href="https://example.com/elements/">elements</a> posts for raw HTML and controls.</p>
+<p>From here, the other groups show the remaining features in detail: the <a href="https://example.com/languages">languages</a> posts for ruby and CJK, the <a href="https://example.com/tables">tables</a> posts for table syntax, and the <a href="https://example.com/elements">elements</a> posts for raw HTML and controls.</p>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
@@ -198,7 +198,7 @@ Like this one.</p>
 <h2 id="emphasis">Emphasis</h2>
 <p>Text can be <em>emphasized</em>, <strong>strong</strong>, <del>deleted</del>, or shown as <code>inline code</code>.</p>
 <h2 id="links">Links</h2>
-<p>Links can point <a href="https://example.com/prose/">to a page</a>, <a href="#emphasis">to a section</a>, <a href="https://example.com">to an external site</a>, or <a href="mailto:example@example.com">to an email</a>.</p>
+<p>Links can point <a href="https://example.com/prose">to a page</a>, <a href="#emphasis">to a section</a>, <a href="https://example.com">to an external site</a>, or <a href="mailto:example@example.com">to an email</a>.</p>
 <h2 id="blockquotes">Blockquotes</h2>
 <blockquote>
 <p>A blockquote contains quoted text.</p>
