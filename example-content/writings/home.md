@@ -27,5 +27,5 @@ $partial("templates/features.html")$
 ## Online
 
 ```{=html}
-$partial("templates/social-links-about.html")$
+$partial("templates/social-links.html")$
 ```

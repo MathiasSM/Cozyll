@@ -1,17 +1,12 @@
-# Example social accounts. Each item links to an account and opts into where it
-# is shown: showContact (the contact page) and showAbout (the home page).
+# Example social accounts. Each item is shown in the site's social links unless
+# it opts out with `_show: false`.
 - icon: github
   href: https://github.com/example
   username: example
-  showContact: true
-  showAbout: true
 - icon: twitter
   href: https://x.com/example
   username: "@example"
-  showContact: true
-  showAbout: false
 - icon: mastodon
   href: https://mastodon.social/@example
   username: "@example@mastodon.social"
-  showContact: false
-  showAbout: true
+  _show: false

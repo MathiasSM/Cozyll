@@ -7,7 +7,7 @@ import Data.Either (isLeft)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, testCase, (@?=))
 
--- | A social account with every field except the optional show flags
+-- | A social account with every field except the optional _show flag
 validSocial :: Fields
 validSocial = [("icon", "twitter"), ("href", "https://x.com/example"), ("username", "example")]
 
@@ -15,12 +15,12 @@ tests :: TestTree
 tests =
     testGroup
         "parseSocialsYaml"
-        [ testCase "reads an account, hidden by default" $
+        [ testCase "reads an account, shown by default" $
             parse validSocial
-                @?= Right [Social "twitter" "https://x.com/example" "example" False False]
-        , testCase "reads showContact and showAbout" $
-            parse (set "showContact" "true" $ set "showAbout" "true" validSocial)
-                @?= Right [Social "twitter" "https://x.com/example" "example" True True]
+                @?= Right [Social "twitter" "https://x.com/example" "example" True]
+        , testCase "hides when _show is false" $
+            parse (set "_show" "false" validSocial)
+                @?= Right [Social "twitter" "https://x.com/example" "example" False]
         , testCase "reads a list of accounts in order" $
             parseSocialsYaml
                 ( unlines
@@ -33,8 +33,8 @@ tests =
                     ]
                 )
                 @?= Right
-                    [ Social "twitter" "https://x.com/example" "example" False False
-                    , Social "github" "https://github.com/example" "example" False False
+                    [ Social "twitter" "https://x.com/example" "example" True
+                    , Social "github" "https://github.com/example" "example" True
                     ]
         , testCase "ignores fields it doesn't model" $
             parse (set "cta" "x" validSocial) @?= parse validSocial

@@ -15,8 +15,7 @@ data Social = Social
     { socialIcon :: String
     , socialHref :: String
     , socialUsername :: String
-    , socialShowContact :: Bool
-    , socialShowAbout :: Bool
+    , socialShow :: Bool
     }
     deriving (Eq, Show)
 
@@ -28,8 +27,7 @@ parseSocial o =
             <$> required o K.Icon
             <*> required o K.Href
             <*> required o K.Username
-            <*> (fromMaybe False <$> optional o K.ShowContact)
-            <*> (fromMaybe False <$> optional o K.ShowAbout)
+            <*> (fromMaybe True <$> optional o K.Show)
         )
 
 -- | 'parseSocial' on the contents of the socials file (a list of accounts)
