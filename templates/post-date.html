@@ -1,5 +1,5 @@
 <div class="post-date-header" lang="$language$">
   $if(author)$<span class="post-authors">$if(linkAuthors)$$for(author)$<a href="$path$">$displayName$</a>$sep$, $endfor$$else$$for(author)$$displayName$$sep$, $endfor$$endif$</span><span> · </span>$endif$
   <time datetime="$date$">$date$</time>
-  $if(lastModifiedAt)$<span> $t("post.updated")$: <time datetime="$lastModifiedAt$">$lastModifiedAt$</time></span>$endif$
+  $if(lastModifiedAt)$<span> ($t("post.updated")$: <time datetime="$lastModifiedAt$">$lastModifiedAt$</time>)</span>$endif$
 </div>

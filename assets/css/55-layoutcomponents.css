@@ -130,7 +130,7 @@
     }
   }
 
-  h2 {clear: none; margin: 0;}
+  h2 {clear: none; margin: 0;font-size:1.4em;}
 }
 
 
@@ -151,7 +151,11 @@
 
   a[href^=http]::after { display:none }
 
-  svg {width: 1em; fill: var(--color-border-strong);}
+  svg {
+    width: 1em;
+    fill: var(--color-border-strong);
+    vertical-align: center;
+  }
   li {
     margin:.5rem;
     display: inline-block;
@@ -161,6 +165,7 @@
     padding: .5rem 1rem;
     background: var(--color-surface);
     color: var(--color-text);
+    gap: .5em;
     &:hover {
       background: var(--color-highlight);
     }
