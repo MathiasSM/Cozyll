@@ -21,6 +21,11 @@ project.finished:
   es: Terminado en
   ja: 完了日
 
+author.by:
+  en: By
+  es: Por
+  ja: 執筆
+
 # Reserved: each used language's full og:locale (xx_YY). Required for every page.
 _ogLocaleDefaultRegion:
   en: en_US

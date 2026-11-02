@@ -7,6 +7,12 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 
+## [3.0.0.2] - 2026-11-02
+
+### Changed
+
+- Adds "By:" to author pages header
+
 ## [3.0.0.1] - 2026-11-01
 
 ### Changed
@@ -280,7 +286,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.1...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.2...master
+[3.0.0.2]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.1...v3.0.0.2
 [3.0.0.1]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.0...v3.0.0.1
 [3.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v2.0.0.0...v3.0.0.0
 [2.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v1.0.0.0...v2.0.0.0
