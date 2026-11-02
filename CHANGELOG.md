@@ -7,6 +7,13 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 
+## [3.0.0.1] - 2026-11-01
+
+### Changed
+
+- Minor style changes for header tags (h1, h2, ...)
+- Minor style fix for social icons/buttons.
+
 ## [3.0.0.0] - 2026-11-01
 
 ### Added
@@ -273,7 +280,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.0...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.1...master
+[3.0.0.1]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.0...v3.0.0.1
 [3.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v2.0.0.0...v3.0.0.0
 [2.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v1.0.0.0...v2.0.0.0
 [1.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v0.5.0.0...v1.0.0.0
