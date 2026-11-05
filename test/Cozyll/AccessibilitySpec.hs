@@ -73,6 +73,27 @@ tests =
                 reports "<a href=\"/x\">   </a>" "link has no accessible name"
             ]
         , testGroup
+            "inline svg"
+            [ testCase "allows an svg hidden via its own aria-hidden" $
+                notReported "<svg aria-hidden=\"true\"></svg>" "inline svg has no accessible name"
+            , testCase "allows an svg hidden via an ancestor aria-hidden" $
+                notReported "<span aria-hidden=\"true\"><svg></svg></span>" "inline svg has no accessible name"
+            , testCase "uses role and aria-label as the name" $
+                notReported "<svg role=\"img\" aria-label=\"Menu\"></svg>" "inline svg has no accessible name"
+            , testCase "uses aria-labelledby as the name" $
+                notReported "<svg role=\"img\" aria-labelledby=\"title-1\"></svg>" "inline svg has no accessible name"
+            , testCase "uses an inner title as the name" $
+                notReported "<svg><title>Menu</title></svg>" "inline svg has no accessible name"
+            , testCase "reports a bare svg" $
+                reports "<svg></svg>" "inline svg has no accessible name"
+            , testCase "reports role without a name" $
+                reports "<svg role=\"img\"></svg>" "inline svg has no accessible name"
+            , testCase "reports an svg after a closed aria-hidden wrapper" $
+                reports "<span aria-hidden=\"true\"></span><svg></svg>" "inline svg has no accessible name"
+            , testCase "reports an svg after an aria-hidden void sibling" $
+                reports "<img alt=\"\" aria-hidden=\"true\"><svg></svg>" "inline svg has no accessible name"
+            ]
+        , testGroup
             "ids"
             [ testCase "reports duplicate ids" $
                 reports "<h2 id=\"a\"></h2><h2 id=\"a\"></h2>" "duplicate id: a"

@@ -22,7 +22,7 @@ Custom templates, styles, and content you provide are processed on a best-effort
 
 ## How we verify
 
-The generator runs automated accessibility checks on the final rendered HTML of every page at build time, and fails the build if a page violates them. The checks cover: image alternative text, the page `<title>`, the `<html lang>` attribute, heading structure and order, link accessible names, duplicate `id`s, and the presence of a `<main>` landmark. See `src/Cozyll/Accessibility.hs` and `test/Cozyll/AccessibilitySpec.hs`.
+The generator runs automated accessibility checks on the final rendered HTML of every page at build time, and fails the build if a page violates them. The checks cover: image alternative text, the page `<title>`, the `<html lang>` attribute, heading structure and order, link accessible names, inline-SVG accessible names, duplicate `id`s, and the presence of a `<main>` landmark. See `src/Cozyll/Accessibility.hs` and `test/Cozyll/AccessibilitySpec.hs`.
 
 These checks catch structural issues, not everything. Color contrast and focus visibility are verified by review rather than automation.
 

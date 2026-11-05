@@ -31,6 +31,7 @@ checks =
     , checkHeadingOrder
     , checkEmptyHeadings
     , checkLinks
+    , checkInlineSvgs
     , checkIds
     , checkMain
     ]
@@ -147,6 +148,48 @@ checkLinks tags =
     nonEmpty Nothing = False
 
     hrefOf attrs = maybe "" (\h -> " (href \"" ++ h ++ "\")") (lookup "href" attrs)
+
+{- | Every inline @svg@ has an accessible name or is hidden from assistive tech.
+
+A decorative icon may be marked `aria-hidden="true"` (on the @svg@ or an
+ancestor). A meaningful icon needs an accessible name: `aria-label`,
+`aria-labelledby`, or an inner @title@ element. The recommended markup for a
+meaningful icon is @role="img"@ plus one of those names; @role="img"@ alone
+does not name the icon. Void elements (like @img@ and @meta@) are skipped, since
+they never enclose other content.
+-}
+checkInlineSvgs :: [Tag String] -> [String]
+checkInlineSvgs = go []
+  where
+    -- Stack entries: (element name, whether it carries aria-hidden="true").
+    -- Void elements are never pushed; on a TagClose we still drop everything
+    -- down to (and including) the matching open entry.
+    go _ [] = []
+    go stack (TagOpen "svg" attrs : rest) =
+        let (body, afterClose) = break (isTagCloseName "svg") rest
+            hidden = any snd stack || lookup "aria-hidden" attrs == Just "true"
+            named =
+                nonEmpty (lookup "aria-label" attrs)
+                    || nonEmpty (lookup "aria-labelledby" attrs)
+                    || hasTitle body
+         in ["inline svg has no accessible name" | not hidden && not named]
+                ++ go stack (drop 1 afterClose)
+    go stack (TagOpen name attrs : rest)
+        | name `elem` voidElements = go stack rest
+        | otherwise = go ((name, lookup "aria-hidden" attrs == Just "true") : stack) rest
+    go stack (TagClose name : rest) = go (pop name stack) rest
+    go stack (_ : rest) = go stack rest
+
+    pop name stack = case break ((== name) . fst) stack of
+        (_, []) -> stack
+        (_, _ : below) -> below
+
+    voidElements = ["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]
+
+    hasTitle body = not (all (all isSpace) (innerTextsOf "title" body))
+
+    nonEmpty (Just s) = not (all isSpace s)
+    nonEmpty Nothing = False
 
 -- | No duplicate `id` values
 checkIds :: [Tag String] -> [String]
