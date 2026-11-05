@@ -33,7 +33,7 @@
   flex: none;
   width: 1.5rem;
   height: 1.5rem;
-  color: var(--color-border-strong);
+  color: var(--color-surface-strong-border);
 }
 
 .groups .group-meta {
@@ -43,6 +43,6 @@
 }
 
 .groups .group-meta span {
-  color: var(--color-text-muted);
+  color: var(--color-fg-muted);
   font-size: 0.9em;
 }
