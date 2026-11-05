@@ -7,6 +7,13 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 
+### Changed
+
+- Icons are neutral SVG graphics; templates now set each inline icon's
+  accessibility (decorative icons wrapped in `aria-hidden="true"`, meaningful
+  icons via `role="img"` + `aria-label` or a `<title>`), and the build fails
+  when an inline SVG is neither hidden nor named.
+
 ## [3.0.0.2] - 2026-11-02
 
 ### Changed

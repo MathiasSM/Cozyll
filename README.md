@@ -139,7 +139,7 @@ Any YAML under `content/data/**/*.yaml` becomes a template context named after i
 - A file holding a top-level **map** is read with dotted keys (`$name.key$`); nested maps flatten the same way (`$name.address.city$`).
 - Scalars render as strings (booleans as `true`/`false`, numbers without scientific notation).
 
-Any scalar field whose name contains `icon` also gets two derived fields: `<field>Href` (the icon URL, a bare name resolved to `images/icons/<name>.svg`) and `<field>Raw` (the SVG markup, inlined). For example, `icon: book` provides `$icon$`, `$iconHref$` and `$iconRaw$`.
+Any scalar field whose name contains `icon` also gets two derived fields: `<field>Href` (the icon URL, a bare name resolved to `images/icons/<name>.svg`) and `<field>Raw` (the SVG markup, inlined). For example, `icon: book` provides `$icon$`, `$iconHref$` and `$iconRaw$`. Icons inlined via `<field>Raw` are neutral SVG with no accessibility attributes, so the template sets how each icon is exposed: wrap a decorative icon (redundant with adjacent text) in `<span aria-hidden="true">…</span>`, and expose a meaningful standalone icon with `role="img"` and an `aria-label` (or give the SVG a `<title>`); an icon that is the sole content of a link or button should instead carry the accessible name on that control via its own `aria-label`. When using `<field>Href` as an `<img src>` instead, set `alt=""` for a decorative icon or a descriptive `alt`.
 
 A data file may ship a JSON Schema, co-located as `content/data/name.schema.json` next to `content/data/name.yaml`; it is validated at build time (and the YAML's `$schema` points at the local file for editor hints).
 
