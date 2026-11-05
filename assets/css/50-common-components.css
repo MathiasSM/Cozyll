@@ -25,8 +25,8 @@ a:active[href^=http]::after { opacity: .8; }
 
 /* table of contents **********************************************************/
 nav#TOC {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--color-surface-weak);
+  border: 1px solid var(--color-surface-border);
   border-radius: var(--round-corners);
   padding: 0.5em 1em;
   margin: 0 0 1.5em;
@@ -50,4 +50,4 @@ div.line-block { margin: 1rem 0;}
 .footnotes { margin-top: 2em; font-size: .9em; }
 .footnotes hr { width: 30%; margin-inline-start: 0; }
 .footnote-ref { white-space: nowrap; }
-.footnote-back { color: var(--color-text-muted); }
+.footnote-back { color: var(--color-fg-muted); }

@@ -1,15 +1,15 @@
 /* common classes *************************************************************/
-.post-date-header {font-style:normal;color:var(--color-text-muted)}
+.post-date-header {font-style:normal;color:var(--color-fg-muted)}
 
 /* site header ****************************************************************/
 .site-header {
-  background: var(--color-brand);
-  color: var(--color-on-brand);
+  background: var(--color-surface-brand);
+  color: var(--color-surface-brand-fg);
   display: flex;
   flex-direction: column;
   text-align: center
 }
-.site-header svg * {fill: var(--color-on-brand);}
+.site-header svg * {fill: var(--color-surface-brand-fg);}
 .site-header a {color: currentcolor}
 
 .site-logo {
@@ -36,9 +36,17 @@
   flex-direction: column;
   flex-wrap:wrap;
 
-  a { padding: .4em; flex:1;
-    &:hover {color:var(--color-link);background: var(--color-surface)}
-    &:active, &.active {color:var(--color-accent);background: var(--color-surface)}
+  a {
+    padding: .4em;
+    flex:1;
+    &:hover {
+      color:var(--color-interactive-hover);
+      background: var(--color-surface-strong)
+    }
+    &:active, &.active {
+      color:var(--color-interactive-selected);
+      background: var(--color-surface-strong)
+    }
   }
   mark {background:none;color:currentcolor;
     &::before {content:'('}
@@ -55,8 +63,8 @@
 }
 .main-article > header {margin-bottom:1em;}
 .main-article > header > div {font-style:italic}
-.main-article .post-date-header {font-style:normal;color:var(--color-text-muted)}
-.main-article > footer {padding:1em 0;margin-top:2em;border-top:1px solid var(--color-border-strong)}
+.main-article .post-date-header {font-style:normal;color:var(--color-fg-muted)}
+.main-article > footer {padding:1em 0;margin-top:2em;border-top:1px solid var(--color-surface-strong-border)}
 
 /* site aside *****************************************************************/
 .site-aside {
@@ -95,9 +103,9 @@
     /* Control toggles: see templates/controls--*-toggle.html */
     .ruby-toggle, .images-toggle {
       padding:.5rem;
-      background: var(--color-surface);
+      background: var(--color-surface-weak);
       &:hover {
-        background: var(--color-highlight);
+        background: var(--color-bg-highlight);
       }
     }
 
@@ -123,21 +131,37 @@
   a {color:currentcolor}
   header > div {font-style: italic}
 
-  li {border-inline-start: .5rem solid var(--color-brand);
+  li {border-inline-start: .5rem solid var(--color-interactive);
     a {padding: .5rem 1rem; display:block;}
-    &:hover {background-color:var(--color-surface); border-color: var(--color-accent);
-      .status {color:var(--color-accent)}
-    }
+    &:hover {background-color:var(--color-surface-weak); border-color: var(--color-accent);}
   }
 
   h2 {clear: none; margin: 0;font-size:1.4em;}
 }
 
+/* projects *******************************************************************/
+a.project::after { content: none;}
+.project { 
+  .status {
+    float:inline-end;
+    font-size: 1.2em; /* Given the color, this is needed for WCAG AA */
+    font-style:normal;font-weight:bold;
+    color:var(--color-interactive);
+    line-height: 1;
+  }
+  .status::before {content:'['}
+  .status::after {content:']'}
+
+  &:hover { 
+    .status {color:var(--color-accent)}
+  }
+}
+
 
 /* site footer ****************************************************************/
 .site-footer {
-  color:var(--color-on-brand);
-  background: var(--color-brand);
+  color:var(--color-surface-brand-fg);
+  background: var(--color-surface-brand);
   text-align:end;
   padding: .5rem 1rem;
 }
@@ -151,11 +175,6 @@
 
   a[href^=http]::after { display:none }
 
-  svg {
-    width: 1em;
-    fill: var(--color-border-strong);
-    vertical-align: center;
-  }
   li {
     margin:.5rem;
     display: inline-block;
@@ -163,11 +182,18 @@
   a {
     display: flex;
     padding: .5rem 1rem;
-    background: var(--color-surface);
-    color: var(--color-text);
+    background: var(--color-surface-weak);
+    color: var(--color-fg);
     gap: .5em;
+    span[aria-hidden="true"] svg {
+      width: 1em;
+      fill: var(--color-surface-strong-border);
+    }
     &:hover {
-      background: var(--color-highlight);
+      background: var(--color-bg-highlight);
+      span[aria-hidden="true"] svg {
+        fill: var(--color-surface-brand-fg);
+      }
     }
     > div:first-child  {
       margin-inline-end:1em;
