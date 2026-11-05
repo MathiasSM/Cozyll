@@ -4,17 +4,27 @@
   color-scheme: light dark;
 
   /* COLORS *******************************************************************/
-  --color-bg:            light-dark(hsl(210, 75%, 99%), hsl(210, 75%, 15%));
-  --color-text:          light-dark(hsl(210, 75%, 10%), hsl(210, 75%, 95%));
-  --color-text-muted:    light-dark(hsl(210, 15%, 50%), hsl(210, 35%, 75%));
-  --color-link:          light-dark(hsl(210, 75%, 40%), hsl(210, 75%, 75%));
-  --color-brand:         light-dark(hsl(210, 75%, 50%), hsl(210, 55%, 50%));
-  --color-on-brand:      light-dark(hsl(210, 75%, 95%), hsl(210, 75%, 98%));
-  --color-accent:        light-dark(hsl(30, 75%, 50%),  hsl(30, 75%, 50%));
-  --color-surface:       light-dark(hsl(210, 75%, 95%), hsl(210, 50%, 30%));
-  --color-highlight:     light-dark(hsl(30, 75%, 80%),  hsl(30, 50%, 50%));
-  --color-border:        light-dark(hsl(210, 75%, 80%), hsl(210, 50%, 30%));
-  --color-border-strong: light-dark(hsl(210, 75%, 30%), hsl(210, 50%, 75%));
+  --color-brand:          light-dark(hsl(210, 85%, 45%), hsl(210, 85%, 40%));
+  --color-accent:         light-dark(hsl(30, 85%, 45%),  hsl(30, 95%, 65%));
+
+  --color-bg:             light-dark(hsl(210, 75%, 95%), hsl(210, 75%, 10%));
+  --color-fg:             light-dark(hsl(210, 75%, 15%), hsl(210, 75%, 95%));
+  --color-fg-muted:       light-dark(hsl(210, 35%, 40%), hsl(210, 35%, 75%));
+  --color-bg-highlight:   light-dark(hsl(30, 75%, 80%),  hsl(30, 75%, 30%));
+
+  --color-interactive:          light-dark(hsl(210, 85%, 40%), hsl(210, 65%, 70%));
+  --color-interactive-hover:    light-dark(hsl(30, 100%, 40%), hsl(30, 65%, 70%));
+  --color-interactive-selected: light-dark(hsl(30, 80%, 35%), hsl(30, 75%, 90%));
+
+  --color-surface-weak:           light-dark(hsl(210, 75%, 90%), hsl(210, 50%, 30%));
+  --color-surface-strong:         light-dark(hsl(210, 75%, 80%), hsl(210, 60%, 40%));
+  --color-surface-brand:          light-dark(hsl(210, 85%, 45%), hsl(210, 85%, 45%));
+
+  --color-surface-brand-fg:       light-dark(hsl(210, 75%, 99%), hsl(210, 75%, 98%));
+
+  --color-surface-weak-border:    light-dark(hsl(210, 75%, 80%), hsl(210, 60%, 50%));
+  --color-surface-strong-border:  light-dark(hsl(210, 75%, 30%), hsl(210, 50%, 75%));
+
 
   /* BORDERS ******************************************************************/
   --round-corners: 5px;

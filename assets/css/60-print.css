@@ -10,7 +10,7 @@
   body { widows: 2; display: block !important;}
 
   .site-header {display: block; color: black; background: none;}
-  .site-header svg {fill:var(--color-brand)}
+  .site-header svg {fill:var(--color-surface-brand)}
 
   .site-header nav,
   .site-footer {display:none}
@@ -19,7 +19,7 @@
   .main-article > .content  { column-count:2; column-fill: auto; height:100%}
   .main-article a[href^=http]::after { content: " [" attr(href) "] "; }
 
-  .site-header svg, .site-header svg * {fill: var(--color-border);}
+  .site-header svg, .site-header svg * {fill: var(--color-surface-border);}
 
   .social-contact {display:block !important;}
   .social-contact li {padding: 0; margin: 0;}

@@ -12,7 +12,7 @@ body {
     font-style: normal;
     text-rendering: optimizeLegibility;
     background: var(--color-bg);
-    color: var(--color-text);
+    color: var(--color-fg);
 }
 
 small {font-size: .8em;}
@@ -29,6 +29,11 @@ sup {top: -0.5em;}
 sub {bottom: -0.25em;}
 
 img, figure {border: none; max-width:100%; margin:0;}
+span[aria-hidden="true"] svg {
+  width: 100%;
+  height: auto;
+  vertical-align: center;
+}
 p:first-child {margin-top:0}
 
 menu { list-style: none; padding-inline:0; }
@@ -60,11 +65,11 @@ th, td {
 }
 thead,tfoot {
     background: var(--color-brand);
-    color: var(--color-on-brand);
+    color: var(--color-surface-brand-fg);
 }
 tfoot { font-style: italic; }
 tbody tr:nth-child(odd) {
-    background:var(--color-surface);
+    background:var(--color-surface-weak);
 }
 table:not(:has(tfoot)) tbody tr:last-child{
     border-bottom: .25rem solid var(--color-brand);
@@ -85,31 +90,31 @@ textarea {
     font: inherit;
     color: inherit;
     background: var(--color-bg);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-surface-border);
     padding: .5em 1em;
 }
 textarea {width: 100%; resize: vertical;}
 button {
     font: inherit;
-    color: var(--color-on-brand);
+    color: var(--color-surface-brand-fg);
     background: var(--color-brand);
     border: 1px solid var(--color-brand);
     padding: .5em 1em;
     cursor: pointer;
 }
 button:hover {background: var(--color-accent); border-color: var(--color-accent);}
-fieldset {border: 1px solid var(--color-border); border-radius: var(--round-corners); padding: 1em 1.5em 1.5em;}
+fieldset {border: 1px solid var(--color-surface-border); border-radius: var(--round-corners); padding: 1em 1.5em 1.5em;}
 legend {padding: 0 .5em; font-weight: bold;}
 
 /* links */
-a {color: var(--color-link); text-decoration:none}
-a:hover,a:active {color: var(--color-accent);}
+a {color: var(--color-interactive); text-decoration:none}
+a:hover,a:active {color: var(--color-interactive-hover);}
 
 /* code */
 pre, code, kbd, samp, var, .sourceCode {
     font: .9em/1.6 var(--font-mono);
     padding: .2em .4em;
-    background: var(--color-surface);
+    background: var(--color-surface-weak);
 }
 pre {
     padding: 1em;
@@ -136,7 +141,7 @@ kbd {
 /* quotes */
 blockquote {
     position:relative;
-    border-inline-start: 1rem solid var(--color-highlight);
+    border-inline-start: 1rem solid var(--color-bg-highlight);
     padding: 1em 1.5em;
     margin: 0
 }
@@ -148,7 +153,7 @@ dd { margin-block: 0 .5em; margin-inline: 1em 0; }
 /* Details */
 details {
     margin: 1rem 0;
-    border-inline-start: .5rem solid var(--color-border);
+    border-inline-start: .5rem solid var(--color-surface-weak-border);
     padding: 0 1rem;
 }
 summary {
@@ -165,7 +170,7 @@ figure {
     margin-block: 0 .5rem;
     margin-inline: .5em 0;
     padding: .5rem;
-    background-color: var(--color-surface);
+    background-color: var(--color-surface-weak);
     border-radius: var(--round-corners);
 }
 figure:has(> .full) { width: 100%; height: auto; float: none; margin: 0}
@@ -177,7 +182,7 @@ figure > img { object-fit: contain; display: block; }
 figcaption {
   font-size: 0.8rem;
   line-height: 1.25;
-  color: var(--color-text);
+  color: var(--color-fg);
   text-align: center;
   margin-top: .5em;
   padding: 0 0.5rem;
@@ -203,4 +208,4 @@ hr {
     margin: 1rem auto;
 }
 
-mark { background: var(--color-highlight); }
+mark { background: var(--color-bg-highlight); }
