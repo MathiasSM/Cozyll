@@ -1,11 +1,11 @@
 <ol class="main-list">
     $for(projects)$
     <li>
-        <a href="$href$" class="project special">
+        <a href="$href$" class="project special" aria-labelledby="$slug$">
           <article>
             <header>
               <div class="status">$status$</div>
-              <h2>$title$</h2>
+              <h2 id="$slug$">$title$</h2>
               $partial("templates/project-date.html")$
               <div>$shortDescription$</div>
             </header>
