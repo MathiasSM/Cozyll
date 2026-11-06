@@ -1,4 +1,13 @@
--- | A showcase project's fields as a template context
+{- | A showcase project's fields as a template context.
+
+The available fields are @$title$@, @$href$@, @$status$@, @$startDate$@,
+@$endDate$@ (absent when unset, because the field returns 'noResult'),
+@$shortDescription$@, @$longDescription$@, and @$slug$@ (the project file's base
+name, not a YAML field), plus the language and translation contexts.
+
+@$team$@ and @$priority$@ are not exposed to templates; @priority@ is only used
+to order the showcase. TODO: expose @team@ here.
+-}
 module Cozyll.Context.Project (projectContext) where
 
 import Cozyll.Config (SiteConfig)

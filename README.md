@@ -17,18 +17,37 @@
 
 This is a [hakyll](https://hackage.haskell.org/package/hakyll)-based site generator. It's main purpose is to build [mathiassm.dev (my personal site)](https://mathiassm.dev), but it can be used to build other kinds of sites with similar needs. In essence, it's a thin-ish layer of extra logic, some premade templates and styling, on top of the actual generator library by [jaspervdj](https://jaspervdj.be/).
 
+## Documentation
+
+API reference (per-module Haddock) is published at <https://cozyll.mathiassm.dev>.
+
+It is generated with:
+
+```sh
+cabal haddock-project --hackage \
+  --haddock-options="--show-all" \
+  --haddock-options="--quickjump"
+```
+
+The published site reflects the documentation of the **latest release**, not `master`. To read
+the docs for unreleased changes, run the command above locally; the output lands in
+`haddocks/` (gitignored).
+
 ## Usage
 
 You may download the [latest release](https://github.com/MathiasSM/Cozyll/releases/latest), which should include an executable for ubuntu (I can tweak the release thing to provide statically-linked executables, or builds for other platforms, but I don't know of anyone needing them as of writing). Keep in mind the main reason for the release is more easy integration with Github actions to publish a "content repo" using this. You may run the executable in a directory with:
 
 - `templates/` vended hakyll templates that define components of each (usually html) pages. There are included files in the release tarball and this repo, but you may change them as you need to.
 - `assets/` vended styles and potentially other files, either too basic or coupled with the vended templates.
-- `content/` where all writing, images and other stuff lives. To build my personal site, I use a separate repo that holds these files. It expects some files:
-  - `website.yaml` (see `schema/example.website.yaml`), a file with metadata about the site, for use during generation.
-  - `socials.yaml` (see `schema/example.socials.yaml`), a file with a list of accounts linked to you/your site, used for templates to build links to those profiles, and for some `.well-known` files.
+- `content/` where all writing, images and other stuff lives. To build my personal site, I use a separate repo that holds these files. It expects these files:
+  - `website.yaml` (see `schema/example.website.yaml`), a file with metadata about the site, for use during generation. Required.
+  - `socials.yaml` (see `schema/example.socials.yaml`), a file with a list of accounts linked to you/your site, used for templates to build links to those profiles, and for some `.well-known` files. Required.
+  - `authors.yaml` (see `schema/authors.schema.json`), a map keyed by author id: each author's name, links, profile image, and the one flagged `siteDefault: true` (see [Authors](#authors)). Required.
+  - `localization.yaml`, a map of UI string id → `{ locale: translation }` (plus the reserved `_ogLocaleDefaultRegion` key) that backs the templates' `$t("id")$` lookups and `og:locale`. Required, even for a single-language site; the build fails on a missing translation.
   - `writings/` shall contain any and all markdown/djot/whatever files, each of which will become a specific page in your site. Each file has a frontmatter yaml which adds some metadata to the processed page (see [Frontmatter](#frontmatter)). 
   - `data/` may hold yaml files, which are translated into usable context fields, usable in templates or templated pages (see [Data Files](#data-files)).
   - `media/` may hold images and other binary files which can be included in the site and linked to.
+  - `projects/` may hold YAML files, each becoming an item on the projects (showcase) page.
   - Optionally, a `templates/` directory may hold additional templates, or override existing ones (by using the same name). 
   - Optionally, a `css/` directory may hold additional stylesheets, or override existing ones (by using the same name). 
 
@@ -41,8 +60,8 @@ The way to execute this is same as any hakyll site; if you build it from source,
   - `rebuild` (clean and build again)
   - `server` (run server on what's built)
   - `watch` (recompile server)
-  - `check` (check the built html for broken links)
-    - Note: By default hakyll checks external links as well, but due to some broken external sites, I decided to disable it via compilation flags.
+  - `check` (validate the already-built HTML in `_site` for broken links; run `build` first)
+    - Only internal links are checked: `cabal.project` sets `constraints: hakyll -checkexternal`, which compiles out Hakyll's external-link check, so external URLs are skipped silently. Upstream's `checkExternal` flag defaults to on; see the comment in `cabal.project` for why it is off here.
 
 You may set environment variables to override some `website.yaml` fields; export them manually, use a `.env` file, or your preferred method. See `.env.example`.
 
@@ -74,8 +93,8 @@ SITE_ENV=prod
    mise install
    ```
 
-  - You may install `hls`, `fourmolu`, `hlint`, `apply-refact` with it, or use `cabal install PKG-VERSION` (see [CONTRIBUTING.md](CONTRIBUTING.md) for the expected `fourmolu`/`hlint` versions)
-  - Remember to `ghcup set <TOOL>` (in particular, you might need to `ghcup set cabal 3.14` because of hlint support)
+  - You may install `hls`, `fourmolu`, `hlint`, `apply-refact` with it, or use `cabal install PKG-VERSION` (see [CONTRIBUTING.md](CONTRIBUTING.md); CI reads the fourmolu, GHC, and cabal versions from the `FOURMOLU_VERSION`, `GHC_VERSION`, and `CABAL_VERSION` repository variables)
+  - Remember to `ghcup set <TOOL>` (in particular, match CI with `ghcup set cabal <CABAL_VERSION>`)
 5. Enable the git hooks (runs `fourmolu` and `hlint` before each commit) via
    [pre-commit](https://pre-commit.com/); see [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -131,60 +150,39 @@ This project "deploys" as a release, via the CI workflow. Content repos can pull
 ---
 
 
-## Data files
+## Features how-to (?)
 
-Any YAML under `content/data/**/*.yaml` becomes a template context named after its path: directories are joined with `-` and the `.yaml` extension is dropped. So `content/data/team/members.yaml` is available as `team-members`. Avoid `-` inside file and directory names themselves, since it doubles as the directory separator.
+### Data files
 
-- A file holding a top-level **list** is looped with `$for(name)$`; each item's keys are exposed as fields (`$name$`, `$href$`, …).
-- A file holding a top-level **map** is read with dotted keys (`$name.key$`); nested maps flatten the same way (`$name.address.city$`).
-- Scalars render as strings (booleans as `true`/`false`, numbers without scientific notation).
+Any YAML under `content/data/**/*.yaml` becomes a template context named after its path.
+See the [`Cozyll.Context.Data` docs](https://cozyll.mathiassm.dev/cozyll/Cozyll-Context-Data.html)
+(source: `src/Cozyll/Context/Data.hs`) for list/map access, `_show`, icon `Href`/`Raw` and
+accessibility, and `*.schema.json` validation.
 
-Any scalar field whose name contains `icon` also gets two derived fields: `<field>Href` (the icon URL, a bare name resolved to `images/icons/<name>.svg`) and `<field>Raw` (the SVG markup, inlined). For example, `icon: book` provides `$icon$`, `$iconHref$` and `$iconRaw$`. Icons inlined via `<field>Raw` are neutral SVG with no accessibility attributes, so the template sets how each icon is exposed: wrap a decorative icon (redundant with adjacent text) in `<span aria-hidden="true">…</span>`, and expose a meaningful standalone icon with `role="img"` and an `aria-label` (or give the SVG a `<title>`); an icon that is the sole content of a link or button should instead carry the accessible name on that control via its own `aria-label`. When using `<field>Href` as an `<img src>` instead, set `alt=""` for a decorative icon or a descriptive `alt`.
+### Authors
 
-A data file may ship a JSON Schema, co-located as `content/data/name.schema.json` next to `content/data/name.yaml`; it is validated at build time (and the YAML's `$schema` points at the local file for editor hints).
+Authors live in the required `content/authors.yaml` (see
+[`Cozyll.Domain.Author`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Domain-Author.html),
+source `src/Cozyll/Domain/Author.hs`). Post author resolution and the `$for(author)$` template
+fields are documented in
+[`Cozyll.Context.Author`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Context-Author.html).
 
-## Authors
+### Frontmatter
 
-Authors live in `content/authors.yaml`, a map keyed by author id (the slug used in `author:` front matter). Each author supports:
-
-- `name` (required, non-empty) — the full name.
-- `type` — `person` (default) or `organization`.
-- `siteDefault: true` — marks the site's default author; exactly one author must set it. Posts without an `author:` fall back to this author.
-- `displayName` — a shorter name for the DOM (bylines, author page heading).
-- `description` — a short bio.
-- `profileImage` — a site-relative path to the author's image.
-- `links` — a list of profile URLs.
-- `addCopyrightNotice: true` — opt into a per-post copyright notice (a `© <authors> <years>` line at the end of the post, years from `date` to `lastModifiedAt`; not shown in lists or feeds).
-- Any other scalar field is exposed to templates as-is.
-
-A post references its authors with `author: <id>` or `author: [<id>, <id>]` front matter; without it, the post falls back to the site-default author. The resolved authors are available in templates as `$for(author)$` (each with `$id$`, `$name$`, `$displayName$`, `$path$`, `$url$`, `$description$`, `$profileImage$`, `$type$`, and `$for(links)$`).
-
-Every author also gets a profile page at `/authors/<id>` (included in `sitemap.xml`), showing their display name (or name), description, profile image, links, and every post they authored — a post without `author:` counts for the site-default author. The page's canonical URL and `og:url` are `https://<domain>/authors/<id>`, and its `og:image` is the profile image when one is set.
-
-## Frontmatter
-
-See `src/Cozyll/Metadata.hs` or its documentation for a full list of supported fields. Other fields become available as part of the page/post's context, which you may use in templates or templates markup.
+See [`Cozyll.Metadata`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Metadata.html) (source:
+`src/Cozyll/Metadata.hs`) for the full list of supported fields. Other fields become available as
+part of the page/post's context, which you may use in templates or templated markup.
 
 ### Social metadata
 
-Open Graph tags and JSON-LD structured data are emitted on posts, the home page, and standalone pages automatically.
+Open Graph and JSON-LD are generated automatically for posts, the home page, standalone
+pages, group indexes, and author pages. Keys are listed under *Frontmatter*
+(`shareTitle`, `shareDescription`, `schemaType`); the emission rules and `@id` graph are
+documented in
+[`Cozyll.Context.SocialMeta`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Context-SocialMeta.html).
 
-- `shareTitle` and `shareDescription` override the social title and description (which otherwise fall back to `title` and `description`).
-- `#main-image` on an image (`![alt](src){#main-image}`) marks it as the Open Graph / JSON-LD image; its URL is resolved to an absolute one.
-- `schemaType` sets a standalone page's schema.org type: one of `WebPage` (the default), `AboutPage`, `ContactPage`, `CollectionPage`, or `ProfilePage`. Any other value fails the build.
+### Per-article controls
 
-The JSON-LD is a schema.org `@graph` with stable `@id`s: the home page carries the `WebSite` entity (`#website`), the site's `Organization` (`#organization`), and the site-default author; posts are `BlogPosting` nodes (`<page>#article`) whose `author` entries are the post's authors, credited by profile URL; standalone pages are the page's `schemaType` (linking to the site via `isPartOf`). Group index pages are `CollectionPage` nodes whose `mainEntity` is an `ItemList` mirroring the visible list (the showcase has no list, so no `ItemList`). Author pages are `ProfilePage` nodes with the author's entity as `mainEntity` and `hasPart` listing their posts. Author entities live at `https://<domain>/authors/<id>#person` (`#organization` for organizations). Articles also emit `article:author` and their published/modified timestamps, and an opted-in post carries `copyrightNotice`/`copyrightHolder`.
-
-## Adding a control (toggle)
-
-A control is a checkbox in a page's aside that toggles a CSS class on `<html>`
-(e.g. `no-images`), so you can show/hide elements by classname. To add one:
-
-1. Pick the class to toggle (`no-images`) and add a front-matter key whose value
-   is the control's label (`imagesToggle: "Images"`); add a `Metadata.Key` for it.
-2. List it in `controlKeys` in `src/Cozyll/Context/Aside.hs`, and add its
-   `toggleLabelField <Key> "<name>ToggleLabel"` line to `asideContext`.
-3. Add `templates/controls--<name>-toggle.html`: a `<label>` with
-   `<input type="checkbox" checked data-toggle-class="no-images">` and `$<name>ToggleLabel$`.
-4. Add a gated `<li>` to `templates/site-aside.html`.
-5. Add the hiding CSS (`.no-images img { display:none }`). The shared script needs no change.
+A control is a checkbox in a page's aside that toggles a class on `<html>`. The contract lives in
+[`Cozyll.Context.Aside`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Context-Aside.html); the
+step-by-step recipe is in [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-control-toggle).

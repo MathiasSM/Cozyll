@@ -1,4 +1,16 @@
--- | A social account, as read from the single socials YAML list
+{- | A social account, read from the single list in @socials.yaml@ (required).
+
+== Schema
+
+  [@icon@] icon name under @content/media/icons/social/@, without the @.svg@
+      extension (required).
+  [@href@] URL the account links to (required).
+  [@username@] handle shown on the link (required).
+  [@_show@] whether to include the account (default @true@; @_show: false@
+      hides it).
+
+See also @schema/socials.schema.json@.
+-}
 module Cozyll.Domain.Social (
     Social (..),
     parseSocial,

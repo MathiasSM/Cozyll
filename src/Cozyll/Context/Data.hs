@@ -1,14 +1,34 @@
 {- | Generic data files: any YAML under @content/data/@, exposed to templates.
 
 Each file becomes a template context named after its path (directories joined
-with @-@, extension dropped). A file holding a top-level list is looped with
-@$for(name)$@; a top-level map is read with @$name.key$@ (nested maps flatten
-to dotted keys). Scalars render as strings.
+with @-@, extension dropped, so @content/data/team/members.yaml@ is available as
+@team-members@). A file holding a top-level list is looped with @$for(name)$@; a
+top-level map is read with @$name.key$@ (nested maps flatten to dotted keys).
+Scalars render as strings (booleans as @true@/@false@, numbers without
+scientific notation).
 
 A list item with @_show: false@ is left out of the loop entirely.
 
 Any scalar field whose name contains @icon@ also gets two derived fields:
-@<field>Href@ (the icon URL) and @<field>Raw@ (the SVG markup, inlined).
+@<field>Href@ (the icon URL) and @<field>Raw@ (the SVG markup, inlined). For
+example, @icon: book@ provides @$icon$@, @$iconHref$@, and @$iconRaw$@.
+
+A data file may ship a JSON Schema, co-located as @content/data/<name>.schema.json@
+next to @content/data/<name>.yaml@; it is validated at build time, and the YAML's
+@$schema@ key points at the local file for editor hints. @schema/*.json@ ships
+with the release kit.
+
+Avoid @-@ inside file and directory names themselves: it doubles as the
+hierarchy separator.
+
+Icons inlined via @<field>Raw@ are neutral SVG with no accessibility attributes,
+so the template decides how each icon is exposed: wrap a decorative icon
+(redundant with adjacent text) in @<span aria-hidden="true">...</span>@; expose a
+meaningful standalone icon with @role="img"@ and an @aria-label@ (or give the SVG
+a @<title>@); an icon that is the sole content of a link or button should instead
+carry the accessible name on that control via its own @aria-label@. When using
+@<field>Href@ as an @<img src>@ instead, set @alt=""@ for a decorative icon or a
+descriptive @alt@.
 -}
 module Cozyll.Context.Data (
     dataContext,
@@ -170,6 +190,10 @@ iconName = \case
 data IconVariant = Href | Raw
     deriving (Eq, Show)
 
+{- | Classify a derived icon field name: @(base, Href)@ for @<base>Href@,
+@(base, Raw)@ for @<base>Raw@, and 'Nothing' for anything else. The @base@
+must itself contain @icon@.
+-}
 iconVariant :: String -> Maybe (String, IconVariant)
 iconVariant key =
     case stripSuffix "Href" key of

@@ -7,6 +7,16 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 
+## [3.1.0.1] - 2026-11-07
+
+### Added
+
+- ADRs
+
+### Changed
+
+- Documentation changes (updates to reflect real state)
+
 ## [3.1.0.0] - 2026-11-06
 
 ### Changed
@@ -304,7 +314,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.0...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.1...master
+[3.1.0.1]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.0...v3.1,0,1
 [3.1.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.2...v3.1.0.0
 [3.0.0.2]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.1...v3.0.0.2
 [3.0.0.1]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.0...v3.0.0.1

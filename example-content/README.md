@@ -12,10 +12,12 @@ purposes:
 Structure
 -------------------------------------------------------------------------------
 
-- `website.yaml` — site identity, contact, manifest, highlight, feed, robots,
-  security, trust, and funding. Neutral values.
+- `website.yaml` — site identity, contact, manifest, mathjax, highlight, feed,
+  robots, security, trust, and funding. Neutral values.
 - `socials.yaml` — example accounts exercising the `_show` flag (opt-out) and
   icon inlining.
+- `authors.yaml` — neutral example authors (one `siteDefault: true`).
+- `localization.yaml` — UI strings for the example site's language.
 - `data/` — YAML data files exposed to templates. `groups.yaml` is a list of
   the post groups (looped with `$for(groups)$`) with a schema and icons;
   `features.yaml` is a list of demonstrated features; `meta.yaml` is a map read

@@ -1,23 +1,19 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/MathiasSM/Cozyll/master/schema/socials.schema.json
 # Example social accounts. A content repo needs a proper socials.yaml.
 #
-# One account per list item. Each item links to an account and opts into where
-# it is shown:
+# One account per list item:
 #   icon        Icon under content/media/icons/social/, without the .svg extension.
 #   href        URL the account links to.
 #   username    Handle shown on the link.
-#   showContact Whether to show the account in the contact section (default: false).
-#   showAbout   Whether to show the account on the home page (default: false).
+#   _show       Whether to show the account (default: true; _show: false hides it).
 
-# A GitHub account, shown in both the contact section and the home page.
+# A GitHub account, shown in the social links.
 - icon: github
   href: https://github.com/example
   username: example
-  showContact: true
-  showAbout: true
 
-# A Twitter/X account, shown only in the contact section (showAbout stays false).
+# A Twitter/X account, hidden with _show: false.
 - icon: twitter
   href: https://x.com/example
   username: "@example"
-  showContact: true
+  _show: false
