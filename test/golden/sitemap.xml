@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset
   xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-  xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
-  xmlns:xhtml="http://www.w3.org/1999/xhtml"
-  xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
-  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-  xmlns:video="http://www.google.com/schemas/sitemap-video/1.1"
 >
 
   <url>
@@ -16,6 +11,7 @@
 
   <url>
     <loc>https://example.com/code</loc>
+    <lastmod>2024-04-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -34,24 +30,28 @@
 
   <url>
     <loc>https://example.com/elements</loc>
+    <lastmod>2024-06-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://example.com</loc>
+    <lastmod>2024-06-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
     <loc>https://example.com/languages</loc>
+    <lastmod>2024-05-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://example.com/prose</loc>
+    <lastmod>2024-02-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -64,6 +64,7 @@
 
   <url>
     <loc>https://example.com/tables</loc>
+    <lastmod>2024-03-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -210,12 +211,14 @@
 
   <url>
     <loc>https://example.com/authors/example</loc>
+    <lastmod>2024-06-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://example.com/authors/example-org</loc>
+    <lastmod>2024-02-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
