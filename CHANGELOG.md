@@ -7,6 +7,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 
+## [3.1.0.0] - 2026-11-06
+
 ### Changed
 
 - Icons are neutral SVG graphics; templates now set each inline icon's
@@ -17,6 +19,11 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   pointing at the item title's slug `id` (posts: the hyphenated `path:` front
   matter, e.g. `blog-el-garson`; projects: the project file name), so each link's
   accessible name is the title only.
+- Adjusted the color palette to meet WCAG 2.2 AA contrast ratios.
+
+### Fixed
+
+- `sitemap.xml` now computes a `<lastmod>` for group index pages.
 
 ## [3.0.0.2] - 2026-11-02
 
@@ -297,7 +304,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.2...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.0...master
+[3.1.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.2...v3.1.0.0
 [3.0.0.2]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.1...v3.0.0.2
 [3.0.0.1]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.0...v3.0.0.1
 [3.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v2.0.0.0...v3.0.0.0
