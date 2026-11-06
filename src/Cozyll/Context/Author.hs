@@ -1,4 +1,43 @@
--- | Author resolution and the per-post author context
+{- | Author resolution and the author contexts.
+
+== Resolution
+
+A post's @author:@ is an id (or list of ids) from @authors.yaml@; without it the
+post falls back to the site-default author. Unknown ids are dropped and
+duplicates are de-duplicated.
+
+== Template fields
+
+@$for(author)$@ exposes each resolved author with:
+
+  [@$id$@] the author id.
+  [@$name$@] the full name.
+  [@$displayName$@] the shorter display name (falls back to @$name$@).
+  [@$path$@] @/authors/<id>@.
+  [@$url$@] the absolute profile URL.
+  [@$description$@] the bio (@""@ when absent).
+  [@$profileImage$@] the absolute image URL (@""@ when absent).
+  [@$type$@] @person@ or @organization@.
+  [@$for(links)$@] the profile links, with @$url$@ per link.
+
+Posts also get @$postCopyright$@ (whether any author opted in),
+@$postCopyrightYears$@, and @$postCopyrightHolders$@ (each with @$name$@),
+driven by @addCopyrightNotice@ (a @© <authors> <years>@ line at the end of the
+post, years from @date@ to @lastModifiedAt@, not shown in lists or feeds).
+
+An author's page ('authorPageContext') exposes @$title$@, @$path$@, @$name$@,
+@$displayName$@, @$url$@, @$type$@, @$profileImage$@, @$description$@ (only when
+set), and @$links$@.
+
+== Author pages
+
+Every author gets a profile page at @/authors/<id>@ (included in
+@sitemap.xml@) showing their display name (or name), description, profile
+image, links, and every post they authored; a post without @author:@ counts for
+the site-default author. The canonical URL and @og:url@ are
+@https://<domain>/authors/<id>@, and @og:image@ is the profile image when one is
+set.
+-}
 module Cozyll.Context.Author (
     resolveAuthors,
     authorItemContext,

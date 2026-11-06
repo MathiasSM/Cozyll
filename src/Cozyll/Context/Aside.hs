@@ -1,4 +1,22 @@
--- | Per-page aside: the labeled controls (toggles) and the table of contents
+{- | Per-page aside: the labeled controls (toggles) and the table of contents.
+
+A control is a checkbox in a page's aside that toggles a CSS class on @<html>@
+(for example @no-images@), so elements can be shown or hidden by class.
+
+The pieces of a control:
+
+  * a front-matter key whose value is the control's label;
+  * a @Cozyll.Metadata.Key@ constructor and its @keyName@ case;
+  * membership in @controlKeys@;
+  * a @toggleLabelField <Key> "<name>ToggleLabel"@ line in 'asideContext' (the
+      label is rendered from inline markdown);
+  * the @controls--<name>-toggle.html@ partial, and a gated @<li>@ in
+      @site-aside.html@ wired through the shared @[data-toggle-class]@ script;
+  * the CSS rule that hides elements while the class is set.
+
+'hasAnyControl' and 'hasAside' gate whether the aside renders at all. The
+step-by-step recipe lives in @CONTRIBUTING.md@ ("Adding a control (toggle)").
+-}
 module Cozyll.Context.Aside (
     asideContext,
     hasAnyControl,

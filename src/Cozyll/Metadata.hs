@@ -1,4 +1,7 @@
--- | Front-matter keys the site knows about, and how they are spelled
+{- | Front-matter keys the site knows about, and how they are spelled.
+This is the canonical reference for the front-matter keys; the README's
+*Frontmatter* section points here.
+-}
 module Cozyll.Metadata (
     Key (..),
     keyName,
@@ -28,19 +31,31 @@ data Key
       Aliases
     | -- | A short description, used for the feed and page metadata.
       Description
-    | -- | Overrides 'Description' in social metadata (open graph and JSON-LD).
+    | -- | Overrides 'Description' in social metadata (Open Graph and JSON-LD); falls back to 'Description' when unset.
       ShareDescription
-    | -- | Overrides 'Title' in social metadata (open graph and JSON-LD).
+    | -- | Overrides 'Title' in social metadata (Open Graph and JSON-LD); falls back to 'Title' when unset.
       ShareTitle
     | -- | The post's author(s): an id (or list of ids) from @authors.yaml@.
       Author
-    | -- | The schema.org type of a standalone page (@WebPage@ by default).
+    | {- | The schema.org type of a standalone page (default @WebPage@). One of
+      @WebPage@, @AboutPage@, @ContactPage@, @CollectionPage@, or
+      @ProfilePage@; any other value fails the build. Ignored on posts
+      (always @BlogPosting@) and overridden on pages marked 'Home'
+      (@WebSite@) or 'Index' (@CollectionPage@). See
+      "Cozyll.Context.SocialMeta".
+      -}
       SchemaType
     | -- | An icon name, resolved to @images/icons/<name>.svg@.
       Icon
-    | -- | The item's language (@en@, @es@, or @ja@; defaults to @en@).
+    | {- | The item's language: a 2-letter ISO 639-1 code with an optional
+      region (@en@, @pt-BR@); defaults to @en@. Lookup falls back from
+      @xx-YY@ to @xx@. See "Cozyll.Domain.Language" and
+      "Cozyll.Localization".
+      -}
       Language
-    | -- | Marks an item as a draft: the page we be built only if @SITE_ENV=dev@, hidden otherwise.
+    | {- | Marks an item as a draft: the page is built only if @SITE_ENV=dev@,
+      hidden otherwise.
+      -}
       Draft
     | -- | The post group an item belongs to (otherwise its folder under @writings/@).
       Group

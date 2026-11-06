@@ -1,4 +1,34 @@
--- | Open Graph and JSON-LD metadata for posts, the home page, and standalone pages
+{- | Open Graph and JSON-LD metadata for posts, the home page, standalone pages,
+group indexes, and author pages.
+
+The keys themselves are documented in "Cozyll.Metadata"; this module defines how
+they are emitted.
+
+  [@shareTitle@ / @shareDescription@] override the social title and description,
+      which otherwise fall back to @title@ and @description@.
+  [@#main-image@] on an image (@![alt](src){#main-image}@) marks it as the Open
+      Graph and JSON-LD image, and its URL is resolved to an absolute one. It is
+      a Pandoc image attribute, not a @Cozyll.Metadata.Key@; 'mainImageOf'
+      resolves it.
+  [@schemaType@] selects a standalone page's schema.org type (see
+      "Cozyll.Metadata" for the allowed values). It is ignored on posts (always
+      @BlogPosting@) and overridden on pages marked @home: true@ (always
+      @WebSite@) or @index: true@ (always @CollectionPage@).
+
+The JSON-LD is a schema.org @\@graph@ with stable @\@id@s: the home page carries
+the @WebSite@ entity (@#website@), the site's @Organization@ (@#organization@),
+and the site-default author; posts are @BlogPosting@ nodes (@<page>#article@)
+whose @author@ entries are the post's authors, credited by profile URL;
+standalone pages are the page's @schemaType@, linked to the site via
+@isPartOf@. Group index pages are @CollectionPage@ nodes whose @mainEntity@ is
+an @ItemList@ mirroring the visible list (the showcase has no @ItemList@).
+Author pages are @ProfilePage@ nodes with the author's entity as @mainEntity@
+and @hasPart@ listing their posts (when the author has any). Author entities
+live at @https://<domain>/authors/<id>#person@ (@#organization@ for
+organizations). Articles also emit @article:author@ and their published and
+modified timestamps, and an opted-in post carries @copyrightNotice@ and
+@copyrightHolder@.
+-}
 module Cozyll.Context.SocialMeta (
     PageKind (..),
     MainImage (..),

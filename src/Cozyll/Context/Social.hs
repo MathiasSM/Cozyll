@@ -1,4 +1,9 @@
--- | The socials data file, as the lists read by the social templates
+{- | The socials data file, as the lists read by the social templates.
+
+The @socials@ list exposes @$iconHref$@ (@images/icons/social/<icon>.svg@),
+@$iconRaw$@ (the inlined SVG), @$href$@, and @$username$@. Accounts with
+@_show: false@ are filtered out before the list reaches the templates.
+-}
 module Cozyll.Context.Social (socialMediaContext) where
 
 import Cozyll.Config (SiteConfig, mediaDir, socialsFile)

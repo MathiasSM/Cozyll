@@ -1,4 +1,32 @@
--- | Authors, as read from @authors.yaml@ in the content repo
+{- | Authors, read from @authors.yaml@ (a required content file).
+
+== Schema
+
+@authors.yaml@ is a map keyed by author id (the slug used in @author:@ front
+matter). Each author supports:
+
+  [@name@] the full name (required, non-empty).
+  [@type@] @person@ (default) or @organization@.
+  [@siteDefault: true@] marks the site's default author; exactly one author
+      must set it. Posts without @author:@ fall back to this author.
+  [@displayName@] a shorter name for the DOM (bylines, author page heading).
+  [@description@] a short bio.
+  [@profileImage@] a site-relative path to the author's image.
+  [@links@] a list of profile URLs.
+  [@addCopyrightNotice: true@] opt into a per-post copyright notice (a
+      @© <authors> <years>@ line at the end of the post, years from @date@ to
+      @lastModifiedAt@; not shown in lists or feeds).
+
+Any other scalar field is accepted and stored in @authorExtra@ but is NOT
+exposed to templates yet. TODO: expose @authorExtra@ in "Cozyll.Context.Author"
+(both @authorItemContext@ and @authorPageContext@).
+
+Posts resolve their authors from @author:@ (an id or list of ids), falling back
+to the site-default author; see "Cozyll.Context.Author". Every author gets a
+profile page at @/authors/<id>@; see "Cozyll.Rules.AuthorPages".
+
+See also @schema/authors.schema.json@.
+-}
 module Cozyll.Domain.Author (
     Author (..),
     AuthorType (..),
@@ -39,9 +67,13 @@ data Author = Author
     , authorLinks :: [String]
     , authorAddCopyrightNotice :: Bool
     , authorExtra :: [(String, String)]
-    -- ^ Scalar extra fields, for the DOM
+    {- ^ Scalar extra fields, parsed but not yet exposed to templates
+    (TODO: expose them in "Cozyll.Context.Author")
+    -}
     , authorRaw :: Object
-    -- ^ The whole object, for JSON-LD passthrough
+    {- ^ The whole object as written. Reserved for a future JSON-LD passthrough;
+    nothing reads it today.
+    -}
     }
     deriving (Eq, Show)
 

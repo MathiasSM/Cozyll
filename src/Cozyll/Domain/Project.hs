@@ -1,4 +1,23 @@
--- | A showcase project, as read from a project YAML file
+{- | A showcase project, read from one YAML file under @content/projects/@.
+
+== Schema
+
+  [@title@] the project's name (required).
+  [@href@] link to the project (required).
+  [@status@] one of @alpha@, @finished@, @ongoing@, @unmaintained@ (required).
+  [@startDate@] @YYYY-MM-DD@ (required).
+  [@endDate@] @YYYY-MM-DD@ (optional; must not precede @startDate@).
+  [@shortDescription@] one-line summary (required).
+  [@longDescription@] longer prose (required).
+  [@team@] list of people (optional, defaults to @[]@).
+  [@priority@] integer sort key, lower first (optional; unset sorts last).
+
+Showcase order is @(priority, startDate descending)@; see
+@Cozyll.Content.showcaseKey@.
+
+@projectTeam@ is parsed and validated but is not exposed to templates yet.
+TODO: expose it in "Cozyll.Context.Project".
+-}
 module Cozyll.Domain.Project (
     Status (..),
     statusName,
