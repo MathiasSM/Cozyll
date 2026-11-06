@@ -1,10 +1,10 @@
 <ol class="main-list">
     $for(posts)$
         <li>
-            <a href="$url$">
+            <a href="$url$" aria-labelledby="$slug$">
                 <article>
                     <header lang="$language$">
-                        <h2>$title$</h2>
+                        <h2 id="$slug$">$title$</h2>
                         $partial("templates/post-date.html")$
                     </header>
                     $if(description)$<div>$description$</div>$endif$

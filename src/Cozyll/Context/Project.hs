@@ -5,7 +5,8 @@ import Cozyll.Config (SiteConfig)
 import Cozyll.Context.Language (languageContext)
 import Cozyll.Domain.Project (Project (..), statusName)
 import Cozyll.Localization (translationsContext)
-import Hakyll (Context, Item (itemBody), field, noResult)
+import Hakyll (Context, Item (itemBody, itemIdentifier), field, noResult, toFilePath)
+import System.FilePath.Posix (takeBaseName)
 
 -- | A showcase project's fields, as read by the project templates
 projectContext :: SiteConfig -> Context Project
@@ -20,6 +21,7 @@ projectContext cfg =
         , projectField "longDescription" projectLongDescription
         , languageContext
         , translationsContext cfg
+        , field "slug" (return . takeBaseName . toFilePath . itemIdentifier)
         ]
   where
     projectField name get = field name (return . get . itemBody)

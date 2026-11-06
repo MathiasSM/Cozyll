@@ -13,6 +13,10 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   accessibility (decorative icons wrapped in `aria-hidden="true"`, meaningful
   icons via `role="img"` + `aria-label` or a `<title>`), and the build fails
   when an inline SVG is neither hidden nor named.
+- Group index, author, and showcase list-item links now carry `aria-labelledby`
+  pointing at the item title's slug `id` (posts: the hyphenated `path:` front
+  matter, e.g. `blog-el-garson`; projects: the project file name), so each link's
+  accessible name is the title only.
 
 ## [3.0.0.2] - 2026-11-02
 
