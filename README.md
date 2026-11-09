@@ -147,6 +147,34 @@ Configured via Github Actions within `.github` directory.
 
 This project "deploys" as a release, via the CI workflow. Content repos can pull their preferred release (ideally latest, I suppose) and execute it against their files. The release includes both the executable (not statically linked as of writing), as well as templates and assets.
 
+#### Consumer CI
+
+Content repos can also reuse a ready-made workflow instead of hand-writing one. Add this to
+`.github/workflows/ci.yml` in the content repo:
+
+```yaml
+name: Site CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  site:
+    uses: MathiasSM/Cozyll/.github/workflows/site-ci.yml@master
+    with:
+      cozyll-version: latest
+      site-domain: example.com
+```
+
+The workflow checks the content repo out under `content/`, installs the kit release, builds the
+site, and runs the enabled checks (content schema, HTML, accessibility, JSON-LD, well-known files,
+XML). External links and spelling checks are opt-in. See
+[docs/consumer-ci.md](docs/consumer-ci.md) for the full input list, the individual composite
+actions, and migration notes. Pin an exact release tag instead of `@master` for stability.
+
 ---
 
 
