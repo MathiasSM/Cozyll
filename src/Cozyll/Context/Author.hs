@@ -26,8 +26,8 @@ driven by @addCopyrightNotice@ (a @© <authors> <years>@ line at the end of the
 post, years from @date@ to @lastModifiedAt@, not shown in lists or feeds).
 
 An author's page ('authorPageContext') exposes @$title$@, @$path$@, @$name$@,
-@$displayName$@, @$url$@, @$type$@, @$profileImage$@, @$description$@ (only when
-set), and @$links$@.
+@$displayName$@, @$url$@, @$type$@, @$links$@, and @$profileImage$@ and
+@$description$@ (each only when set).
 
 == Author pages
 
@@ -169,7 +169,10 @@ authorPageContext cfg author =
         <> constField "displayName" displayName
         <> constField "url" (authorUrl cfg author)
         <> constField "type" (authorTypeName (authorType author))
-        <> constField "profileImage" (maybe "" (absoluteImageUrl cfg) (authorProfileImage author))
+        <> maybe
+            mempty
+            (constField "profileImage" . absoluteImageUrl cfg)
+            (authorProfileImage author)
         <> maybe mempty (constField "description") (authorDescription author)
         <> listField "links" linkItemContext (return (map linkItem (authorLinks author)))
   where
