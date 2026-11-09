@@ -1,4 +1,5 @@
 # Consumer-facing composite action: validate content YAML against the Cozyll schemas.
+# Requires pipx; uses check-jsonschema against the shipped `*.schema.json` files.
 name: check-content-schema
 description: Validate website.yaml, authors.yaml and socials.yaml against the shipped JSON schemas.
 inputs:
@@ -16,16 +17,6 @@ runs:
     - name: Validate content files
       shell: bash
       run: |
-        set -euo pipefail
-        for pair in website:website.yaml authors:authors.yaml socials:socials.yaml; do
-          schema="${pair%%:*}"
-          file="${pair##*:}"
-          if [ -f "${{ inputs.content-dir }}/$file" ]; then
-            echo "validating $file against $schema.schema.json"
-            pipx run check-jsonschema \
-              --schemafile "${{ inputs.schema-dir }}/$schema.schema.json" \
-              "${{ inputs.content-dir }}/$file"
-          else
-            echo "skipping missing ${{ inputs.content-dir }}/$file"
-          fi
-        done
+        bash "${{ github.action_path }}/../../../scripts/check-site.sh" content-schema \
+          --content-dir "${{ inputs.content-dir }}" \
+          --schema-dir "${{ inputs.schema-dir }}"

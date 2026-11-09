@@ -39,6 +39,17 @@ enabled checks. Add your own `deploy` job after `site` if you publish to GitHub 
 Use `@master` for the tip, or pin an exact release tag (the release workflow tags each version, for
 example `v3.1.0.1`) so the workflow does not change under you.
 
+## Local checks
+
+Build the site, then run the default set:
+
+```sh
+cozyll build
+scripts/check-site.sh all --content-dir content --site-dir _site --schema-dir schema
+```
+
+The script is included next to `cozyll` in the release kit. Run `scripts/check-site.sh --help` for
+the available checks and their tool requirements.
 ## Migrating from a hand-written workflow
 
 - Remove the Lighthouse step. Cozyll no longer recommends it; accessibility is covered by

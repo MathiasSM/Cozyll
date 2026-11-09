@@ -1,4 +1,5 @@
 # Consumer-facing composite action: validate that generated XML is well formed.
+# Requires xmllint (libxml2-utils).
 name: check-xml
 description: Validate that generated XML files (feeds, sitemap) are well formed.
 inputs:
@@ -15,10 +16,5 @@ runs:
     - name: Check XML
       shell: bash
       run: |
-        set -euo pipefail
-        mapfile -t files < <(find "${{ inputs.site-dir }}" -type f -name '*.xml')
-        if [ "${#files[@]}" -eq 0 ]; then
-          echo "no XML files found"
-          exit 0
-        fi
-        xmllint --noout "${files[@]}"
+        bash "${{ github.action_path }}/../../../scripts/check-site.sh" xml \
+          --site-dir "${{ inputs.site-dir }}"

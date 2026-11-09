@@ -23,6 +23,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Reusable `check-wellknown` action, which validates security.txt, funding.json, manifest, robots, trust and sitemap.
 - Reusable `check-spelling` action, which runs typos (advisory, and not a hard gate for mixed-language content).
 - Reusable `site-ci.yml` workflow, which builds a content repo and runs the enabled checks.
+- Added `scripts/check-site.sh`, a local runner for the same checks, also shipped in the kit.
 
 ### Changed
 
