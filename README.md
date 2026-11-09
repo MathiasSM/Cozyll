@@ -174,6 +174,9 @@ site, and runs the enabled checks. See [docs/consumer-ci.md](docs/consumer-ci.md
 setup and migration notes; each composite action documents its own inputs and requirements in its
 `action.yml`. Pin an exact release tag instead of `@master` for stability.
 
+The checks can also be run locally with `scripts/check-site.sh`, which ships in the release kit.
+Run `scripts/check-site.sh --help` for the available checks and their tool requirements.
+
 ---
 
 

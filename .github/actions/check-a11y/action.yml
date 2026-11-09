@@ -1,4 +1,6 @@
 # Consumer-facing composite action: accessibility audit with pa11y-ci.
+# Requires Python 3, npx and Chrome; uses `chromeLaunchConfig --no-sandbox` on CI runners.
+# Advisory in site-ci.yml and the dogfood.
 name: check-a11y
 description: Audit the built site for accessibility with pa11y-ci using the axe runner.
 inputs:
@@ -20,37 +22,7 @@ runs:
     - name: Serve and audit
       shell: bash
       run: |
-        set -euo pipefail
-        site="${{ inputs.site-dir }}"
-        port="${{ inputs.port }}"
-        python3 -m http.server "$port" --directory "$site" >/dev/null 2>&1 &
-        pid=$!
-        trap 'kill "$pid" 2>/dev/null || true' EXIT
-        for _ in $(seq 1 20); do
-          curl -fsS -o /dev/null "http://localhost:$port/" && break
-          sleep 0.5
-        done
-        python3 - "$site" "$port" "${{ inputs.standard }}" > "$RUNNER_TEMP/pa11y.json" <<'PY'
-        import json, pathlib, sys
-        root = pathlib.Path(sys.argv[1])
-        port = sys.argv[2]
-        standard = sys.argv[3]
-        urls = []
-        for page in sorted(root.rglob("*.html")):
-            rel = page.relative_to(root).as_posix()
-            if rel.endswith("index.html"):
-                rel = rel[: -len("index.html")]
-            urls.append(f"http://localhost:{port}/{rel}")
-        json.dump(
-            {
-                "defaults": {
-                    "standard": standard,
-                    "runners": ["axe"],
-                    "chromeLaunchConfig": {"args": ["--no-sandbox"]},
-                },
-                "urls": urls,
-            },
-            sys.stdout,
-        )
-        PY
-        npx --yes pa11y-ci --config "$RUNNER_TEMP/pa11y.json"
+        bash "${{ github.action_path }}/../../../scripts/check-site.sh" a11y \
+          --site-dir "${{ inputs.site-dir }}" \
+          --port "${{ inputs.port }}" \
+          --standard "${{ inputs.standard }}"

@@ -1,4 +1,5 @@
 # Consumer-facing composite action: validate generated well-known and metadata files.
+# Requires Python 3; checks robots.txt, manifest, funding.json, sitemap, security.txt and trust.txt.
 name: check-wellknown
 description: Validate generated security.txt, funding.json, manifest, robots, trust and sitemap files.
 inputs:
@@ -12,42 +13,5 @@ runs:
     - name: Check well-known files
       shell: bash
       run: |
-        set -euo pipefail
-        d="${{ inputs.site-dir }}"
-        fail=0
-        require_file() {
-          if [ ! -f "$d/$1" ]; then
-            echo "missing $d/$1"
-            fail=1
-          fi
-        }
-        for f in robots.txt manifest.webmanifest funding.json sitemap.xml .well-known/security.txt .well-known/trust.txt; do
-          require_file "$f"
-        done
-        if [ "$fail" -ne 0 ]; then
-          exit 1
-        fi
-        grep -qi '^Contact:' "$d/.well-known/security.txt" || { echo "security.txt missing Contact"; exit 1; }
-        exp="$(grep -i '^Expires:' "$d/.well-known/security.txt" | head -1 | cut -d: -f2- | xargs)"
-        python3 - "$exp" <<'PY'
-        import sys
-        from datetime import datetime, timezone
-        raw = sys.argv[1].strip()
-        if not raw:
-            print("security.txt missing Expires")
-            sys.exit(1)
-        try:
-            when = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-        except ValueError as exc:
-            print(f"security.txt Expires is not ISO 8601: {raw} ({exc})")
-            sys.exit(1)
-        if when <= datetime.now(timezone.utc):
-            print(f"security.txt Expires is in the past: {raw}")
-            sys.exit(1)
-        PY
-        python3 - "$d/manifest.webmanifest" "$d/funding.json" <<'PY'
-        import json, sys
-        for path in sys.argv[1:]:
-            with open(path, encoding="utf-8") as fh:
-                json.load(fh)
-        PY
+        bash "${{ github.action_path }}/../../../scripts/check-site.sh" wellknown \
+          --site-dir "${{ inputs.site-dir }}"

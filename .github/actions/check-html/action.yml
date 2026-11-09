@@ -1,4 +1,5 @@
 # Consumer-facing composite action: validate generated markup with the W3C Nu checker.
+# Requires Java; downloads vnu.jar (sha1-verified) to the temp dir.
 name: check-html
 description: Validate generated HTML, CSS and SVG with the W3C Nu checker.
 inputs:
@@ -14,17 +15,8 @@ runs:
       with:
         distribution: temurin
         java-version: "17"
-    - name: Download vnu
-      shell: bash
-      run: |
-        set -euo pipefail
-        curl -fsSL -o "$RUNNER_TEMP/vnu.jar" https://github.com/validator/validator/releases/latest/download/vnu.jar
-        curl -fsSL -o "$RUNNER_TEMP/vnu.jar.sha1" https://github.com/validator/validator/releases/latest/download/vnu.jar.sha1
-        ( cd "$RUNNER_TEMP" && sha1sum -c vnu.jar.sha1 )
     - name: Validate
       shell: bash
       run: |
-        set -euo pipefail
-        java -jar "$RUNNER_TEMP/vnu.jar" \
-          --skip-non-html --also-check-css --also-check-svg --errors-only \
-          "${{ inputs.site-dir }}"
+        bash "${{ github.action_path }}/../../../scripts/check-site.sh" html \
+          --site-dir "${{ inputs.site-dir }}"
