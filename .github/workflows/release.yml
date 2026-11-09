@@ -1,10 +1,13 @@
 # Release the site generator: on a version bump, tag it, publish a versioned
 # GitHub release (marked latest) and a Hackage candidate, and deploy the docs.
+# Dispatch manually to dry-run the kit build and smoke test without tagging or
+# publishing.
 name: Release
 
 on:
   push:
     branches: [master]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -30,6 +33,7 @@ jobs:
 
       - name: Create tag if the version was bumped
         id: tag
+        if: github.event_name != 'workflow_dispatch'
         run: |
           git fetch --tags --force
           VERSION="$(grep '^version:' cozyll.cabal | awk '{print $2}')"
@@ -49,16 +53,16 @@ jobs:
 
   build:
     needs: autotag
-    if: needs.autotag.outputs.created == 'true'
+    if: needs.autotag.outputs.created == 'true' || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/_build-test.yml
     with:
       ghc-version: ${{ vars.GHC_VERSION }}
       cabal-version: ${{ vars.CABAL_VERSION }}
 
   versioned:
-    name: Publish versioned GitHub release
+    name: Versioned release
     needs: [build, autotag]
-    if: needs.autotag.outputs.created == 'true'
+    if: needs.autotag.outputs.created == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -85,7 +89,32 @@ jobs:
           tar -czf cozyll-kit.tar.gz -C kit .
           sha256sum cozyll-kit.tar.gz > cozyll-kit.tar.gz.sha256
 
+      - name: Smoke-test the kit
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+          mkdir -p smoke
+          tar -xzf cozyll-kit.tar.gz -C smoke
+          cp -r example-content smoke/example-content
+          ( cd smoke && SITE_ENV=example ./cozyll build -v && SITE_ENV=example ./cozyll check )
+
+      - uses: ./.github/actions/check-html
+        with:
+          site-dir: smoke/_site
+      - uses: ./.github/actions/check-a11y
+        continue-on-error: true
+        with:
+          site-dir: smoke/_site
+      - uses: ./.github/actions/check-jsonld
+        with:
+          site-dir: smoke/_site
+      - uses: ./.github/actions/check-xml
+        with:
+          site-dir: smoke/_site
+
       - name: Publish versioned release
+        if: github.event_name != 'workflow_dispatch'
         uses: step-security/action-gh-release@44319d37c8b7966bf07f89f0cbf63408141446df # v3.0.3
         with:
           tag_name: ${{ needs.autotag.outputs.name }}

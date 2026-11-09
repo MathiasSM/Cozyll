@@ -27,6 +27,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 ### Changed
 
 - Release kit now bundles `schema/*.schema.json` (editor hints and consumer schema validation).
+- Release kits are smoke-tested (example build plus checks) before publishing.
 
 ## [3.1.0.1] - 2026-11-07
 
