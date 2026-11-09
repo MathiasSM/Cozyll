@@ -141,7 +141,7 @@
 
 /* projects *******************************************************************/
 a.project::after { content: none;}
-.project { 
+.project {
   .status {
     float:inline-end;
     font-size: 1.2em; /* Given the color, this is needed for WCAG AA */
@@ -152,7 +152,7 @@ a.project::after { content: none;}
   .status::before {content:'['}
   .status::after {content:']'}
 
-  &:hover { 
+  &:hover {
     .status {color:var(--color-accent)}
   }
 }

@@ -63,11 +63,11 @@ body:
     attributes:
       label: Technical details
       description: |
-        If you're able to, provide a high-level approach to implementing this change. It doesn't need to be perfect, and it can be simply a "I think it would involve X and Y changes". 
+        If you're able to, provide a high-level approach to implementing this change. It doesn't need to be perfect, and it can be simply a "I think it would involve X and Y changes".
 
         What modules do you expect it to touch? Does it require new ones? Try to not over-engineer your solution.
       placeholder: A change in X would likely be enough, although we might need...
-  
+
   - type: checkboxes
     id: contribute
     attributes:
@@ -85,4 +85,3 @@ body:
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true
-

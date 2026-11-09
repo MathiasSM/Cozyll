@@ -7,7 +7,7 @@ updates:
       interval: "daily"
     groups:
       # Codeql has different actions that need to run with the same version.
-      # Otherwise, CI fails. 
+      # Otherwise, CI fails.
       codeql-action:
         patterns:
           - "github/codeql-action/*"

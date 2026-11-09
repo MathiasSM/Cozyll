@@ -32,7 +32,7 @@ The deepest level.
 
 ## Paragraphs and line breaks
 
-A paragraph is a run of text. A line break is forced with two trailing spaces.  
+A paragraph is a run of text. A line break is forced with two trailing spaces.
 Like this one.
 
 ## Emphasis

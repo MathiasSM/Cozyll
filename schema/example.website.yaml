@@ -34,7 +34,7 @@ mathjax:
 highlight:
   style: pygments
 
-# atom feed 
+# atom feed
 feed:
   size: 20
 
