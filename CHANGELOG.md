@@ -11,6 +11,10 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 - Author pages omit the profile image when an author has no image, instead of rendering an `img` with an empty `src`.
 
+### Added
+
+- Reusable `setup-cozyll` action, which installs the kit from a release or a local tarball.
+
 ### Changed
 
 - Release kit now bundles `schema/*.schema.json` (editor hints and consumer schema validation).

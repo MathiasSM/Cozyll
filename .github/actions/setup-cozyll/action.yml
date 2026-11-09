@@ -1,0 +1,48 @@
+# Consumer-facing composite action: install the Cozyll kit.
+name: setup-cozyll
+description: Install the Cozyll kit (from a release or a local tarball) and put cozyll on PATH.
+inputs:
+  version:
+    description: Release tag (for example v3.1.0.1) or "latest". Ignored when kit-tarball is set.
+    required: false
+    default: latest
+  kit-tarball:
+    description: Local path to a cozyll-kit.tar.gz. When set, no download or checksum is done.
+    required: false
+    default: ""
+  install-imagemagick:
+    description: Install ImageMagick, which is needed to build the site.
+    required: false
+    default: "true"
+outputs:
+  kit-dir:
+    description: Directory the kit was extracted into.
+    value: ${{ steps.kit.outputs.dir }}
+runs:
+  using: composite
+  steps:
+    - name: Fetch and unpack the kit
+      id: kit
+      shell: bash
+      run: |
+        set -euo pipefail
+        tb="${{ inputs.kit-tarball }}"
+        if [ -z "$tb" ]; then
+          if [ "${{ inputs.version }}" = "latest" ]; then
+            base="https://github.com/MathiasSM/Cozyll/releases/latest/download"
+          else
+            base="https://github.com/MathiasSM/Cozyll/releases/download/${{ inputs.version }}"
+          fi
+          curl -fsSL -o "$RUNNER_TEMP/cozyll-kit.tar.gz" "$base/cozyll-kit.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/cozyll-kit.tar.gz.sha256" "$base/cozyll-kit.tar.gz.sha256"
+          ( cd "$RUNNER_TEMP" && sha256sum -c cozyll-kit.tar.gz.sha256 )
+          tb="$RUNNER_TEMP/cozyll-kit.tar.gz"
+        fi
+        tar -xzf "$tb" -C "$GITHUB_WORKSPACE"
+        chmod +x "$GITHUB_WORKSPACE/cozyll"
+        echo "$GITHUB_WORKSPACE" >> "$GITHUB_PATH"
+        echo "dir=$GITHUB_WORKSPACE" >> "$GITHUB_OUTPUT"
+    - name: Install ImageMagick
+      if: inputs.install-imagemagick == 'true'
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y imagemagick
