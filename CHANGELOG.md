@@ -11,6 +11,10 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 - Author pages omit the profile image when an author has no image, instead of rendering an `img` with an empty `src`.
 
+### Changed
+
+- Release kit now bundles `schema/*.schema.json` (editor hints and consumer schema validation).
+
 ## [3.1.0.1] - 2026-11-07
 
 ### Added
