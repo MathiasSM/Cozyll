@@ -14,6 +14,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 ### Added
 
 - Reusable `setup-cozyll` action, which installs the kit from a release or a local tarball.
+- Reusable `check-content-schema` action, which validates content YAML against the shipped schemas.
 
 ### Changed
 
