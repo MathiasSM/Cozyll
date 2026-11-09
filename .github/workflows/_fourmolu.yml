@@ -1,3 +1,4 @@
+# Internal (not a consumer contract).
 # Reusable format job: checks Haskell sources are fourmolu-formatted.
 name: Format (reusable)
 

@@ -1,3 +1,4 @@
+# Internal (not a consumer contract).
 # Reusable lint job: runs HLint and uploads the result to GitHub code scanning.
 name: Lint (reusable)
 

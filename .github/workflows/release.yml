@@ -50,7 +50,7 @@ jobs:
   build:
     needs: autotag
     if: needs.autotag.outputs.created == 'true'
-    uses: ./.github/workflows/build-test.yml
+    uses: ./.github/workflows/_build-test.yml
     with:
       ghc-version: ${{ vars.GHC_VERSION }}
       cabal-version: ${{ vars.CABAL_VERSION }}
