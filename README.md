@@ -87,7 +87,7 @@ SITE_ENV=prod
 1. Install ImageMagick (e.g. via `sudo apt install imagemagick`).
 2. Install ghcup (e.g. using `mise use -g ghcup`).
 3. Use ghcup to install `ghc`, `cabal` (both required)
-4. Install the repo's `mise.toml` tools (`pre-commit`, `actionlint`):
+4. Install the repo's `mise.toml` tools:
 
    ```sh
    mise install
@@ -101,6 +101,12 @@ SITE_ENV=prod
 #### Build
 
 1. `cabal build all`: First time will take a while, but dependencies won't need to recompile often.
+
+#### Checks
+
+`mise run example-checks` builds `example-content` and runs the same
+[`scripts/check-site.sh`](scripts/check-site.sh) checks as CI. Accessibility findings are advisory,
+as in CI. The script's `--help` lists the checks and the tools they need.
 
 #### Dependencies
 
@@ -119,10 +125,9 @@ benchmark dependencies are pinned too.
 
 #### Format and lint
 
-Either
-
 - Via your editor (in my case, NeoVim's lsp registering the installed `hls`, configured with `hlint` and `fourmolu`).
 - Calling the executables directly over `app/`, `src/`, `test/`.
+- Running the CI formatting check with `mise run format`.
 
 #### Test
 

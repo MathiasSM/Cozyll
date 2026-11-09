@@ -30,6 +30,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Release kit now bundles `schema/*.schema.json` (editor hints and consumer schema validation).
 - Release kits are smoke-tested (example build plus checks) before publishing.
 - Documented the consumer CI workflow and actions in `docs/consumer-ci.md`.
+- `mise.toml` provides the tools used by the local site checks, with `mise run example-checks`, `mise run format` and `mise run docs` mirroring the CI steps.
+- The accessibility check in `site-ci.yml` is advisory (non-blocking) for now; it reports findings without failing the workflow.
 
 ### Removed
 

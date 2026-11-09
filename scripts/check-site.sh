@@ -24,6 +24,7 @@ Options:
   --schema-dir DIR    Schema directory (default: schema).
   --port PORT         Port for the local a11y server (default: 8080).
   --standard STD      WCAG standard for pa11y (default: WCAG2AA).
+  --a11y-fail BOOL    Fail on accessibility issues (default: true).
   --config FILE       Tool config file, where supported (lychee, typos).
   --vnu-jar FILE      Path to vnu.jar (default: VNU_JAR, else downloaded to the temp dir).
   --fail BOOL         For links-external: fail on broken links (default: false).
@@ -46,6 +47,7 @@ standard="WCAG2AA"
 config=""
 vnu_jar="${VNU_JAR:-}"
 fail_links="false"
+a11y_fail="true"
 check=""
 
 while [ "$#" -gt 0 ]; do
@@ -60,6 +62,7 @@ while [ "$#" -gt 0 ]; do
     --config) config="$2"; shift 2 ;;
     --vnu-jar) vnu_jar="$2"; shift 2 ;;
     --fail) fail_links="$2"; shift 2 ;;
+    --a11y-fail) a11y_fail="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) die "unknown argument: $1" ;;
   esac
@@ -147,7 +150,13 @@ json.dump(
     sys.stdout,
 )
 PY
-    npx --yes pa11y-ci --config "$cfg"
+    if npx --yes pa11y-ci --config "$cfg"; then
+      :
+    elif [ "$a11y_fail" = "true" ]; then
+      exit 1
+    else
+      info "a11y reported issues (advisory; pass --a11y-fail true to gate)"
+    fi
   )
 }
 

@@ -50,6 +50,7 @@ scripts/check-site.sh all --content-dir content --site-dir _site --schema-dir sc
 
 The script is included next to `cozyll` in the release kit. Run `scripts/check-site.sh --help` for
 the available checks and their tool requirements.
+
 ## Migrating from a hand-written workflow
 
 - Remove the Lighthouse step. Cozyll no longer recommends it; accessibility is covered by
