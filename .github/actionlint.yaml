@@ -1,0 +1,8 @@
+# actionlint 1.7.12 does not yet understand the GitHub self-repository action
+# reference ($/path/to/action). GitHub resolves it at the running commit, which
+# is what site-ci.yml needs for cross-repo reusable workflow calls. Ignore only
+# that diagnostic. Upstream: rhysd/actionlint#732.
+paths:
+  .github/workflows/site-ci.yml:
+    ignore:
+      - 'invalid format because ref is missing'

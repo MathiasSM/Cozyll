@@ -1,0 +1,239 @@
+# Consumer-facing reusable workflow: build a Cozyll content repo and run optional checks.
+name: Cozyll site CI
+
+on:
+  workflow_call:
+    inputs:
+      cozyll-version:
+        description: Kit release tag (for example v3.1.0.1) or "latest".
+        required: false
+        type: string
+        default: latest
+      site-domain:
+        description: Value for SITE_DOMAIN. Leave empty to use website.yaml.
+        required: false
+        type: string
+        default: ""
+      run-links-internal:
+        description: Run the internal link check (cozyll check).
+        required: false
+        type: boolean
+        default: true
+      run-content-schema:
+        description: Validate content YAML against the shipped schemas.
+        required: false
+        type: boolean
+        default: true
+      run-html:
+        description: Validate generated HTML, CSS and SVG.
+        required: false
+        type: boolean
+        default: true
+      run-a11y:
+        description: Run the accessibility audit.
+        required: false
+        type: boolean
+        default: true
+      run-jsonld:
+        description: Validate JSON-LD blocks.
+        required: false
+        type: boolean
+        default: true
+      run-wellknown:
+        description: Validate well-known and metadata files.
+        required: false
+        type: boolean
+        default: true
+      run-xml:
+        description: Validate generated XML well-formedness.
+        required: false
+        type: boolean
+        default: true
+      run-links-external:
+        description: Check external links with lychee.
+        required: false
+        type: boolean
+        default: false
+      run-spelling:
+        description: Run typos (advisory).
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (audit outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: content
+      - uses: $/.github/actions/setup-cozyll
+        with:
+          version: ${{ inputs.cozyll-version }}
+      - name: Build
+        env:
+          SITE_DOMAIN: ${{ inputs.site-domain }}
+        run: cozyll build -v
+      - name: Internal link check
+        if: inputs.run-links-internal
+        run: cozyll check
+      - name: Upload the built site
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site
+          path: _site
+
+  content-schema:
+    name: Content schema
+    if: inputs.run-content-schema
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (audit outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: content
+      - uses: $/.github/actions/setup-cozyll
+        with:
+          version: ${{ inputs.cozyll-version }}
+          install-imagemagick: "false"
+      - uses: $/.github/actions/check-content-schema
+        with:
+          content-dir: content
+          schema-dir: schema
+
+  html:
+    name: HTML
+    if: inputs.run-html
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (audit outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: _site
+      - uses: $/.github/actions/check-html
+        with:
+          site-dir: _site
+
+  a11y:
+    name: Accessibility
+    if: inputs.run-a11y
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (audit outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: _site
+      - uses: $/.github/actions/check-a11y
+        with:
+          site-dir: _site
+
+  jsonld:
+    name: JSON-LD
+    if: inputs.run-jsonld
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (audit outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: _site
+      - uses: $/.github/actions/check-jsonld
+        with:
+          site-dir: _site
+
+  wellknown:
+    name: Well-known files
+    if: inputs.run-wellknown
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (audit outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: _site
+      - uses: $/.github/actions/check-wellknown
+        with:
+          site-dir: _site
+
+  xml:
+    name: XML
+    if: inputs.run-xml
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (audit outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: _site
+      - uses: $/.github/actions/check-xml
+        with:
+          site-dir: _site
+
+  links-external:
+    name: External links
+    if: inputs.run-links-external
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (audit outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site
+          path: _site
+      - uses: $/.github/actions/check-links-external
+        with:
+          site-dir: _site
+          fail: "true"
+
+  spelling:
+    name: Spelling (advisory)
+    if: inputs.run-spelling
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Harden the runner (audit outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: content
+      - uses: $/.github/actions/check-spelling
+        with:
+          content-dir: content
