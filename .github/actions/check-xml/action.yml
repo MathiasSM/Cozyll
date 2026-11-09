@@ -1,0 +1,24 @@
+# Consumer-facing composite action: validate that generated XML is well formed.
+name: check-xml
+description: Validate that generated XML files (feeds, sitemap) are well formed.
+inputs:
+  site-dir:
+    description: Directory containing the built site.
+    required: false
+    default: _site
+runs:
+  using: composite
+  steps:
+    - name: Install xmllint
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+    - name: Check XML
+      shell: bash
+      run: |
+        set -euo pipefail
+        mapfile -t files < <(find "${{ inputs.site-dir }}" -type f -name '*.xml')
+        if [ "${#files[@]}" -eq 0 ]; then
+          echo "no XML files found"
+          exit 0
+        fi
+        xmllint --noout "${files[@]}"

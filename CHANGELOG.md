@@ -18,6 +18,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Reusable `check-html` action, which validates generated HTML, CSS and SVG with the W3C Nu checker.
 - Reusable `check-a11y` action, which audits the built site with pa11y-ci and the axe runner.
 - Reusable `check-links-external` action, which checks external links with lychee (advisory by default).
+- Reusable `check-xml` action, which validates that generated XML files are well formed.
 
 ### Changed
 
