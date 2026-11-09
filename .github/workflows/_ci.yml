@@ -17,18 +17,18 @@ concurrency:
 
 jobs:
   lint:
-    uses: ./.github/workflows/hlint.yml
+    uses: ./.github/workflows/_hlint.yml
     permissions:
       security-events: write
       contents: read
 
   format:
-    uses: ./.github/workflows/fourmolu.yml
+    uses: ./.github/workflows/_fourmolu.yml
     with:
       fourmolu-version: ${{ vars.FOURMOLU_VERSION }}
 
   build:
-    uses: ./.github/workflows/build-test.yml
+    uses: ./.github/workflows/_build-test.yml
     with:
       ghc-version: ${{ vars.GHC_VERSION }}
       cabal-version: ${{ vars.CABAL_VERSION }}

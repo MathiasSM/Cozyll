@@ -1,3 +1,4 @@
+# Internal (not a consumer contract).
 name: Build & Test (reusable)
 
 on:
