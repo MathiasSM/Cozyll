@@ -1,0 +1,20 @@
+# Consumer-facing composite action: run a spelling check with typos.
+name: check-spelling
+description: Check spelling with typos. Advisory only, and not suitable as a hard gate for mixed-language content.
+inputs:
+  content-dir:
+    description: Directory to check.
+    required: false
+    default: content
+  config:
+    description: Optional path to a typos config file.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Run typos
+      uses: crate-ci/typos@master
+      with:
+        files: ${{ inputs.content-dir }}
+        config: ${{ inputs.config }}
