@@ -1,0 +1,40 @@
+# Consumer-facing composite action: validate JSON-LD blocks in generated HTML.
+name: check-jsonld
+description: Validate that JSON-LD blocks in generated HTML parse and declare @context and @type or @graph.
+inputs:
+  site-dir:
+    description: Directory containing the built site.
+    required: false
+    default: _site
+runs:
+  using: composite
+  steps:
+    - name: Check JSON-LD
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 - "${{ inputs.site-dir }}" <<'PY'
+        import json, pathlib, re, sys
+
+        root = pathlib.Path(sys.argv[1])
+        pattern = re.compile(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', re.S | re.I)
+        failures = []
+        count = 0
+        for html in root.rglob("*.html"):
+            text = html.read_text(encoding="utf-8")
+            for i, block in enumerate(pattern.findall(text), start=1):
+                count += 1
+                try:
+                    data = json.loads(block)
+                except json.JSONDecodeError as exc:
+                    failures.append(f"{html}: block {i}: invalid JSON: {exc}")
+                    continue
+                if "@context" not in data:
+                    failures.append(f"{html}: block {i}: missing @context")
+                if "@type" not in data and "@graph" not in data:
+                    failures.append(f"{html}: block {i}: missing @type or @graph")
+        if failures:
+            print("\n".join(failures))
+            sys.exit(1)
+        print(f"validated {count} JSON-LD blocks")
+        PY
