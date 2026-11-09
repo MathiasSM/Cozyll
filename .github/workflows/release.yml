@@ -81,6 +81,7 @@ jobs:
           cp artifact-executable kit/cozyll
           cp -r templates kit/
           cp -r assets kit/
+          cp -r schema kit/
           tar -czf cozyll-kit.tar.gz -C kit .
           sha256sum cozyll-kit.tar.gz > cozyll-kit.tar.gz.sha256
 
