@@ -17,6 +17,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Reusable `check-content-schema` action, which validates content YAML against the shipped schemas.
 - Reusable `check-html` action, which validates generated HTML, CSS and SVG with the W3C Nu checker.
 - Reusable `check-a11y` action, which audits the built site with pa11y-ci and the axe runner.
+- Reusable `check-links-external` action, which checks external links with lychee (advisory by default).
 
 ### Changed
 
