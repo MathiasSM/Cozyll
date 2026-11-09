@@ -1,4 +1,5 @@
 # Consumer-facing composite action: check external links with lychee.
+# Runs lychee with --root-dir <site-dir> so root-relative links resolve; advisory unless fail is true.
 name: check-links-external
 description: Check external links in the built site with lychee.
 inputs:

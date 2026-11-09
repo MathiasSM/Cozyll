@@ -1,4 +1,5 @@
 # Consumer-facing composite action: install the Cozyll kit.
+# Requires curl, tar and sha256sum. Extracts the kit to $GITHUB_WORKSPACE and puts `cozyll` on PATH.
 name: setup-cozyll
 description: Install the Cozyll kit (from a release or a local tarball) and put cozyll on PATH.
 inputs:
