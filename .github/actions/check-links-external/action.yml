@@ -28,7 +28,7 @@ runs:
         fi
         echo "value=$a" >> "$GITHUB_OUTPUT"
     - name: Run lychee
-      uses: lycheeverse/lychee-action@v2
+      uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
       with:
         args: ${{ steps.args.outputs.value }} ${{ inputs.site-dir }}
         fail: ${{ inputs.fail }}
