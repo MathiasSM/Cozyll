@@ -1,0 +1,8 @@
+# Link checks for the example content run on GitHub-hosted runners. X/Twitter
+# rejects datacenter egress with 403, so exclude those hosts (same excludes as
+# the web-writings content config).
+exclude = [
+    'x\.com',
+    'twitter\.com',
+    't\.co',
+]

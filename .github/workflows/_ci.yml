@@ -33,6 +33,11 @@ jobs:
       ghc-version: ${{ vars.GHC_VERSION }}
       cabal-version: ${{ vars.CABAL_VERSION }}
 
+  example-checks:
+    name: Example site checks
+    needs: build
+    uses: ./.github/workflows/_example-checks.yml
+
   upload-codecov:
     needs: build
     if: ${{ !cancelled() }}
