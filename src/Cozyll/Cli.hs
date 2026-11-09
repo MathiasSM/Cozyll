@@ -1,7 +1,7 @@
 {-# LANGUAGE Trustworthy #-}
 
 -- | The command-line interface and its subcommands
-module Cozyll.Cli (cli) where
+module Cozyll.Cli (cli, contentDirIO) where
 
 import Control.Monad (filterM, unless)
 import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
@@ -124,3 +124,7 @@ parseEnv (Just other) = die $ "unknown SITE_ENV \"" ++ other ++ "\" (expected pr
 contentDirFor :: Env -> FilePath
 contentDirFor Example = "example-content"
 contentDirFor _ = "content"
+
+-- | The content directory for the current environment (for tooling that runs before Hakyll)
+contentDirIO :: IO FilePath
+contentDirIO = contentDirFor <$> (parseEnv =<< lookupEnv "SITE_ENV")

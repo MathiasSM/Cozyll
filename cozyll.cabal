@@ -85,14 +85,21 @@ library
                   , Cozyll.Rules.Sitemap
                   , Cozyll.Rules.Validate
                   , Cozyll.Rules.WellKnown
+                  , Cozyll.Ruby.Data
+                  , Cozyll.Ruby.Derive
+                  , Cozyll.Ruby.Manifest
                   , Cozyll.Theme
                   , Cozyll.Yaml
   other-modules: Paths_cozyll
   autogen-modules: Paths_cozyll
   build-depends:    base         >= 4 && < 5
                   , aeson        >= 2.2 && < 3
+                  , bytestring   >= 0.11 && < 0.13
+                  , containers   >= 0.6 && < 0.8
+                  , crypton      >= 1.0 && < 3
                   , directory    >= 1.3 && < 2
                   , filepath     >= 1.5 && < 2
+                  , memory       >= 0.18 && < 0.19
                   , jsonschema   >= 0.3 && < 0.4
                   , mtl          >= 2.3 && < 3
                   , scientific   >= 0.3 && < 0.4
@@ -101,6 +108,7 @@ library
                   , pandoc       >= 3.12 && < 4
                   , pandoc-types >= 1.23 && < 2
                   , tagsoup      >= 0.14 && < 1
+                  , unicode-transforms >= 0.4 && < 0.5
                   , yaml         >= 0.11 && < 1
                   , hakyll       == 4.17.*
 
@@ -108,9 +116,19 @@ executable cozyll
   import:           shared
   main-is:          Main.hs
   hs-source-dirs:   app
+  other-modules:    DataCommand
   build-depends:    base
-                  , hakyll
+                  , aeson
+                  , bytestring
                   , cozyll
+                  , directory
+                  , filepath
+                  , hakyll
+                  , http-client >= 0.7 && < 0.8
+                  , http-client-tls >= 0.3 && < 0.5
+                  , http-types >= 0.12 && < 0.13
+                  , text
+                  , zip-archive >= 0.4 && < 0.6
   ghc-options:      -threaded -rtsopts -with-rtsopts=-N
 
 test-suite spec
@@ -135,6 +153,8 @@ test-suite spec
                   , Cozyll.PostSpec
                   , Cozyll.ProjectSpec
                   , Cozyll.RedirectsSpec
+                  , Cozyll.RubyDataSpec
+                  , Cozyll.RubyDeriveSpec
                   , Cozyll.SocialMetaSpec
                   , Cozyll.SocialSpec
                   , Cozyll.ThemeSpec
@@ -142,6 +162,7 @@ test-suite spec
                   , hakyll
                   , cozyll
                   , aeson
+                  , bytestring
                   , pandoc
                   , tasty
                   , tasty-ant-xml

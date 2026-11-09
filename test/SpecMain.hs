@@ -19,6 +19,8 @@ import Cozyll.NavSpec qualified as Nav
 import Cozyll.PostSpec qualified as Post
 import Cozyll.ProjectSpec qualified as Project
 import Cozyll.RedirectsSpec qualified as Redirects
+import Cozyll.RubyDataSpec qualified as RubyData
+import Cozyll.RubyDeriveSpec qualified as RubyDerive
 import Cozyll.SocialMetaSpec qualified as SocialMeta
 import Cozyll.SocialSpec qualified as Social
 import Cozyll.ThemeSpec qualified as Theme
@@ -47,6 +49,8 @@ main =
             , Post.tests
             , Project.tests
             , Redirects.tests
+            , RubyData.tests
+            , RubyDerive.tests
             , SocialMeta.tests
             , Social.tests
             , Theme.tests
