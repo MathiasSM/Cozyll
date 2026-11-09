@@ -71,6 +71,20 @@ pre-commit install
 
 Run it manually over the whole tree with `pre-commit run --all-files`.
 
+## CI workflows
+
+Workflows and actions split into two groups:
+
+- **Internal** (not a consumer contract): workflows prefixed with `_` (for example `_ci.yml`,
+  `_build-test.yml`, `_hlint.yml`, `_fourmolu.yml`, `_example-checks.yml`), plus the release and
+  repository automation workflows. These may change freely.
+- **Consumer-facing**: `.github/workflows/site-ci.yml` and the composite actions under
+  `.github/actions/`. These are the reusable surface documented in
+  [docs/consumer-ci.md](docs/consumer-ci.md); change them with care and keep the docs in sync.
+
+`_example-checks.yml` runs the consumer checks against `example-content`, so a change to a consumer
+check or to the vendored templates and styles is exercised here before it reaches a release.
+
 ## Releases
 
 Version bumps happen only in a dedicated release PR: bump `version:` in

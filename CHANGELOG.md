@@ -28,6 +28,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 - Release kit now bundles `schema/*.schema.json` (editor hints and consumer schema validation).
 - Release kits are smoke-tested (example build plus checks) before publishing.
+- Documented the consumer CI workflow and actions in `docs/consumer-ci.md`.
 
 ## [3.1.0.1] - 2026-11-07
 

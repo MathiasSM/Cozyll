@@ -1,4 +1,5 @@
-# Consumer-facing composite action: run a spelling check with typos.
+# Consumer-facing composite action: run a spelling check with typos (advisory).
+# Uses the pinned crate-ci/typos action. Advisory only; mixed-language content needs an allow-list.
 name: check-spelling
 description: Check spelling with typos. Advisory only, and not suitable as a hard gate for mixed-language content.
 inputs:
