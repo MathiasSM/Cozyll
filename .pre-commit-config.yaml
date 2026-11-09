@@ -1,6 +1,23 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0 # use the latest tag
+    hooks:
+      - id: trailing-whitespace
+        exclude: '^test/golden'
+      - id: end-of-file-fixer
+        exclude: '^test/golden'
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: check-added-large-files
   - repo: local
     hooks:
+      # Haskell
       - id: fourmolu
         name: fourmolu
         entry: fourmolu --mode check
@@ -11,9 +28,21 @@ repos:
         entry: hlint --ignore-suggestions
         language: system
         types: [haskell]
+      - id: cabal-check
+        name: cabal check
+        entry: cabal check
+        language: system
+        pass_filenames: false
+      # Github CI
       - id: actionlint
         name: actionlint
         entry: actionlint
         language: system
         types: [yaml]
         files: ^\.github/workflows/
+      # Shell scripts
+      - id: shellcheck
+        name: shellcheck
+        entry: shellcheck
+        language: system
+        types: [shell]

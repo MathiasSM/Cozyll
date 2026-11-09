@@ -193,7 +193,7 @@ A definition rendered as a <code>&lt;dl&gt;</code>.
 <h6 id="a-sixth-level-heading">A sixth-level heading</h6>
 <p>The deepest level.</p>
 <h2 id="paragraphs-and-line-breaks">Paragraphs and line breaks</h2>
-<p>A paragraph is a run of text. A line break is forced with two trailing spaces.<br />
+<p>A paragraph is a run of text. A line break is forced with two trailing spaces.
 Like this one.</p>
 <h2 id="emphasis">Emphasis</h2>
 <p>Text can be <em>emphasized</em>, <strong>strong</strong>, <del>deleted</del>, or shown as <code>inline code</code>.</p>

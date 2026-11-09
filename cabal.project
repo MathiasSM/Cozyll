@@ -2,7 +2,7 @@ packages: .
 
 -- Hakyll by default checks external URLs are reachable via its check command
 -- As of writing, X (Twitter) returns so much content within the response headers,
--- it breaks this, "throwing" a OverlongHeaders exception. 
+-- it breaks this, "throwing" a OverlongHeaders exception.
 --
 -- I don't see another way to configure it, so this disables all external checks
 --

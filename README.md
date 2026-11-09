@@ -44,12 +44,12 @@ You may download the [latest release](https://github.com/MathiasSM/Cozyll/releas
   - `socials.yaml` (see `schema/example.socials.yaml`), a file with a list of accounts linked to you/your site, used for templates to build links to those profiles, and for some `.well-known` files. Required.
   - `authors.yaml` (see `schema/authors.schema.json`), a map keyed by author id: each author's name, links, profile image, and the one flagged `siteDefault: true` (see [Authors](#authors)). Required.
   - `localization.yaml`, a map of UI string id → `{ locale: translation }` (plus the reserved `_ogLocaleDefaultRegion` key) that backs the templates' `$t("id")$` lookups and `og:locale`. Required, even for a single-language site; the build fails on a missing translation.
-  - `writings/` shall contain any and all markdown/djot/whatever files, each of which will become a specific page in your site. Each file has a frontmatter yaml which adds some metadata to the processed page (see [Frontmatter](#frontmatter)). 
+  - `writings/` shall contain any and all markdown/djot/whatever files, each of which will become a specific page in your site. Each file has a frontmatter yaml which adds some metadata to the processed page (see [Frontmatter](#frontmatter)).
   - `data/` may hold yaml files, which are translated into usable context fields, usable in templates or templated pages (see [Data Files](#data-files)).
   - `media/` may hold images and other binary files which can be included in the site and linked to.
   - `projects/` may hold YAML files, each becoming an item on the projects (showcase) page.
-  - Optionally, a `templates/` directory may hold additional templates, or override existing ones (by using the same name). 
-  - Optionally, a `css/` directory may hold additional stylesheets, or override existing ones (by using the same name). 
+  - Optionally, a `templates/` directory may hold additional templates, or override existing ones (by using the same name).
+  - Optionally, a `css/` directory may hold additional stylesheets, or override existing ones (by using the same name).
 
 
 The way to execute this is same as any hakyll site; if you build it from source, you can use `cabal exec cozyll <CMD>` instead.
