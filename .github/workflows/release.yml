@@ -85,6 +85,28 @@ jobs:
           tar -czf cozyll-kit.tar.gz -C kit .
           sha256sum cozyll-kit.tar.gz > cozyll-kit.tar.gz.sha256
 
+      - name: Smoke-test the kit
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y imagemagick
+          mkdir -p smoke
+          tar -xzf cozyll-kit.tar.gz -C smoke
+          cp -r example-content smoke/example-content
+          ( cd smoke && SITE_ENV=example ./cozyll build -v && ./cozyll check )
+      - uses: ./.github/actions/check-html
+        with:
+          site-dir: smoke/_site
+      - uses: ./.github/actions/check-a11y
+        with:
+          site-dir: smoke/_site
+      - uses: ./.github/actions/check-jsonld
+        with:
+          site-dir: smoke/_site
+      - uses: ./.github/actions/check-xml
+        with:
+          site-dir: smoke/_site
+
       - name: Publish versioned release
         uses: step-security/action-gh-release@44319d37c8b7966bf07f89f0cbf63408141446df # v3.0.3
         with:
