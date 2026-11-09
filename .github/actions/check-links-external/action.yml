@@ -1,0 +1,34 @@
+# Consumer-facing composite action: check external links with lychee.
+name: check-links-external
+description: Check external links in the built site with lychee.
+inputs:
+  site-dir:
+    description: Directory containing the built site.
+    required: false
+    default: _site
+  config:
+    description: Optional path to a lychee config file.
+    required: false
+    default: ""
+  fail:
+    description: Fail the step when broken links are found.
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: Resolve arguments
+      id: args
+      shell: bash
+      run: |
+        set -euo pipefail
+        a="--no-progress --root-dir ${{ inputs.site-dir }}"
+        if [ -n "${{ inputs.config }}" ]; then
+          a="$a --config ${{ inputs.config }}"
+        fi
+        echo "value=$a" >> "$GITHUB_OUTPUT"
+    - name: Run lychee
+      uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+      with:
+        args: ${{ steps.args.outputs.value }} ${{ inputs.site-dir }}
+        fail: ${{ inputs.fail }}
