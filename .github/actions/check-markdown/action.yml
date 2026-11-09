@@ -1,0 +1,24 @@
+# Consumer-facing composite action: lint Markdown with markdownlint-cli2.
+name: check-markdown
+description: Lint Markdown with markdownlint-cli2. Advisory and opt-in.
+inputs:
+  content-dir:
+    description: Directory to check.
+    required: false
+    default: content
+  config:
+    description: Optional path to a markdownlint config file.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Run markdownlint-cli2
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -n "${{ inputs.config }}" ]; then
+          npx --yes markdownlint-cli2 --config "${{ inputs.config }}" "${{ inputs.content-dir }}/**/*.md"
+        else
+          npx --yes markdownlint-cli2 "${{ inputs.content-dir }}/**/*.md"
+        fi

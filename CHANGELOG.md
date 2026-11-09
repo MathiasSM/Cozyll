@@ -22,6 +22,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Reusable `check-jsonld` action, which validates JSON-LD blocks in generated HTML.
 - Reusable `check-wellknown` action, which validates security.txt, funding.json, manifest, robots, trust and sitemap.
 - Reusable `check-spelling` action, which runs typos (advisory, and not a hard gate for mixed-language content).
+- Reusable `check-markdown` action, which lints Markdown with markdownlint-cli2 (advisory and opt-in).
 
 ### Changed
 
