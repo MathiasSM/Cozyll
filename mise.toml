@@ -1,3 +1,24 @@
 [tools]
 actionlint = "latest"
+java = "temurin-17"
+lychee = "latest"
+node = "lts"
+pipx = "latest"
 pre-commit = "latest"
+shellcheck = "latest"
+typos = "latest"
+
+[tasks.example-checks]
+description = "Build example-content, then run the default site checks"
+run = [
+  "SITE_ENV=example cabal run exe:cozyll -- build -v",
+  "scripts/check-site.sh all --content-dir example-content --a11y-fail false",
+]
+
+[tasks.format]
+description = "Check Haskell formatting with fourmolu, as CI does"
+run = "fourmolu --mode check $(git ls-files '*.hs')"
+
+[tasks.docs]
+description = "Build the Haddock documentation, as CI does"
+run = 'cabal haddock-project --hackage --haddock-options="--show-all" --haddock-options="--quickjump"'

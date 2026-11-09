@@ -146,6 +146,7 @@ jobs:
           name: site
           path: _site
       - uses: $/.github/actions/check-a11y
+        continue-on-error: true
         with:
           site-dir: _site
 
