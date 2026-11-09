@@ -20,6 +20,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Reusable `check-links-external` action, which checks external links with lychee (advisory by default).
 - Reusable `check-xml` action, which validates that generated XML files are well formed.
 - Reusable `check-jsonld` action, which validates JSON-LD blocks in generated HTML.
+- Reusable `check-wellknown` action, which validates security.txt, funding.json, manifest, robots, trust and sitemap.
 
 ### Changed
 
