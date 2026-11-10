@@ -4,6 +4,7 @@
 module Cozyll.Cli (cli) where
 
 import Control.Monad (filterM, unless)
+import Cozyll.Cli.Data (runDataCommand)
 import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Website qualified as Web
@@ -36,6 +37,14 @@ cli = do
     let contentDir = contentDirFor env
     -- 1. Parse args
     args <- getArgs
+    -- 2. `data` is a pre-Hakyll command and must not require website.yaml
+    case args of
+        ("data" : rest) -> runDataCommand contentDir rest
+        _ -> runBuild env contentDir args
+
+-- | The build/server/clean commands, which need @website.yaml@ and Hakyll
+runBuild :: Env -> FilePath -> [String] -> IO ()
+runBuild env contentDir args = do
     -- 2. Get and validate website files/config
     -- (`website.yaml` is always required, even for `clean`)
     website <- Web.loadWebsite contentDir
