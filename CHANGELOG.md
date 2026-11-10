@@ -24,12 +24,12 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 - Raster logos are supported: `media/branding/logo.png` is used when no `logo.svg` exists, and `content/static/` files override the generated icon at the same path.
 - `content/static/` is copied verbatim to the site root, for files such as `CNAME`, `.nojekyll` and verification files.
+- `schema/example.authors.yaml`, `schema/example.localization.yaml` and `schema/localization.schema.json`, so every required config file has an example and a schema; the content-schema check now validates `localization.yaml` too.
 
 ### Changed
 
 - `-v`/`--verbose` now enables debug output, including the resolved `SITE_ENV` and content directory.
 - `scripts/check-site.sh` treats accessibility findings as advisory unless `--a11y-fail true` is passed, matching CI.
-- `SITE_ENV=dev` builds now leave `styles.css` readable (comments and the syntax-highlighting CSS are not minified); `prod` and `example` builds keep the minified stylesheet.
 - `funding:` may be omitted from `website.yaml`; a site without it publishes no `funding.json` and no `.well-known/funding-manifest-urls`.
 - Every file under `content/media/` is now published (previously a whitelist silently dropped files); `media/branding/*` still flattens to `/images/*` and `.dot` sources still render to PNG.
 - Build errors now list the required content tree, explain a group without an index page, and report every item missing `path:` in one go.

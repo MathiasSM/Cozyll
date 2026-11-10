@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/MathiasSM/Cozyll/master/schema/authors.schema.json
+# Example authors. A content repo needs a proper authors.yaml.
+#
+# A map keyed by author id (the slug used in `author:` front matter).
+# Exactly one author must set `siteDefault: true`.
+
+example:
+  # The author's full name. Required.
+  name: Marta Ibáñez
+  # person (default) or organization.
+  type: person
+  # Marks the site's default author; exactly one author must set it.
+  siteDefault: true
+  # A shorter name for bylines and the author page heading.
+  displayName: Marta
+  # A short bio.
+  description: Writer and maintainer of the example site.
+  # Site-relative path to the author's image (published under /images/...).
+  profileImage: images/photos/og-home.png
+  # Profile URLs, emitted as JSON-LD sameAs.
+  links:
+    - https://example.com/marta
+    - https://github.com/example
+  # Show a per-post copyright notice for this author's posts.
+  addCopyrightNotice: true
+
+# A second author, an organization. It does not set `siteDefault`.
+example-labs:
+  name: Example Labs
+  type: organization
+  # Optional fields can be omitted and take the schema defaults.
+  description: The organization behind the example site.
+  links:
+    - https://example.com/labs

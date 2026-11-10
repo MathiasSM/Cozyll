@@ -8,7 +8,7 @@ usage() {
 Usage: check-site.sh <check> [options]
 
 Checks (tools in parentheses):
-  content-schema   Validate website.yaml, authors.yaml and socials.yaml against the schemas. (pipx)
+  content-schema   Validate website.yaml, authors.yaml, socials.yaml and localization.yaml against the schemas. (pipx)
   html             Validate HTML, CSS and SVG with the W3C Nu checker. (java, curl)
   a11y             Audit the built site with pa11y-ci and the axe runner. (python3, npx, Chrome)
   links-external   Check external links with lychee. (lychee)
@@ -78,7 +78,7 @@ done
 run_content_schema() {
   need pipx "Install pipx, for example 'python3 -m pip install --user pipx'."
   local pair schema file
-  for pair in website:website.yaml authors:authors.yaml socials:socials.yaml; do
+  for pair in website:website.yaml authors:authors.yaml socials:socials.yaml localization:localization.yaml; do
     schema="${pair%%:*}"
     file="${pair##*:}"
     if [ -f "$content_dir/$file" ]; then

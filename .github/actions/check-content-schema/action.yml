@@ -1,10 +1,10 @@
 # Consumer-facing composite action: validate content YAML against the Cozyll schemas.
 # Requires pipx; uses check-jsonschema against the shipped `*.schema.json` files.
 name: check-content-schema
-description: Validate website.yaml, authors.yaml and socials.yaml against the shipped JSON schemas.
+description: Validate website.yaml, authors.yaml, socials.yaml and localization.yaml against the shipped JSON schemas.
 inputs:
   content-dir:
-    description: Directory containing website.yaml, authors.yaml and socials.yaml.
+    description: Directory containing website.yaml, authors.yaml, socials.yaml and localization.yaml.
     required: false
     default: content
   schema-dir:

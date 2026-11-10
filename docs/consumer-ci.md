@@ -76,6 +76,8 @@ the available checks and their tool requirements.
 
 ## Notes
 
+- The content-schema check validates `website.yaml`, `authors.yaml`, `socials.yaml` and
+  `localization.yaml` against the shipped schemas; missing files are skipped.
 - The workflow assumes your content repo is checked out at `content/`. That is the directory
   Cozyll reads for production builds.
 - `site-domain` is passed as `SITE_DOMAIN`; leave it empty to use `website.yaml`.

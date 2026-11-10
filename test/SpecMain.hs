@@ -20,6 +20,7 @@ import Cozyll.FormatSpec qualified as Format
 import Cozyll.HtmlSpec qualified as Html
 import Cozyll.JsonLdSpec qualified as JsonLd
 import Cozyll.LanguageSpec qualified as Language
+import Cozyll.LocalizationExampleSpec qualified as LocalizationExample
 import Cozyll.MediaSpec qualified as Media
 import Cozyll.MetadataSpec qualified as Metadata
 import Cozyll.NavSpec qualified as Nav
@@ -68,6 +69,7 @@ main = do
             , JsonLd.tests
             , Language.tests
             , Media.tests
+            , LocalizationExample.tests
             , Metadata.tests
             , Nav.tests
             , Post.tests
