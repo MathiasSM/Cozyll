@@ -14,6 +14,7 @@ Architecture Decision Records for Cozyll, the Hakyll-based static site generator
 | [0008](0008-authors-model.md) | `authors-model` | Authors Model | Accepted | 2026-11-01 |
 | [0009](0009-structured-data-in-house.md) | `structured-data-in-house` | Structured Data In-House | Accepted | 2026-11-01 |
 | [0010](0010-localization-model.md) | `localization-model` | Localization Model | Accepted | 2026-11-01 |
+| [0011](0011-external-ruby-index.md) | `external-ruby-index` | External Ruby Index | Accepted | 2026-11-10 |
 
 - **0001** — Splits site content into a separate content repo so the generator stays reusable.
 - **0002** — Pins full-site golden output to catch template and context regressions.
@@ -25,3 +26,4 @@ Architecture Decision Records for Cozyll, the Hakyll-based static site generator
 - **0008** — Models authors in a single YAML map with a site-default author.
 - **0009** — Emits Open Graph and schema.org JSON-LD in-house.
 - **0010** — Supports open language codes and localized strings via `localization.yaml`.
+- **0011** — Derives JLPT levels, coverage, and reading checks from a committed, external ruby index.
