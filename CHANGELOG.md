@@ -29,6 +29,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 - `-v`/`--verbose` now enables debug output, including the resolved `SITE_ENV` and content directory.
 - `scripts/check-site.sh` treats accessibility findings as advisory unless `--a11y-fail true` is passed, matching CI.
+- `SITE_ENV=dev` builds now leave `styles.css` readable (comments and the syntax-highlighting CSS are not minified); `prod` and `example` builds keep the minified stylesheet.
 - `funding:` may be omitted from `website.yaml`; a site without it publishes no `funding.json` and no `.well-known/funding-manifest-urls`.
 - Every file under `content/media/` is now published (previously a whitelist silently dropped files); `media/branding/*` still flattens to `/images/*` and `.dot` sources still render to PNG.
 - Build errors now list the required content tree, explain a group without an index page, and report every item missing `path:` in one go.

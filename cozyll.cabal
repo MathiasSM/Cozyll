@@ -149,6 +149,7 @@ test-suite spec
                   , Cozyll.CleanURLSpec
                   , Cozyll.CliSpec
                   , Cozyll.ContentSpec
+                  , Cozyll.CssSpec
                   , Cozyll.DataSpec
                   , Cozyll.FeedSpec
                   , Cozyll.Fixture

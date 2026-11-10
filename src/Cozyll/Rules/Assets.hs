@@ -2,7 +2,7 @@
 module Cozyll.Rules.Assets (processAssets, mediaRoute, mediaTarget, staticRoute, staticTarget) where
 
 import Control.Monad (unless)
-import Cozyll.Config (SiteConfig, assetsDir, contentCssPattern, contentDir, dataPattern, dataSchemaPattern, highlightStyle, localizationPattern, mediaDir, siteBrand, socialsPattern, staticDir, staticPattern)
+import Cozyll.Config (Env (..), SiteConfig, assetsDir, contentCssPattern, contentDir, dataPattern, dataSchemaPattern, highlightStyle, localizationPattern, mediaDir, siteBrand, siteEnv, socialsPattern, staticDir, staticPattern)
 import Cozyll.Domain.Website (toPandocStyle)
 import Cozyll.Rules.Favicon (faviconRules)
 import Data.List (stripPrefix)
@@ -105,19 +105,32 @@ processDataFiles cfg = do
     match (socialsPattern cfg .||. localizationPattern cfg .||. dataPattern cfg) $ compile getResourceString
     match (dataSchemaPattern cfg) $ compile getResourceString
 
--- | Compress all CSS as one file
+{- | Concatenate all CSS as one file, minifying it outside development
+
+In 'Dev' the vendored and content stylesheets are concatenated verbatim and the
+syntax-highlighting CSS is left uncompressed, so comments survive while
+verifying an override. 'Prod' and 'Example' keep the minified stylesheet.
+Switching 'siteEnv' is safe: the build-state reset clears @_site@ and @_cache@
+when the environment changes, so a readable dev stylesheet cannot leak into a
+later production build.
+-}
 processCss :: SiteConfig -> Rules ()
 processCss cfg = do
-    match (cssFiles cfg) (compile compressCssCompiler)
-    match (contentCssPattern cfg) (compile compressCssCompiler)
+    let cssCompiler = case siteEnv cfg of
+            Dev -> getResourceString
+            _ -> compressCssCompiler
+    match (cssFiles cfg) (compile cssCompiler)
+    match (contentCssPattern cfg) (compile cssCompiler)
     create ["styles.css"] $ do
         route idRoute
         compile $ do
             vendored <- loadAll $ cssFiles cfg
             content <- loadAll $ contentCssPattern cfg
-            makeItem $
-                unlines (map itemBody (vendored ++ content))
-                    ++ compressCss (styleToCss (toPandocStyle (highlightStyle cfg)))
+            let highlightCss = styleToCss (toPandocStyle (highlightStyle cfg))
+                renderedHighlight = case siteEnv cfg of
+                    Dev -> highlightCss
+                    _ -> compressCss highlightCss
+            makeItem $ unlines (map itemBody (vendored ++ content)) ++ renderedHighlight
 
 -- | Uses unix external filter (dot) to compile every Graphviz source as png
 processDotImages :: SiteConfig -> Rules ()

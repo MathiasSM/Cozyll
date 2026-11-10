@@ -13,6 +13,7 @@ import Cozyll.CleanURLSpec qualified as CleanURL
 import Cozyll.CliDataSpec qualified as CliData
 import Cozyll.CliSpec qualified as Cli
 import Cozyll.ContentSpec qualified as Content
+import Cozyll.CssSpec qualified as Css
 import Cozyll.DataSpec qualified as Data
 import Cozyll.FeedSpec qualified as Feed
 import Cozyll.FormatSpec qualified as Format
@@ -59,6 +60,7 @@ main = do
             , CliData.tests
             , Cli.tests
             , Content.tests
+            , Css.tests
             , Data.tests
             , Feed.tests
             , Format.tests
