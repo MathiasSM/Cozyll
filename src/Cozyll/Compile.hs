@@ -12,7 +12,7 @@ import Cozyll.Filters (processRubyText)
 import Cozyll.Html (readonlyCheckboxes)
 import Cozyll.Metadata (Key (Language, RubySkip), lookupKey, lookupKeyList)
 import Cozyll.Ruby (checkCoverage)
-import Cozyll.Ruby.Data (RubyData)
+import Cozyll.Ruby.Index (RubyData)
 import Data.Maybe (fromMaybe, isJust)
 import Data.Text qualified as T
 import Hakyll (
@@ -65,7 +65,7 @@ runPandocWith rubyData item = do
     checkCoverageWith (Just rubyData') metadata body = do
         path <- toFilePath <$> getUnderlying
         let pageLang = fromMaybe "en" (lookupKey Language metadata)
-            skipWords = map T.pack (fromMaybe [] (lookupKeyList RubySkip metadata))
+            skipWords = maybe [] (map T.pack) (lookupKeyList RubySkip metadata)
             problems = checkCoverage pageLang skipWords rubyData' body
         unless (null problems) $ throwError (map ((path ++ ": ") ++) problems)
 

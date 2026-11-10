@@ -7,7 +7,7 @@ module Cozyll.Ruby.Derive (
 ) where
 
 import Control.Monad (forM, unless)
-import Cozyll.Ruby.Data (
+import Cozyll.Ruby.Index (
     Index (..),
     KanjiRow (..),
     Level (..),
@@ -127,7 +127,7 @@ parseKanji bytes = do
         grade <- maybe (Right Nothing) (asMaybeInt "grade") (KeyMap.lookup "grade" obj)
         jlptNew <- maybe (Right Nothing) (asMaybeInt "jlpt_new") (KeyMap.lookup "jlpt_new" obj)
         let level = jlptNew >>= levelFromNew
-            keep = maybe False (\g -> g `elem` ([1 .. 6] ++ [8, 9, 10])) grade || isJust level
+            keep = maybe False (\g -> g `elem` ([1 .. 6] ++ [8])) grade || isJust level
         pure $ if keep then Just (KanjiRow ch grade level) else Nothing
 
     levelFromNew n = case n of

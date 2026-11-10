@@ -1,7 +1,7 @@
 -- | The build checks that run on rendered page bodies
 module Cozyll.Ruby (checkCoverage) where
 
-import Cozyll.Ruby.Data (RubyData (rdKanji), isHan)
+import Cozyll.Ruby.Index (RubyData (rdKanji), isHan)
 import Data.Char (isAsciiUpper)
 import Data.List (nub, sortOn)
 import Data.Map.Strict qualified as Map

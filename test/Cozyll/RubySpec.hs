@@ -2,7 +2,7 @@
 module Cozyll.RubySpec (tests) where
 
 import Cozyll.Ruby (checkCoverage)
-import Cozyll.Ruby.Data (Index (..), KanjiRow (..), RubyData, toRubyData)
+import Cozyll.Ruby.Index (Index (..), KanjiRow (..), RubyData, toRubyData)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 

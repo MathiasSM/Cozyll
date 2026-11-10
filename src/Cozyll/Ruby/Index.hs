@@ -1,5 +1,12 @@
--- | The derived ruby index: schema, canonical encoding, normalisation, and lookup structures
-module Cozyll.Ruby.Data (
+{- | The derived ruby index: schema, canonical encoding, normalisation, and lookup structures.
+
+The index is Japanese-specific: 'Level' is a JLPT level (N1–N5), 'KanjiRow' is a
+Japanese kanji with its school grade and JLPT level, and 'WordRow'/'SegmentRow'
+pair Japanese surfaces with kana readings. Ruby itself is a generic HTML
+annotation (pinyin, bopomofo, furigana); this module only models the Japanese
+furigana use case.
+-}
+module Cozyll.Ruby.Index (
     -- * Levels
     Level (..),
     levelRank,
@@ -26,25 +33,23 @@ module Cozyll.Ruby.Data (
     dataDirName,
     indexFileName,
     indexPath,
-    manifestFileName,
+    readIndexFile,
     loadIndexFile,
     writeIndexFile,
     writeTextFileAtomic,
-    sha256Hex,
 
     -- * Limits
-    maxIndexBytes,
+    defaultMaxIndexBytes,
+    indexLimitIO,
 ) where
 
 import Control.Monad (unless, when)
-import Crypto.Hash (Digest, SHA256, hash)
 import Data.Aeson (Value (..), eitherDecodeStrict')
 import Data.Aeson.Key qualified as Key
 import Data.Aeson.KeyMap (KeyMap)
 import Data.Aeson.KeyMap qualified as KeyMap
 import Data.Aeson.Text (encodeToLazyText)
 import Data.Bifunctor (first)
-import Data.ByteString (ByteString)
 import Data.ByteString qualified as BS
 import Data.Char (isSpace, ord)
 import Data.Foldable (toList)
@@ -61,8 +66,11 @@ import Data.Text.Encoding.Error (UnicodeException)
 import Data.Text.Lazy qualified as TL
 import Data.Text.Normalize (NormalizationMode (NFC, NFKC), normalize)
 import System.Directory (createDirectoryIfMissing, doesFileExist, getFileSize, renameFile)
+import System.Environment (lookupEnv)
+import System.Exit (die)
 import System.FilePath.Posix (takeDirectory, (</>))
 import System.IO (hClose, openBinaryTempFile)
+import Text.Read (readMaybe)
 
 -- Levels ----------------------------------------------------------------------
 
@@ -249,9 +257,6 @@ decodeSegmentRow value = do
 
 validateIndex :: Index -> Either String Index
 validateIndex idx = do
-    when (length (idxKanji idx) > maxKanjiRows) $ Left "kanji table is too large"
-    when (length (idxWords idx) > maxWordRows) $ Left "words table is too large"
-    when (length (idxSegments idx) > maxSegmentRows) $ Left "segments table is too large"
     checkSortedUnique "kanji" krChar (idxKanji idx)
     checkSortedUnique "words" wordKey (idxWords idx)
     checkSortedUnique "segments" segmentKey (idxSegments idx)
@@ -379,25 +384,48 @@ dataDirName = "ruby-data"
 indexFileName :: FilePath
 indexFileName = "index.json"
 
-manifestFileName :: FilePath
-manifestFileName = "manifest.json"
-
 -- | The index path for a content root
 indexPath :: FilePath -> FilePath
 indexPath contentDir = contentDir </> dataDirName </> indexFileName
 
-{- | Loads and validates an index. @Right Nothing@ when the file is absent (the
-build then behaves exactly as before this feature).
+{- | The default limit for an index file, in bytes (8 MiB). Overridable with
+@COZYLL_RUBY_INDEX_LIMIT@; see 'indexLimitIO'.
 -}
-loadIndexFile :: FilePath -> IO (Either String (Maybe RubyData))
-loadIndexFile path = do
+defaultMaxIndexBytes :: Int
+defaultMaxIndexBytes = 8 * 1024 * 1024
+
+{- | The configured index size limit: @COZYLL_RUBY_INDEX_LIMIT@ in bytes, or
+'defaultMaxIndexBytes'. This is a sanity bound (a corrupt or misplaced file),
+not a security boundary; it is configurable so consumers never have to rebuild.
+-}
+indexLimitIO :: IO Int
+indexLimitIO = do
+    value <- lookupEnv "COZYLL_RUBY_INDEX_LIMIT"
+    case value of
+        Nothing -> pure defaultMaxIndexBytes
+        Just raw -> maybe (die ("invalid COZYLL_RUBY_INDEX_LIMIT \"" ++ raw ++ "\"")) pure (readMaybe raw)
+
+-- | Reads and parses an index without requiring canonical bytes (for @data fmt@)
+readIndexFile :: FilePath -> IO (Either String Index)
+readIndexFile path = do
+    bytes <- BS.readFile path
+    pure $ do
+        text <- first show (decodeUtf8' bytes)
+        decodeIndex text
+
+{- | Loads and validates an index, rejecting files larger than @limit@ bytes.
+@Right Nothing@ when the file is absent (the build then behaves exactly as
+before this feature).
+-}
+loadIndexFile :: Int -> FilePath -> IO (Either String (Maybe RubyData))
+loadIndexFile limit path = do
     exists <- doesFileExist path
     if not exists
         then pure (Right Nothing)
         else do
             size <- getFileSize path
-            if size > fromIntegral maxIndexBytes
-                then pure (Left (path ++ ": index is larger than " ++ show maxIndexBytes ++ " bytes"))
+            if size > fromIntegral limit
+                then pure (Left (path ++ ": index is larger than " ++ show limit ++ " bytes"))
                 else do
                     bytes <- BS.readFile path
                     pure $ do
@@ -424,15 +452,3 @@ writeTextFileAtomic path text = do
     BS.hPut handle (encodeUtf8 text)
     hClose handle
     renameFile tmp path
-
--- | Lowercase hex SHA-256 of a bytestring
-sha256Hex :: ByteString -> Text
-sha256Hex bytes = T.pack (show (hash bytes :: Digest SHA256))
-
--- Limits ----------------------------------------------------------------------
-
-maxIndexBytes, maxKanjiRows, maxWordRows, maxSegmentRows :: Int
-maxIndexBytes = 8 * 1024 * 1024
-maxKanjiRows = 20000
-maxWordRows = 50000
-maxSegmentRows = 100000

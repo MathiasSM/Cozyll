@@ -44,6 +44,7 @@ library
   exposed-modules:  Cozyll.Accessibility
                   , Cozyll.CleanURL
                   , Cozyll.Cli
+                  , Cozyll.Cli.Data
                   , Cozyll.Compile
                   , Cozyll.Config
                   , Cozyll.Content
@@ -86,9 +87,9 @@ library
                   , Cozyll.Rules.Validate
                   , Cozyll.Rules.WellKnown
                   , Cozyll.Ruby
-                  , Cozyll.Ruby.Data
                   , Cozyll.Ruby.Derive
-                  , Cozyll.Ruby.Manifest
+                  , Cozyll.Ruby.Index
+                  , Cozyll.Ruby.Sources
                   , Cozyll.Theme
                   , Cozyll.Yaml
   other-modules: Paths_cozyll
@@ -99,6 +100,10 @@ library
                   , containers   >= 0.6 && < 0.8
                   , crypton      >= 1.0 && < 3
                   , directory    >= 1.3 && < 2
+                  , file-embed   >= 0.0.15 && < 0.1
+                  , http-client  >= 0.7 && < 0.8
+                  , http-client-tls >= 0.3 && < 0.5
+                  , http-types   >= 0.12 && < 0.13
                   , filepath     >= 1.5 && < 2
                   , memory       >= 0.18 && < 0.19
                   , jsonschema   >= 0.3 && < 0.4
@@ -109,6 +114,8 @@ library
                   , pandoc       >= 3.12 && < 4
                   , pandoc-types >= 1.23 && < 2
                   , tagsoup      >= 0.14 && < 1
+                  , template-haskell >= 2.20 && < 2.24
+                  , zip-archive  >= 0.4 && < 0.6
                   , unicode-transforms >= 0.4 && < 0.5
                   , yaml         >= 0.11 && < 1
                   , hakyll       == 4.17.*
@@ -117,19 +124,9 @@ executable cozyll
   import:           shared
   main-is:          Main.hs
   hs-source-dirs:   app
-  other-modules:    DataCommand
   build-depends:    base
-                  , aeson
-                  , bytestring
                   , cozyll
-                  , directory
-                  , filepath
                   , hakyll
-                  , http-client >= 0.7 && < 0.8
-                  , http-client-tls >= 0.3 && < 0.5
-                  , http-types >= 0.12 && < 0.13
-                  , text
-                  , zip-archive >= 0.4 && < 0.6
   ghc-options:      -threaded -rtsopts -with-rtsopts=-N
 
 test-suite spec
@@ -155,7 +152,9 @@ test-suite spec
                   , Cozyll.ProjectSpec
                   , Cozyll.RedirectsSpec
                   , Cozyll.RubySpec
-                  , Cozyll.RubyDataSpec
+                  , Cozyll.RubySourcesSpec
+                  , Cozyll.CliDataSpec
+                  , Cozyll.RubyIndexSpec
                   , Cozyll.RubyDeriveSpec
                   , Cozyll.SocialMetaSpec
                   , Cozyll.SocialSpec
@@ -165,6 +164,7 @@ test-suite spec
                   , cozyll
                   , aeson
                   , bytestring
+                  , containers
                   , pandoc
                   , tasty
                   , tasty-ant-xml

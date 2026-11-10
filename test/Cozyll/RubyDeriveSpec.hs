@@ -1,8 +1,8 @@
 -- | Tests for deriving the index from upstream files
 module Cozyll.RubyDeriveSpec (tests) where
 
-import Cozyll.Ruby.Data (Index (..), Level (..), SegmentRow (..), WordRow (..), encodeIndex)
 import Cozyll.Ruby.Derive (Issue (..), Upstream (..), deriveIndex, readUpstreamFrom)
+import Cozyll.Ruby.Index (Index (..), Level (..), SegmentRow (..), WordRow (..), encodeIndex)
 import Data.ByteString qualified as BS
 import Data.List (find)
 import Data.Text qualified as T

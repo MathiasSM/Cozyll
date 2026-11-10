@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/MathiasSM/Cozyll/master/schema/ruby-sources.schema.json",
+  "title": "Ruby sources",
+  "description": "Upstream files used by `cozyll data fetch` to derive ruby-data/index.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["sources"],
+  "properties": {
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "description": "One entry per upstream source.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "ref", "license", "files"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$",
+            "description": "Stable source id, used in errors and `data sources` output."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["repo", "release"],
+            "description": "`repo` fetches repository files; `release` fetches a release asset."
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Commit SHA or release tag. `latest` is resolved via the GitHub API; non-GitHub locations must pin a concrete ref."
+          },
+          "license": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Upstream licence, for attribution."
+          },
+          "files": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "url"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Logical file name used by the derivation (kanji.json, n5.csv, JmdictFurigana.json, …)."
+                },
+                "url": {
+                  "type": "string",
+                  "pattern": "\\{ref\\}",
+                  "description": "Download URL containing a `{ref}` placeholder."
+                },
+                "entry": {
+                  "type": "string",
+                  "description": "For release archives: the file inside the archive to extract."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
