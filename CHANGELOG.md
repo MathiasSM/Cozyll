@@ -7,6 +7,15 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 
+### Fixed
+
+- `cozyll --help` and `--version` work without a content repo; unknown commands are rejected instead of silently building, and `clean`/`check` no longer require content or a valid `SITE_ENV`.
+
+### Changed
+
+- `-v`/`--verbose` now enables debug output, including the resolved `SITE_ENV` and content directory.
+
+
 ## [3.3.0.0] - 2026-11-10
 
 ### Added

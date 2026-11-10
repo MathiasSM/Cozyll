@@ -8,6 +8,7 @@ import Cozyll.AsideSpec qualified as Aside
 import Cozyll.AuthorSpec qualified as Author
 import Cozyll.CleanURLSpec qualified as CleanURL
 import Cozyll.CliDataSpec qualified as CliData
+import Cozyll.CliSpec qualified as Cli
 import Cozyll.ContentSpec qualified as Content
 import Cozyll.DataSpec qualified as Data
 import Cozyll.FeedSpec qualified as Feed
@@ -43,6 +44,7 @@ main =
             , Author.tests
             , CleanURL.tests
             , CliData.tests
+            , Cli.tests
             , Content.tests
             , Data.tests
             , Feed.tests

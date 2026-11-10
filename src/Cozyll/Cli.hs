@@ -1,9 +1,9 @@
 {-# LANGUAGE Trustworthy #-}
 
 -- | The command-line interface and its subcommands
-module Cozyll.Cli (cli) where
+module Cozyll.Cli (Invocation (..), cli, invocationFor, versionString) where
 
-import Control.Monad (filterM, unless)
+import Control.Monad (filterM, unless, void, when)
 import Cozyll.Cli.Data (runDataCommand)
 import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
@@ -14,53 +14,116 @@ import Cozyll.Theme (discoverContentTemplateNames)
 import Data.Maybe (fromMaybe)
 import Data.Time (getCurrentTime, utctDay)
 import Data.Time.Calendar (toGregorian)
-import Hakyll (hakyllWith)
+import Data.Version (showVersion)
+import Hakyll (Command (..), Options (..), defaultParserInfo, defaultParserPrefs, hakyllWithArgs)
+import Hakyll.Core.Logger qualified as Logger
+import Options.Applicative qualified as OA
+import Paths_cozyll (version)
 import System.Directory (doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs, lookupEnv)
 import System.Exit (die)
 import System.FilePath.Posix ((</>))
 import Text.Read (readMaybe)
 
+-- | What the command line asks for before Hakyll's parser gets to see it
+data Invocation
+    = ShowHelp
+    | ShowVersion
+    | RunDataArgs [String]
+    | RunCommand
+    deriving (Eq, Show)
+
 {- | Main entrypoint for the cli subcommands (usually called like @cabal run cozyll SUBCMD@)
 
+Arguments are parsed with Hakyll's own parser /before/ any content is loaded, so
+@--help@, @--version@ and @-v@/@--verbose@ work without a content repo, and
+unknown commands are rejected with a usage message instead of being silently
+built. @clean@ and @check@ need no content and skip @SITE_ENV@ validation
+entirely; every other command loads @website.yaml@ and the rest of the content
+first.
+
+[@--help@]: Print Hakyll's usage and the command list, then exit 0 (also what no
+arguments prints)
+[@--version@, @-V@]: Print @cozyll \<version\>@; only recognised as the sole
+argument
+[@-v@, @--verbose@]: Enable debug logging (including the resolved @SITE_ENV@ and
+content directory)
+
 [@build@]: Generate the site into @_site@
-[@clean@]: Clean the generated files from @_site@
+[@clean@]: Clean the generated files from @_site@ (needs no content)
 [@rebuild@]: Runs @clean@ + @build@
 [@server@]: Setup a quick dev server serving the files in @_site@
 [@watch@]: Build, serve and rebuild site pieces as code changes
-[@check@]: Verify broken links in @_site@ files
+[@check@]: Verify broken links in @_site@ files (needs no content)
 
 Note: build commands check for required content before running.
 -}
 cli :: IO ()
 cli = do
-    env <- parseEnv =<< lookupEnv "SITE_ENV"
-    let contentDir = contentDirFor env
-    -- 1. Parse args
     args <- getArgs
-    -- 2. `data` is a pre-Hakyll command and must not require website.yaml
-    case args of
-        ("data" : rest) -> runDataCommand contentDir rest
-        _ -> runBuild env contentDir args
+    case invocationFor args of
+        ShowHelp -> void $ OA.handleParseResult $ parseOptions ["--help"]
+        ShowVersion -> putStrLn versionString
+        RunDataArgs rest -> do
+            env <- parseEnv =<< lookupEnv "SITE_ENV"
+            runDataCommand (contentDirFor env) rest
+        RunCommand -> run args
 
--- | The build/server/clean commands, which need @website.yaml@ and Hakyll
-runBuild :: Env -> FilePath -> [String] -> IO ()
-runBuild env contentDir args = do
-    -- 2. Get and validate website files/config
-    -- (`website.yaml` is always required, even for `clean`)
-    website <- Web.loadWebsite contentDir
-    unless ("clean" `elem` args) (Web.validateSecurityExpiration website)
-    -- 3. Check content exists
-    cfg <- loadSiteConfig env contentDir website
-    unless ("clean" `elem` args) (ensureContentExists cfg)
-    -- 4. Load the derived ruby index (if the content provides one)
-    limit <- indexLimitIO
-    rubyData <-
-        if "clean" `elem` args
-            then pure Nothing
-            else loadIndexFile limit (contentDir </> dataDirName </> indexFileName) >>= either die pure
-    -- 5. Run command
-    hakyllWith siteConfiguration (rules cfg{siteRubyData = rubyData} website)
+{- | Classifies the raw arguments: empty means help, a lone @--version@/@-V@
+means version, @data@ is a pre-Hakyll command, everything else is Hakyll's.
+-}
+invocationFor :: [String] -> Invocation
+invocationFor [] = ShowHelp
+invocationFor ["--version"] = ShowVersion
+invocationFor ["-V"] = ShowVersion
+invocationFor ("data" : rest) = RunDataArgs rest
+invocationFor _ = RunCommand
+
+-- | The @--version@ output, e.g. @cozyll 3.3.0.0@
+versionString :: String
+versionString = "cozyll " ++ showVersion version
+
+-- | Hakyll's parser, fed with our 'siteConfiguration'
+parseOptions :: [String] -> OA.ParserResult Options
+parseOptions = OA.execParserPure defaultParserPrefs (defaultParserInfo siteConfiguration)
+
+-- | Dispatches a parsed command, loading content only when the command needs it
+run :: [String] -> IO ()
+run args =
+    case parseOptions args of
+        OA.Success options -> dispatch options
+        failure -> void $ OA.handleParseResult failure
+
+dispatch :: Options -> IO ()
+dispatch options = case optCommand options of
+    -- These only touch the generated files, so they must work without content
+    -- (and without a valid SITE_ENV)
+    Clean -> hakyllWithArgs siteConfiguration options (pure ())
+    Check _ -> hakyllWithArgs siteConfiguration options (pure ())
+    _ -> do
+        env <- parseEnv =<< lookupEnv "SITE_ENV"
+        let contentDir = contentDirFor env
+        debugLog options $ "SITE_ENV=" ++ show env ++ ", content dir: " ++ contentDir
+        -- Get and validate website files/config (`website.yaml` is always required)
+        website <- Web.loadWebsite contentDir
+        Web.validateSecurityExpiration website
+        -- Check content exists
+        cfg <- loadSiteConfig env contentDir website
+        ensureContentExists cfg
+        -- Load the derived ruby index, when the content provides one
+        limit <- indexLimitIO
+        rubyData <-
+            loadIndexFile limit (contentDir </> dataDirName </> indexFileName) >>= either die pure
+        -- Run command
+        hakyllWithArgs siteConfiguration options (rules cfg{siteRubyData = rubyData} website)
+
+-- | Emits a debug line only when @-v@/@--verbose@ was passed
+debugLog :: Options -> String -> IO ()
+debugLog options message =
+    when (verbosity options) $ do
+        logger <- Logger.new Logger.Debug
+        Logger.debug logger message
+        Logger.flush logger
 
 {- | Throws if the content repo is missing, or lacks a file the site needs
 
