@@ -16,7 +16,10 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Ruby coverage check: Japanese content must annotate non-jōyō kanji with ruby; `jaRubySkip`
   exempts words. Requires `content/ruby-data/index.json`.
 - Rendered ruby carries `data-jlpt` and `data-jlpt-source` (`word`, `kanji`, or `unknown`).
-- `jaRubyCheck` (`off`, `warn`, `error`) controls the ruby check per site (`website.yaml`) or page.
+- `jaRubyCheck` (`off`, `warn`, `error`) controls the Japanese ruby checks per site
+  (`website.yaml`) or page.
+- Japanese ruby readings are checked against the derived alignment index; `jaRubyAllow`
+  exempts a surface or a `surface:reading` pair.
 
 ### Changed
 

@@ -1,14 +1,16 @@
 -- | Level assignment and the build checks that run on rendered page bodies
-module Cozyll.Ruby (LevelSource (..), levelOf, checkKanjiCoverage) where
+module Cozyll.Ruby (LevelSource (..), levelOf, checkKanjiCoverage, checkJaReadings) where
 
-import Cozyll.Ruby.Index (Level, RubyData (rdKanji, rdWords), isHan, levelRank, normalizeKey)
+import Cozyll.Ruby.Index (Level, RubyData (rdKanji, rdSegments, rdWords), isHan, levelRank, normalizeKey)
 import Data.Char (isAsciiUpper)
 import Data.List (maximumBy, nub, sortOn)
 import Data.Map.Strict qualified as Maple
+import Data.Maybe (maybeToList)
 import Data.Ord (comparing)
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as T
-import Text.HTML.TagSoup (Tag (..), parseTags)
+import Text.HTML.TagSoup (Tag (..), isTagCloseName, parseTags)
 
 -- | Where a level came from
 data LevelSource = FromWord | FromKanji | FromUnknown
@@ -82,6 +84,117 @@ toLowerAscii c
     | isAsciiUpper c = toEnum (fromEnum c + 32)
     | otherwise = c
 
+{- | Fails when a ruby reading is not attested in the derived index.
+
+@allow@ entries are either a surface (@薔薇@) or a surface/reading pair
+(@薔薇:ばら@). A base with no Han characters (katakana/emphasis ruby) is skipped.
+Only ruby whose effective language is @ja*@ is checked; non-Japanese ruby is left alone.
+-}
+checkJaReadings :: String -> [Text] -> RubyData -> String -> [String]
+checkJaReadings pageLang allow rubyData html =
+    nub
+        [ "ruby [" ++ T.unpack base ++ "](-" ++ T.unpack reading ++ "): reading “" ++ T.unpack reading ++ "” not attested for “" ++ T.unpack base ++ "”"
+        | (base, reading) <- rubyPairs pageLang (parseTags html)
+        , T.any isHan base
+        , not (T.null reading)
+        , not (allowed base reading)
+        , not (attested rubyData (normalizeKey base) (normalizeKey reading))
+        ]
+  where
+    allowed base reading =
+        any
+            ( \entry -> case T.breakOn ":" entry of
+                (surface, rest)
+                    | T.null rest -> normalizeKey surface == normalizeKey base
+                    | otherwise -> normalizeKey surface == normalizeKey base && normalizeKey (T.drop 1 rest) == normalizeKey reading
+            )
+            allow
+
+-- | The (base, reading) pairs of every @<ruby>@ whose effective language is Japanese
+rubyPairs :: String -> [Tag String] -> [(Text, Text)]
+rubyPairs pageLang = go [rootLanguage pageLang]
+  where
+    go _ [] = []
+    go stack (tag : rest) = case tag of
+        TagOpen name attrs ->
+            let lang = maybe (currentLang (rootLanguage pageLang) stack) (map toLowerAscii) (lookup "lang" attrs)
+             in case name of
+                    "ruby" ->
+                        let (content, after) = break (isTagCloseName "ruby") rest
+                         in [rubyPair content | isJapaneseLang lang] <> go stack (drop 1 after)
+                    _
+                        | name `elem` voidElements -> go stack rest
+                        | otherwise -> go (lang : stack) rest
+        TagClose _ -> go (drop 1 stack) rest
+        _ -> go stack rest
+
+    rubyPair content =
+        let (_, _, base, reading) = foldl' collect (False, False, T.empty, T.empty) content
+         in (T.strip base, T.strip reading)
+
+    collect (inRt, inRp, base, reading) tag = case tag of
+        TagOpen "rt" _ -> (True, False, base, reading)
+        TagClose "rt" -> (False, False, base, reading)
+        TagOpen "rp" _ -> (inRt, True, base, reading)
+        TagClose "rp" -> (inRt, False, base, reading)
+        TagText text
+            | inRt -> (inRt, inRp, base, reading <> T.pack text)
+            | inRp -> (inRt, inRp, base, reading)
+            | otherwise -> (inRt, inRp, base <> T.pack text, reading)
+        _ -> (inRt, inRp, base, reading)
+
+-- | Whether a (normalised) base/reading pair is attested
+attested :: RubyData -> Text -> Text -> Bool
+attested rubyData base reading
+    | Maple.member (base, reading) (rdWords rubyData) = True
+    | maybe False (Set.member reading) (Maple.lookup base (rdSegments rubyData)) = True
+    | dp rubyData base reading = True
+    | T.any (== '\x3005') base = dp rubyData (expandIteration base) reading
+    | otherwise = False
+
+{- | Dynamic programming over the segment table: literal kana edges plus every
+attested run that matches a prefix of the remaining reading.
+-}
+dp :: RubyData -> Text -> Text -> Bool
+dp rubyData base reading
+    | baseLength > 512 || readingLength > 1024 = False
+    | otherwise = search (Set.singleton (0, 0))
+  where
+    baseLength = T.length base
+    readingLength = T.length reading
+
+    search seen
+        | Set.member (baseLength, readingLength) seen = True
+        | Set.null next = False
+        | otherwise = search (seen <> next)
+      where
+        next =
+            Set.fromList
+                [ position
+                | (i, j) <- Set.toList seen
+                , i < baseLength
+                , j < readingLength
+                , position <- step i j
+                ]
+
+    step i j =
+        [(i + 1, j + 1) | not (isHan (T.index base i)), T.index base i == T.index reading j]
+            <> [ (i + len, j + T.length rt)
+               | len <- [1 .. min 32 (baseLength - i)]
+               , let surface = T.take len (T.drop i base)
+               , Just readings <- [Maple.lookup surface (rdSegments rubyData)]
+               , rt <- Set.toList readings
+               , rt `T.isPrefixOf` T.drop j reading
+               ]
+
+-- | Replaces @々@ with the preceding character
+expandIteration :: Text -> Text
+expandIteration = T.pack . go Nothing . T.unpack
+  where
+    go _ [] = []
+    go previous ('\x3005' : rest) = maybeToList previous <> go previous rest
+    go _ (c : rest) = c : go (Just c) rest
+
 -- TagSoup walking -------------------------------------------------------------
 
 {- | Drops whole sections of elements whose text must not be inspected. The tag
@@ -113,20 +226,22 @@ runsWithLanguage root = go [root]
     go _ [] = []
     go stack (tag : rest) = case tag of
         TagOpen name attrs ->
-            let lang = maybe (current stack) (map toLowerAscii) (lookup "lang" attrs)
+            let lang = maybe (currentLang root stack) (map toLowerAscii) (lookup "lang" attrs)
              in if name `elem` voidElements
                     then go stack rest
                     else go (lang : stack) rest
         TagClose _ -> go (drop 1 stack) rest
-        TagText text -> (isJapanese (current stack), T.pack text) : go stack rest
+        TagText text -> (isJapaneseLang (currentLang root stack), T.pack text) : go stack rest
         _ -> go stack rest
 
-    current [] = root
-    current (lang : _) = lang
+-- | The language of the current element scope, falling back to the page language
+currentLang :: String -> [String] -> String
+currentLang root [] = root
+currentLang _ (lang : _) = lang
 
-    isJapanese lang =
-        let primary = takeWhile (/= '-') lang
-         in primary == "ja"
+-- | Whether a language tag's primary subtag is @ja@
+isJapaneseLang :: String -> Bool
+isJapaneseLang lang = takeWhile (/= '-') lang == "ja"
 
 voidElements :: [String]
 voidElements =
