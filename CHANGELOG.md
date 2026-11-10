@@ -17,6 +17,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Favicon and web-manifest icon links are no longer dead references when there is no `media/branding/logo.svg`: icons, their `<link>`s and the manifest `icons` key are only emitted when a logo exists.
 - Author pages show the author's full name as the heading (no "By:" prefix), and their profile image is a page-relative URL instead of an absolute one.
 - The site header no longer declares `lang="en"` for non-English pages; menu entries carry their own language.
+- The sitemap's home entry now ends with a trailing slash, matching the canonical URL.
 
 ### Added
 
