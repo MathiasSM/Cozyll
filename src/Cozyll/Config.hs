@@ -47,6 +47,7 @@ module Cozyll.Config (
 )
 where
 
+import Cozyll.Brand (Brand)
 import Cozyll.Domain.Author (Author)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle)
 import Cozyll.Ruby.Index (RubyData)
@@ -78,7 +79,9 @@ data SiteConfig = SiteConfig
     , siteAlternateNames :: [String]
     -- ^ Alternate site names, exposed as @site-alternateNames@ (JSON-LD only for now)
     , siteLogo :: Maybe String
-    -- ^ Site-relative path to the raster logo (e.g. @images/logo.png@), for JSON-LD
+    -- ^ Site-relative path to the logo (e.g. @images/logo.svg@), for JSON-LD
+    , siteBrand :: Maybe Brand
+    -- ^ The logo-derived brand: published logo path and ordered icons
     , siteAuthors :: [Author]
     -- ^ Every author, in @authors.yaml@ file order
     , siteDefaultAuthor :: Author

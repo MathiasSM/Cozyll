@@ -1,34 +1,58 @@
-{- | The example site assembled for integration tests: the vendored theme plus
-@example-content@ in a build directory. Shared by the golden suite and the
-cache regression test, so both start from exactly the same fixture.
--}
+-- | Shared fixture helpers: a 'SiteConfig' builder and a full site build
 module Cozyll.Fixture (
     mkSiteConfig,
+    mkSiteConfigFor,
+    buildFixture,
+    buildFixtureFor,
+    withBuildLock,
+    loadFixtureConfig,
+    loadFixtureConfigFor,
+    runBuild,
     copyTree,
-    exampleSite,
-    copyFixture,
 ) where
 
-import Control.Monad (forM_)
-import Cozyll.Config (Env (Example), SiteConfig (..))
+import Control.Concurrent.MVar (MVar, newMVar, withMVar)
+import Control.Monad (forM_, when)
+import Cozyll.Brand (Brand, brandLogo, discoverBrand)
+import Cozyll.Config (Env (..), SiteConfig (..), siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
-import Cozyll.Domain.Website (Website)
+import Cozyll.Domain.Website (loadWebsite)
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.Ruby.Index (RubyData, defaultMaxIndexBytes, loadIndexFile)
+import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
-import System.Directory (
-    copyFile,
-    createDirectoryIfMissing,
-    doesDirectoryExist,
-    listDirectory,
- )
+import Hakyll.Commands qualified as Commands
+import Hakyll.Core.Logger qualified as Logger
+import Hakyll.Core.Runtime (RunMode (RunModeNormal))
+import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, listDirectory, withCurrentDirectory)
+import System.Exit (ExitCode (..), exitFailure)
 import System.FilePath ((</>))
+import System.IO.Temp (createTempDirectory, getCanonicalTemporaryDirectory)
+import System.IO.Unsafe (unsafePerformIO)
 
--- | Builds a 'SiteConfig' from a parsed @website.yaml@ (no environment overrides)
-mkSiteConfig :: Web.Website -> [Author.Author] -> [FilePath] -> Maybe RubyData -> SiteConfig
-mkSiteConfig website authors contentTemplateNames rubyData =
+{- | Serialises fixture builds: 'withCurrentDirectory' is process-wide, so two
+concurrent builds would interleave their working directories.
+-}
+{-# NOINLINE buildLock #-}
+buildLock :: MVar ()
+buildLock = unsafePerformIO (newMVar ())
+
+-- | Runs an action while holding the fixture-build lock
+withBuildLock :: IO a -> IO a
+withBuildLock action = withMVar buildLock (const action)
+
+-- | Builds an 'Example' 'SiteConfig' from a parsed @website.yaml@
+mkSiteConfig :: Web.Website -> [Author.Author] -> [FilePath] -> Maybe Brand -> Maybe RubyData -> SiteConfig
+mkSiteConfig = mkSiteConfigFor Example
+
+-- | Builds a 'SiteConfig' for @env@ from a parsed @website.yaml@ (no environment overrides)
+mkSiteConfigFor :: Env -> Web.Website -> [Author.Author] -> [FilePath] -> Maybe Brand -> Maybe RubyData -> SiteConfig
+mkSiteConfigFor env website authors contentTemplateNames brand rubyData =
     let site = Web.websiteSite website
         defaultAuthor' = either (error . unlines) id (Author.defaultAuthor authors)
+        logo = case Web.siteLogo site of
+            Just path -> Just path
+            Nothing -> brandLogo <$> brand
      in SiteConfig
             { siteTitle = Web.siteTitle site
             , siteDescription = Web.siteDescription site
@@ -36,7 +60,8 @@ mkSiteConfig website authors contentTemplateNames rubyData =
             , siteCurrentYear = 2021
             , siteDomain = Web.siteDomain site
             , siteAlternateNames = Web.siteAlternateNames site
-            , siteLogo = Web.siteLogo site
+            , siteLogo = logo
+            , siteBrand = brand
             , siteAuthors = authors
             , siteDefaultAuthor = defaultAuthor'
             , mathjaxVersion = Web.mathjaxVersion (Web.websiteMathjax website)
@@ -47,32 +72,64 @@ mkSiteConfig website authors contentTemplateNames rubyData =
             , contentTemplatesDir = "content/templates"
             , contentCssDir = "content/css"
             , contentTemplateNames = contentTemplateNames
-            , siteEnv = Example
+            , siteEnv = env
             , siteRubyData = rubyData
             , siteJaRubyCheck = Web.websiteJaRubyCheck website
             }
 
-{- | Loads the configuration and the website of @root@'s example content.
+{- | Loads the configuration and the website of a fixture build directory.
 
-The example content's own @website.yaml@ drives the build, so the output does
-not depend on the environment.
+The directory must hold the vendored @templates/@ and @assets/@ next to the
+@content/@ directory; this is what 'buildFixture' sets up and what a second
+build (e.g. the cache regression test) reloads after changing the content.
 -}
-exampleSite :: FilePath -> IO (SiteConfig, Website)
-exampleSite root = do
-    website <- Web.loadWebsite (root </> "example-content")
-    contentTemplateNames <- discoverContentTemplateNames (root </> "example-content" </> "templates")
-    authors <- Author.loadAuthors (root </> "example-content")
-    loaded <- loadIndexFile defaultMaxIndexBytes (root </> "example-content" </> "ruby-data" </> "index.json")
-    rubyData <- either error pure loaded
-    pure (mkSiteConfig website authors contentTemplateNames rubyData, website)
+loadFixtureConfig :: FilePath -> IO (SiteConfig, Web.Website)
+loadFixtureConfig = loadFixtureConfigFor Example
 
--- | Copies the vendored theme and the example content into a build directory
-copyFixture :: FilePath -> FilePath -> IO ()
-copyFixture root destination = do
-    createDirectoryIfMissing True destination
-    copyTree (root </> "templates") (destination </> "templates")
-    copyTree (root </> "assets") (destination </> "assets")
-    copyTree (root </> "example-content") (destination </> "content")
+-- | 'loadFixtureConfig' for @env@
+loadFixtureConfigFor :: Env -> FilePath -> IO (SiteConfig, Web.Website)
+loadFixtureConfigFor env buildDir = do
+    let contentDir = buildDir </> "content"
+    website <- loadWebsite contentDir
+    contentTemplateNames <- discoverContentTemplateNames (contentDir </> "templates")
+    authors <- Author.loadAuthors contentDir
+    brand <- discoverBrand contentDir
+    loaded <- loadIndexFile defaultMaxIndexBytes (contentDir </> "ruby-data" </> "index.json")
+    rubyData <- either error pure loaded
+    pure (mkSiteConfigFor env website authors contentTemplateNames brand rubyData, website)
+
+-- | Builds the site in @buildDir@, returning Hakyll's exit code
+runBuild :: FilePath -> SiteConfig -> Web.Website -> IO ExitCode
+runBuild buildDir cfg website = withBuildLock (runBuildIn buildDir cfg website)
+
+-- | 'runBuild' without taking the lock (the caller already holds it)
+runBuildIn :: FilePath -> SiteConfig -> Web.Website -> IO ExitCode
+runBuildIn buildDir cfg website = withCurrentDirectory buildDir $ do
+    -- An Error-only logger keeps the build silent on success
+    logger <- Logger.new Logger.Error
+    Commands.build RunModeNormal siteConfiguration logger (rules cfg website)
+
+{- | Builds an 'Example' site from @contentSource@ in a fresh temporary
+directory (see 'buildFixtureFor').
+-}
+buildFixture :: FilePath -> FilePath -> IO (FilePath, FilePath)
+buildFixture = buildFixtureFor Example
+
+{- | Builds a site for @env@ from @contentSource@ in a fresh temporary
+directory, with the vendored templates and assets next to it. Returns the work
+directory and its @_site@; the caller removes the work directory afterwards.
+-}
+buildFixtureFor :: Env -> FilePath -> FilePath -> IO (FilePath, FilePath)
+buildFixtureFor env root contentSource = withBuildLock $ do
+    work <- getCanonicalTemporaryDirectory >>= \tmp -> createTempDirectory tmp "cozyll-fixture"
+    let buildDir = work </> "build"
+    copyTree (root </> "templates") (buildDir </> "templates")
+    copyTree (root </> "assets") (buildDir </> "assets")
+    copyTree contentSource (buildDir </> "content")
+    (cfg, website) <- loadFixtureConfigFor env buildDir
+    createDirectoryIfMissing True buildDir
+    runBuildIn buildDir cfg website >>= \code -> when (code /= ExitSuccess) exitFailure
+    pure (work, buildDir </> "_site")
 
 -- | Copies a directory tree, creating the destination as needed
 copyTree :: FilePath -> FilePath -> IO ()

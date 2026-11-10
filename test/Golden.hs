@@ -13,25 +13,17 @@ module Golden (
 where
 
 import Control.Monad (forM, forM_)
-import Cozyll.Config (siteConfiguration)
-import Cozyll.Fixture (copyFixture, exampleSite)
-import Cozyll.Rules (rules)
+import Cozyll.Fixture (buildFixture)
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as BS
 import Data.List (sort)
-import Hakyll.Commands qualified as Commands
-import Hakyll.Core.Logger qualified as Logger
-import Hakyll.Core.Runtime (RunMode (RunModeNormal))
 import System.Directory (
     copyFile,
     createDirectoryIfMissing,
     doesDirectoryExist,
     listDirectory,
-    withCurrentDirectory,
  )
-import System.Exit (ExitCode (..), exitFailure)
 import System.FilePath (takeDirectory, takeExtension, (</>))
-import System.IO.Temp (createTempDirectory, getCanonicalTemporaryDirectory)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsFile, writeBinaryFile)
 
@@ -42,19 +34,9 @@ work directory afterwards.
 -}
 buildSiteSnapshot :: FilePath -> IO (FilePath, FilePath)
 buildSiteSnapshot root = do
-    work <- getCanonicalTemporaryDirectory >>= \tmp -> createTempDirectory tmp "golden"
-    let buildDir = work </> "build"
-        snapshot = work </> "snapshot"
-    (cfg, website) <- exampleSite root
-    createDirectoryIfMissing True buildDir
-    copyFixture root buildDir
-    withCurrentDirectory buildDir $ do
-        -- An Error-only logger keeps the build silent on success, like the old script
-        logger <- Logger.new Logger.Error
-        Commands.build RunModeNormal siteConfiguration logger (rules cfg website) >>= \case
-            ExitSuccess -> pure ()
-            _ -> exitFailure
-    buildSnapshot (buildDir </> "_site") snapshot
+    (work, site) <- buildFixture root (root </> "example-content")
+    let snapshot = work </> "snapshot"
+    buildSnapshot site snapshot
     pure (work, snapshot)
 
 {- | One golden test per file, comparing the built snapshot against the

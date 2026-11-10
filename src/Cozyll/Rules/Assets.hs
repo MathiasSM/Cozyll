@@ -2,7 +2,7 @@
 module Cozyll.Rules.Assets (processAssets, mediaRoute, mediaTarget, staticRoute, staticTarget) where
 
 import Control.Monad (unless)
-import Cozyll.Config (SiteConfig, assetsDir, contentCssPattern, dataPattern, dataSchemaPattern, highlightStyle, localizationPattern, mediaDir, socialsPattern, staticDir, staticPattern)
+import Cozyll.Config (SiteConfig, assetsDir, contentCssPattern, contentDir, dataPattern, dataSchemaPattern, highlightStyle, localizationPattern, mediaDir, siteBrand, socialsPattern, staticDir, staticPattern)
 import Cozyll.Domain.Website (toPandocStyle)
 import Cozyll.Rules.Favicon (faviconRules)
 import Data.List (stripPrefix)
@@ -135,10 +135,9 @@ processSvgImages cfg = do
     -- Icon SVGs are inlined via the data files' $iconRaw$, so load them as raw strings
     match (mediaPattern cfg "icons" ["svg"]) $ compile getResourceString
 
--- | Generates the favicons from the logo
+-- | Generates the favicons from the brand logo
 processFavicon :: SiteConfig -> Rules ()
-processFavicon cfg = do
-    faviconRules $ fromString $ mediaDir cfg </> "branding" </> "logo.svg"
+processFavicon cfg = faviconRules (contentDir cfg) (siteBrand cfg)
 
 -- | Where the site's own stylesheets live (see 'assetsDir')
 cssFiles :: SiteConfig -> Pattern

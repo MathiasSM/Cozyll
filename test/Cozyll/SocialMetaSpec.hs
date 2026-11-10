@@ -48,6 +48,7 @@ mkConfig =
         , siteDomain = "example.com"
         , siteAlternateNames = []
         , siteLogo = Nothing
+        , siteBrand = Nothing
         , siteAuthors = [mkAuthor ""]
         , siteDefaultAuthor = mkAuthor ""
         , mathjaxVersion = ""

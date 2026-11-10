@@ -271,6 +271,7 @@ cfg =
         , siteDomain = "example.com"
         , siteAlternateNames = []
         , siteLogo = Nothing
+        , siteBrand = Nothing
         , siteAuthors = [exampleAuthor, orgAuthor]
         , siteDefaultAuthor = exampleAuthor
         , mathjaxVersion = ""

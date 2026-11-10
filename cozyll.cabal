@@ -43,6 +43,7 @@ library
   import:           shared
   hs-source-dirs:   src
   exposed-modules:  Cozyll.Accessibility
+                  , Cozyll.Brand
                   , Cozyll.BuildState
                   , Cozyll.CleanURL
                   , Cozyll.Cli
@@ -142,6 +143,7 @@ test-suite spec
                   , Cozyll.AccessibilitySpec
                   , Cozyll.AsideSpec
                   , Cozyll.AuthorSpec
+                  , Cozyll.BrandSpec
                   , Cozyll.BuildStateSpec
                   , Cozyll.CacheSpec
                   , Cozyll.CleanURLSpec
@@ -149,6 +151,7 @@ test-suite spec
                   , Cozyll.ContentSpec
                   , Cozyll.DataSpec
                   , Cozyll.FeedSpec
+                  , Cozyll.Fixture
                   , Cozyll.FormatSpec
                   , Cozyll.HtmlSpec
                   , Cozyll.JsonLdSpec
@@ -185,6 +188,9 @@ test-suite spec
                   , temporary
                   , text
                   , time
+                  , directory
+                  , filepath
+                  , temporary
   ghc-options:      -threaded
 
 test-suite golden

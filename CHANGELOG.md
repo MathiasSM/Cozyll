@@ -14,9 +14,11 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Template overrides in `content/templates/` now take effect on the next `cozyll build`; no `clean` needed.
 - Drafts from a `dev` build no longer survive a `prod` build: changing `SITE_ENV` clears `_site` and `_cache` together before rebuilding.
 - `cozyll check` now refuses a missing or foreign-env `_site` instead of silently passing, and warns when content is newer than the last build.
+- Favicon and web-manifest icon links are no longer dead references when there is no `media/branding/logo.svg`: icons, their `<link>`s and the manifest `icons` key are only emitted when a logo exists.
 
 ### Added
 
+- Raster logos are supported: `media/branding/logo.png` is used when no `logo.svg` exists, and `content/static/` files override the generated icon at the same path.
 - `content/static/` is copied verbatim to the site root, for files such as `CNAME`, `.nojekyll` and verification files.
 
 ### Changed

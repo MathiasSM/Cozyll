@@ -1,81 +1,119 @@
--- | Rules that generate the favicons from the logo
+-- | Rules that generate the site's icons from the brand logo
 module Cozyll.Rules.Favicon (faviconRules) where
 
+import Control.Monad (forM_, when)
+import Cozyll.Brand (
+    Brand (..),
+    LogoFormat (..),
+    SiteIcon (..),
+    brandSourcePath,
+    needsImageMagick,
+ )
+import Data.Maybe (fromMaybe, isNothing)
+import Data.String (fromString)
 import Hakyll (
-    Pattern,
     Rules,
     compile,
     customRoute,
     getResourceLBS,
     match,
+    preprocess,
     route,
     unixFilterLBS,
     version,
     withItemBody,
  )
+import Hakyll.Core.Logger qualified as Logger
+import System.Directory (findExecutable)
+import System.Exit (die)
 
--- | An icon generated from the logo SVG
-data Favicon
-    = -- | The SVG itself, served from the site root
-      Svg
-    | -- | Single-size .ico
-      Ico
-    | -- | PNG written to @file@, scaled to @size@ with @padding@ pixels on each side
-      Png {file :: FilePath, size :: Int, padding :: Int}
+{- | Generates the icons the brand asks for, reading the logo as its source.
 
-favicons :: [Favicon]
-favicons =
-    [ Svg
-    , Ico
-    , Png "apple-touch-icon.png" 180 20
-    , Png "favicon-192.png" 192 20
-    , Png "favicon-512.png" 512 40
-    ]
+Icons with a @content\/static@ file at the same path are skipped (the static
+file wins), and a site without a logo gets no icons at all. ImageMagick is only
+required when a generated icon actually needs converting.
+-}
+faviconRules :: FilePath -> Maybe Brand -> Rules ()
+faviconRules _ Nothing = message "no media/branding/logo.{svg,png}; skipping favicons"
+faviconRules contentDir (Just brand) = do
+    forM_ overridden $ \icon ->
+        message $ "static/" ++ iconPath icon ++ " wins over the generated icon"
+    converter <-
+        if needsImageMagick (brandFormat brand) generated
+            then preprocess findConverter
+            else pure Nothing
+    when (needsImageMagick (brandFormat brand) generated && isNothing converter)
+        $ preprocess
+        $ die
+        $ "ImageMagick is required to generate favicons from the logo.\n"
+            ++ "Install it (providing 'magick' or 'convert'), or add hand-made icons under content/static/."
+    match (fromString $ brandSourcePath contentDir (brandFormat brand)) $
+        forM_ generated (processFavicon (brandFormat brand) (fromMaybe "convert" converter))
+  where
+    icons = brandIcons brand
+    generated = filter iconGenerated icons
+    overridden = filter (not . iconGenerated) icons
 
-faviconPath :: Favicon -> FilePath
-faviconPath Svg = "favicon.svg"
-faviconPath Ico = "favicon.ico"
-faviconPath Png{file} = file
+-- | Logs a line at Hakyll's message level (shown without @-v@)
+message :: String -> Rules ()
+message text = preprocess $ do
+    logger <- Logger.new Logger.Message
+    Logger.message logger text
+    Logger.flush logger
 
--- | Generates every favicon from the given logo
-faviconRules :: Pattern -> Rules ()
-faviconRules ptn = match ptn $ mapM_ processFavicon favicons
+-- | The ImageMagick executable, preferring version 7's @magick@
+findConverter :: IO (Maybe String)
+findConverter = do
+    magick <- findExecutable "magick"
+    case magick of
+        Just _ -> pure (Just "magick")
+        Nothing -> findExecutable "convert"
 
-processFavicon :: Favicon -> Rules ()
-processFavicon favicon = version (faviconVersion favicon) $ do
-    route $ customRoute $ const $ faviconPath favicon
-    compile $ case faviconCommand favicon of
+-- | Generates one icon from the logo; the SVG is copied, the rest converted
+processFavicon :: LogoFormat -> String -> SiteIcon -> Rules ()
+processFavicon format converter icon = version (iconPath icon) $ do
+    route $ customRoute $ const $ iconPath icon
+    compile $ case faviconCommand format icon of
         Nothing -> getResourceLBS
-        Just (cmd, args) -> getResourceLBS >>= withItemBody (unixFilterLBS cmd args)
+        Just args -> getResourceLBS >>= withItemBody (unixFilterLBS converter args)
 
--- | Distinguishes the versions of the logo item; one per generated file
-faviconVersion :: Favicon -> String
-faviconVersion = faviconPath
-
--- | ImageMagick invocation converting the SVG on stdin, if the favicon needs one
-faviconCommand :: Favicon -> Maybe (String, [String])
-faviconCommand Svg = Nothing
-faviconCommand Ico =
-    Just
-        ( "convert"
-        , ["-background", "none", "svg:-", "-define", "icon:auto-resize=32", "+repage", "ico:-"]
-        )
-faviconCommand Png{size, padding} =
-    Just
-        ( "convert"
-        ,
+-- | ImageMagick invocation converting the logo on stdin, if the icon needs one
+faviconCommand :: LogoFormat -> SiteIcon -> Maybe [String]
+faviconCommand LogoSvg icon
+    | iconPath icon == "favicon.svg" = Nothing
+faviconCommand format icon
+    | iconPath icon == "favicon.ico" =
+        Just
             [ "-background"
             , "none"
-            , "svg:-"
-            , "-gravity"
-            , "center"
-            , "-scale"
-            , show inner ++ "x" ++ show inner
-            , "-extent"
-            , show size ++ "x" ++ show size
+            , input
+            , "-define"
+            , "icon:auto-resize=32"
             , "+repage"
-            , "png:-"
+            , "ico:-"
             ]
-        )
+    | iconPath icon == "apple-touch-icon.png" = Just (pngArguments 180 20)
+    | iconPath icon == "favicon-192.png" = Just (pngArguments 192 20)
+    | iconPath icon == "favicon-512.png" = Just (pngArguments 512 40)
+    | otherwise = Nothing
   where
-    inner = size - padding * 2
+    input = case format of
+        LogoSvg -> "svg:-"
+        LogoPng -> "png:-"
+
+    pngArguments :: Int -> Int -> [String]
+    pngArguments size padding =
+        [ "-background"
+        , "none"
+        , input
+        , "-gravity"
+        , "center"
+        , "-scale"
+        , show inner ++ "x" ++ show inner
+        , "-extent"
+        , show size ++ "x" ++ show size
+        , "+repage"
+        , "png:-"
+        ]
+      where
+        inner = size - padding * 2
