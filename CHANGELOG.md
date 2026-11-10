@@ -18,6 +18,11 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Author pages show the author's full name as the heading (no "By:" prefix), and their profile image is a page-relative URL instead of an absolute one.
 - The site header no longer declares `lang="en"` for non-English pages; menu entries carry their own language.
 - The sitemap's home entry now ends with a trailing slash, matching the canonical URL.
+- Links inside prose are underlined, so in-text links no longer rely on colour alone (WCAG 1.4.1).
+
+### Changed
+
+- `scripts/check-site.sh` treats accessibility findings as advisory unless `--a11y-fail true` is passed, matching CI.
 
 ### Added
 

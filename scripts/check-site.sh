@@ -10,13 +10,14 @@ Usage: check-site.sh <check> [options]
 Checks (tools in parentheses):
   content-schema   Validate website.yaml, authors.yaml and socials.yaml against the schemas. (pipx)
   html             Validate HTML, CSS and SVG with the W3C Nu checker. (java, curl)
-  a11y             Audit the built site with pa11y-ci and axe. (python3, npx, Chrome)
+  a11y             Audit the built site with pa11y-ci and the axe runner. (python3, npx, Chrome)
   links-external   Check external links with lychee. (lychee)
   xml              Validate that generated XML is well formed. (xmllint)
   jsonld           Validate JSON-LD blocks in generated HTML. (python3)
   wellknown        Validate well-known and metadata files. (python3)
   spelling         Run typos. (typos)
-  all              Run the default CI set: content-schema, html, a11y, xml, jsonld, wellknown.
+  all              Run the default CI set: content-schema, html, a11y, xml, jsonld,
+                   wellknown. The a11y check is advisory (see --a11y-fail).
 
 Options:
   --content-dir DIR   Content directory (default: content).
@@ -24,7 +25,7 @@ Options:
   --schema-dir DIR    Schema directory (default: schema).
   --port PORT         Port for the local a11y server (default: 8080).
   --standard STD      WCAG standard for pa11y (default: WCAG2AA).
-  --a11y-fail BOOL    Fail on accessibility issues (default: true).
+  --a11y-fail BOOL    Fail on accessibility issues (default: false; findings are advisory).
   --config FILE       Tool config file, where supported (lychee, typos).
   --vnu-jar FILE      Path to vnu.jar (default: VNU_JAR, else downloaded to the temp dir).
   --fail BOOL         For links-external: fail on broken links (default: false).
@@ -32,6 +33,10 @@ Options:
 
 Tools are expected on PATH. A missing tool fails with an install hint. The optional
 checks (links-external, spelling) are not part of `all`.
+
+Accessibility findings are advisory unless --a11y-fail true is passed, matching CI.
+The a11y check runs pa11y-ci with the axe runner (the same configuration as CI);
+bare `npx pa11y` defaults to HTML_CodeSniffer and will disagree.
 EOF
 }
 
@@ -47,7 +52,7 @@ standard="WCAG2AA"
 config=""
 vnu_jar="${VNU_JAR:-}"
 fail_links="false"
-a11y_fail="true"
+a11y_fail="false"
 check=""
 
 while [ "$#" -gt 0 ]; do
