@@ -1,11 +1,6 @@
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to the [Haskell Package Versioning Policy](https://pvp.haskell.org/).
-
 ## [Unreleased]
+
+## [3.4.0.0] - 2026-11-10
 
 ### Added
 
@@ -13,6 +8,39 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - `site.language` in `website.yaml` (ISO 639-1 with an optional region, default `en`) sets the site's own language: it is the default page language, drives author pages and social metadata, and marks only the site chrome of pages written in another language.
 - `nav:` accepts a map of language to label (e.g. `nav: {en: Guides, es: Guías}`) in addition to a single string; labels resolve for the rendering page's language, then its base language, then the site's language.
 
+## [3.2.1.0] - 2026-11-10
+
+### Fixed
+
+- `cozyll --help` and `--version` work without a content repo; unknown commands are rejected instead of silently building, and `clean`/`check` no longer require content or a valid `SITE_ENV`.
+- Non-ASCII content no longer crashes the build under a non-UTF-8 locale (`LC_ALL=C`); the build pins UTF-8 for its inputs and output.
+- Template overrides in `content/templates/` now take effect on the next `cozyll build`; no `clean` needed.
+- Drafts from a `dev` build no longer survive a `prod` build: changing `SITE_ENV` clears `_site` and `_cache` together before rebuilding.
+- `cozyll check` now refuses a missing or foreign-env `_site` instead of silently passing, and warns when content is newer than the last build.
+- Favicon and web-manifest icon links are no longer dead references when there is no `media/branding/logo.svg`: icons, their `<link>`s and the manifest `icons` key are only emitted when a logo exists.
+- Author pages show the author's full name as the heading (no "By:" prefix), and their profile image is a page-relative URL instead of an absolute one.
+- The site header no longer declares `lang="en"` for non-English pages; menu entries carry their own language.
+- The sitemap's home entry now ends with a trailing slash, matching the canonical URL.
+- Links inside prose are underlined, so in-text links no longer rely on colour alone (WCAG 1.4.1).
+
+### Added
+
+- `docs/authoring.md`, a guide to pages, posts, groups, `path`, drafts, aliases, front matter, media routes and feeds; the build's group and required-content errors now point at it instead of the README.
+- `docs/theming.md`, the theme contract: which templates exist and what they receive, `content.html` being applied by the builder, the CSS custom properties and the override/caching rules.
+- A site-wide Atom feed at `/atom.xml`, aggregating every group's posts newest first (up to `feed.size`), listed first in every page head; per-group feeds are unchanged.
+- Raster logos are supported: `media/branding/logo.png` is used when no `logo.svg` exists, and `content/static/` files override the generated icon at the same path.
+- `content/static/` is copied verbatim to the site root, for files such as `CNAME`, `.nojekyll` and verification files.
+- `schema/example.authors.yaml`, `schema/example.localization.yaml` and `schema/localization.schema.json`, so every required config file has an example and a schema; the content-schema check now validates `localization.yaml` too.
+
+### Changed
+
+- The README now documents the workspace layout (kit vs content repo), install, commands, authoring, localisation, theming and checks, and the kit ships those docs.
+- `-v`/`--verbose` now enables debug output, including the resolved `SITE_ENV` and content directory.
+- Site chrome and author pages now follow `site.language` instead of assuming English; the chrome only claims a language on pages written in another language.
+- `scripts/check-site.sh` treats accessibility findings as advisory unless `--a11y-fail true` is passed, matching CI.
+- `funding:` may be omitted from `website.yaml`; a site without it publishes no `funding.json` and no `.well-known/funding-manifest-urls`.
+- Every file under `content/media/` is now published (previously a whitelist silently dropped files); `media/branding/*` still flattens to `/images/*` and `.dot` sources still render to PNG.
+- Build errors now list the required content tree, explain a group without an index page, and report every item missing `path:` in one go.
 
 ## [3.3.1.0] - 2026-11-10
 
@@ -417,6 +445,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 
 [Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.3.0.0...master
+[3.4.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.3.1.0...v3.4.0.0
 [3.3.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.3.0.0...v3.3.1.0
 [3.3.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.2.0.0...v3.3.0.0
 [3.2.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.1...v3.2.0.0
