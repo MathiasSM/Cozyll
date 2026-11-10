@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Changed
+
+- Release kits are built on a pinned Debian 12 baseline (glibc 2.36) and no longer write `cozyll.tix`; see the release notes for the glibc floor.
+
 ## [3.4.0.0] - 2026-11-10
 
 ### Added
