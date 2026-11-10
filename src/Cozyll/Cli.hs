@@ -3,6 +3,7 @@
 -- | The command-line interface and its subcommands
 module Cozyll.Cli (Invocation (..), cli, invocationFor, parseEnvValue, versionString) where
 
+import Control.Exception (IOException, SomeException, displayException, fromException, try)
 import Control.Monad (filterM, unless, void, when)
 import Cozyll.Brand (brandLogo, discoverBrand)
 import Cozyll.BuildState (
@@ -26,7 +27,7 @@ import Cozyll.Ruby.Index (dataDirName, indexFileName, indexLimitIO, loadIndexFil
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
 import Data.Either (fromRight, isRight)
-import Data.List (intercalate, stripPrefix)
+import Data.List (dropWhileEnd, intercalate, isPrefixOf, stripPrefix)
 import Data.Maybe (fromMaybe)
 import Data.Text qualified as T
 import Data.Time (getCurrentTime, utctDay)
@@ -39,9 +40,9 @@ import Options.Applicative qualified as OA
 import Paths_cozyll (version)
 import System.Directory (doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs, lookupEnv)
-import System.Exit (ExitCode (ExitSuccess), die, exitFailure, exitWith)
+import System.Exit (ExitCode (ExitFailure, ExitSuccess), die, exitFailure, exitWith)
 import System.FilePath.Posix (takeFileName, (</>))
-import System.IO (hPutStr, hPutStrLn, stderr)
+import System.IO (hFlush, hPutStr, hPutStrLn, stderr, stdout)
 import Text.Read (readMaybe)
 
 -- | What the command line asks for before Hakyll's parser gets to see it
@@ -233,10 +234,34 @@ prepareBuild options env = do
     debugLog options $ "build state: " ++ describe start
     applyBuildStart start
 
+-- | The message of an IO error without the attached callstack
+showError :: IOException -> String
+showError err =
+    dropWhileEnd (== '\n')
+        . unlines
+        . takeWhile (not . isPrefixOf "HasCallStack backtrace:")
+        . lines
+        $ displayException err
+
 -- | Runs a build and records the provenance once Hakyll succeeds
 runBuild :: Options -> Env -> SiteConfig -> Web.Website -> IO ()
 runBuild options env cfg website = do
-    code <- hakyllWithExitCodeAndArgs siteConfiguration options (rules cfg website)
+    -- Rule-set errors (invalid front matter, a missing `path`, a group without
+    -- an index page) are thrown as IOExceptions while the rules are built.
+    -- Print the message on its own instead of letting the RTS append a
+    -- callstack to a user-facing error.
+    built <- try (hakyllWithExitCodeAndArgs siteConfiguration options (rules cfg website))
+    code <- case built of
+        Right result -> pure result
+        Left err -> do
+            -- `displayException` on an IOError includes GHC's callstack; content
+            -- authors only need the message. Flush Hakyll's buffered log first
+            -- so the error appears after the rules header.
+            hFlush stdout
+            hPutStrLn stderr $ case fromException err of
+                Just ioErr -> showError (ioErr :: IOException)
+                Nothing -> displayException (err :: SomeException)
+            pure (ExitFailure 1)
     when (code == ExitSuccess) $ do
         builtAt <- getCurrentTime
         writeBuildState
