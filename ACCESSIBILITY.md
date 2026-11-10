@@ -51,3 +51,17 @@ Accessibility is owned by [MathiasSM](https://github.com/MathiasSM). Reports are
 ## Feedback
 
 Accessibility is an ongoing practice. To suggest improvements to this statement or our practices, open an issue or a pull request.
+
+## Ruby
+
+When a derived `ruby-data/index.json` is present, the build checks Japanese content:
+
+- **Coverage** — every non-jōyō kanji (grade 1–6 and 8) must be inside a `<ruby>` base, or
+  the containing word must be listed in `rubySkip`. `lang=` subtrees are respected, and
+  `<code>`, `<pre>`, `<rt>`, and `<rp>` are ignored.
+- **Readings** — every ruby with a kanji base must have an attested reading in the index;
+  `rubyAllow` exempts names and creative readings. This proves the pair exists, not that it
+  is the intended reading in context.
+
+`rubyCheck` (`off`, `warn`, `error`) controls the severity, per site or page. A page
+without the index is not checked.

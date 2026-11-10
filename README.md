@@ -208,6 +208,47 @@ See [`Cozyll.Metadata`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Metadata.html
 `src/Cozyll/Metadata.hs`) for the full list of supported fields. Other fields become available as
 part of the page/post's context, which you may use in templates or templated markup.
 
+### Ruby and JLPT levels
+
+`[base](-reading)` renders ruby. When the content repo provides a derived
+`ruby-data/index.json`, each ruby carries `data-jlpt` (`n1`–`n5` or `unknown`) and
+`data-jlpt-source` (`word`, `kanji`, or `unknown`), and readers get a threshold
+`<select>` plus an independent unknown-level checkbox. Their choice is stored in
+`localStorage`; there is no article default, so without JS all ruby is shown.
+
+Generate (and refresh) the data with the CLI, then commit it:
+
+```sh
+cozyll data fetch     # resolve sources, derive ruby-data/index.json
+cozyll data verify    # schema and canonical form
+cozyll data fmt       # rewrite the index canonically
+cozyll data sources   # print the effective sources file
+```
+
+The default source list is `schema/example.ruby-sources.yaml` (shipped with Cozyll; its
+schema is `schema/ruby-sources.schema.json`). Copy it to `ruby-data/sources.yaml` (or run
+`cozyll data sources --write`) to pin versions or change locations; the content-repo file
+wins. `ref: latest` resolves via the GitHub API; non-GitHub hosts need a pinned ref, and
+release assets are checked against GitHub's digest when one is available.
+
+Builds are offline and never re-derive. The index is not a Hakyll dependency: after
+replacing it, run `cozyll rebuild` (or restart `watch`). The index size limit is
+`COZYLL_RUBY_INDEX_LIMIT` bytes (default 8 MiB). The derived data is CC BY-SA 4.0
+(attribution required); Cozyll itself ships no data.
+
+Front matter (per page):
+
+| Key | Meaning |
+|---|---|
+| `rubyControl: <label>` | enables the threshold `<select>` |
+| `rubyUnknown: <label>` | enables the unknown-level checkbox |
+| `rubySkip: [...]` | words that may appear without ruby |
+| `rubyAllow: [...]` | surfaces or `surface:reading` pairs accepted without a dictionary match |
+| `rubyCheck: off\|warn\|error` | overrides the site's check severity |
+
+`rubyCheck` is also read from `website.yaml` (default `error`). Content repos must add
+`ruby.all` to `localization.yaml` for the “All” option.
+
 ### Social metadata
 
 Open Graph and JSON-LD are generated automatically for posts, the home page, standalone
