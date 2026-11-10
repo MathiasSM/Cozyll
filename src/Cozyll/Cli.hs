@@ -230,7 +230,7 @@ ensureWebsiteExists contentDir = do
             ++ contentDir
             ++ "/:\n"
             ++ unlines (map (\(path, hint) -> "  " ++ pad path ++ hint) requiredTree)
-            ++ "\nRun 'cozyll init' to create these, or see the README."
+            ++ "\nSee docs/authoring.md for what each file needs (the kit ships it)."
 
 -- | The files a site needs, relative to the content directory, with a hint for each
 requiredTree :: [(FilePath, String)]

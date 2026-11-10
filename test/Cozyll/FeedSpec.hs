@@ -36,7 +36,7 @@ tests =
                         , "  index: true"
                         , "  group: curiosities"
                         , "  path: /curiosities"
-                        , "(see the README, \"Groups\")"
+                        , "(see docs/authoring.md, \"Groups\")"
                         ]
             ]
         ]

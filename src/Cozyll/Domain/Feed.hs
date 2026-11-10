@@ -70,7 +70,7 @@ missingIndexPageMessage contentDir group =
         , "  index: true"
         , "  group: " ++ group
         , "  path: /" ++ group
-        , "(see the README, \"Groups\")"
+        , "(see docs/authoring.md, \"Groups\")"
         ]
   where
     indexPage = contentDir </> "writings" </> group <.> "md"
