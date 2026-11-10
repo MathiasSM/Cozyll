@@ -7,6 +7,12 @@
   "additionalProperties": false,
   "required": ["site", "contact", "manifest", "mathjax", "highlight", "feed", "robots", "security", "trust", "funding"],
   "properties": {
+    "rubyCheck": {
+      "type": "string",
+      "enum": ["off", "warn", "error"],
+      "default": "error",
+      "description": "Severity of the ruby coverage check for Japanese content."
+    },
     "site": {
       "type": "object",
       "description": "The site's identity.",

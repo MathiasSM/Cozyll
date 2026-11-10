@@ -15,7 +15,7 @@
     <id>https://example.com/languages/ruby-check</id>
     <published>2024-05-04T00:00:00Z</published>
     <updated>2024-05-04T00:00:00Z</updated>
-    <content type="html"><![CDATA[<p><ruby>薔薇<rp>(</rp><rt>ばら</rt><rp>)</rp></ruby>はルビがあります。薔薇はスキップされます。</p>]]></content>
+    <content type="html"><![CDATA[<p><ruby data-jlpt="unknown" data-jlpt-source="unknown">薔薇<rp>(</rp><rt>ばら</rt><rp>)</rp></ruby>はルビがあります。薔薇はスキップされます。</p>]]></content>
 </entry>
 <entry>
     <title><![CDATA[Polyglot]]></title>
@@ -41,7 +41,7 @@
     <updated>2024-05-02T00:00:00Z</updated>
     <content type="html"><![CDATA[<p>この記事は日本語で書かれています。ルビを振ることもできます。</p>
 <h2 id="見出し">見出し</h2>
-<p><ruby>日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby>はルビで読み方を示せます。<ruby>漢字<rp>(</rp><rt>かんじ</rt><rp>)</rp></ruby>も同様です。</p>]]></content>
+<p><ruby data-jlpt="n5" data-jlpt-source="word">日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby>はルビで読み方を示せます。<ruby data-jlpt="n3" data-jlpt-source="kanji">漢字<rp>(</rp><rt>かんじ</rt><rp>)</rp></ruby>も同様です。</p>]]></content>
 </entry>
 <entry>
     <title><![CDATA[Un escrito]]></title>

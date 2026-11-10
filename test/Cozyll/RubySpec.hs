@@ -1,6 +1,7 @@
 -- | Tests for the jōyō coverage check
 module Cozyll.RubySpec (tests) where
 
+import Cozyll.Domain.Website (CheckMode (..), parseCheckMode)
 import Cozyll.Ruby (checkCoverage)
 import Cozyll.Ruby.Index (Index (..), KanjiRow (..), RubyData, toRubyData)
 import Test.Tasty (TestTree, testGroup)
@@ -36,6 +37,8 @@ tests =
         , testCase "honours rubySkip" $ checkCoverage "ja" ["薔薇"] rubyData "<p>薔薇</p>" @?= []
         , testCase "treats the iteration mark as non-Han" $
             checkCoverage "ja" [] rubyData "<p>下々</p>" @?= []
+        , testCase "parses the check modes" $
+            map parseCheckMode ["off", "warn", "error", "x"] @?= [Just CheckOff, Just CheckWarn, Just CheckError, Nothing]
         , testCase "flags JLPT-tagged non-jōyō kanji (jōyō-only policy)" $
             checkCoverage "ja" [] (toRubyData (Index [KanjiRow '綺' (Just 9) Nothing] [] [])) "<p>綺麗</p>"
                 @?= [ "non-jōyō kanji “綺” in “綺麗” has no ruby"

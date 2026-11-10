@@ -15,6 +15,12 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   versions or locations. Builds read the index offline; the content repo commits it.
 - Ruby coverage check: Japanese content must annotate non-jōyō kanji with ruby; `rubySkip`
   exempts words. Requires `content/ruby-data/index.json`.
+- Rendered ruby carries `data-jlpt` and `data-jlpt-source` (`word`, `kanji`, or `unknown`).
+- `rubyCheck` (`off`, `warn`, `error`) controls the ruby check per site (`website.yaml`) or page.
+
+### Changed
+
+- The ruby filter HTML-escapes base and reading; every `[base](-reading)` link still becomes ruby.
 
 ## [3.2.0.0] - 2026-11-10
 

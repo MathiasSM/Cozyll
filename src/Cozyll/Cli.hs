@@ -114,6 +114,7 @@ loadSiteConfig env contentDir website = do
             , contentTemplateNames = contentTemplates
             , siteEnv = env
             , siteRubyData = Nothing
+            , siteRubyCheck = Web.websiteRubyCheck website
             }
   where
     override :: (Read a) => String -> a -> IO a

@@ -87,6 +87,8 @@ data Key
       RubyToggle
     | -- | Words that may appear without furigana (coverage exemption).
       RubySkip
+    | -- | Overrides the site's ruby check severity (@off@, @warn@, @error@).
+      RubyCheck
     | -- | Enables: The hide-images toggle; the value is the control's label (markdown).
       ImagesToggle
     | -- | A social account's username/handle.
@@ -139,6 +141,7 @@ keyName key = case key of
     TOC -> "TOC"
     RubyToggle -> "rubyToggle"
     RubySkip -> "rubySkip"
+    RubyCheck -> "rubyCheck"
     ImagesToggle -> "imagesToggle"
     Username -> "username"
 

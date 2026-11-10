@@ -64,6 +64,7 @@ mkSiteConfig website authors contentTemplateNames rubyData =
             , contentTemplateNames = contentTemplateNames
             , siteEnv = Example
             , siteRubyData = rubyData
+            , siteRubyCheck = Web.websiteRubyCheck website
             }
 
 {- | Builds the fixture site in a fresh temporary directory and mirrors its

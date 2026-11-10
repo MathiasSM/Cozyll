@@ -4,7 +4,7 @@ module Cozyll.AuthorSpec (tests) where
 import Cozyll.Config (Env (Dev), SiteConfig (..))
 import Cozyll.Context.Author (authoredBy, copyrightYears, resolveAuthors)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, defaultAuthor, parseAuthorsYaml)
-import Cozyll.Domain.Website (HighlightStyle (Pygments))
+import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Metadata qualified as Meta
 import Data.Aeson (Value (..), toJSON)
 import Data.Aeson.Key qualified as AesonKey
@@ -251,6 +251,7 @@ cfg =
         , contentTemplateNames = []
         , siteEnv = Dev
         , siteRubyData = Nothing
+        , siteRubyCheck = CheckError
         }
 
 exampleAuthor :: Author
