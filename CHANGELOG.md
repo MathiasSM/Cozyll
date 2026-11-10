@@ -15,9 +15,14 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Drafts from a `dev` build no longer survive a `prod` build: changing `SITE_ENV` clears `_site` and `_cache` together before rebuilding.
 - `cozyll check` now refuses a missing or foreign-env `_site` instead of silently passing, and warns when content is newer than the last build.
 
+### Added
+
+- `content/static/` is copied verbatim to the site root, for files such as `CNAME`, `.nojekyll` and verification files.
+
 ### Changed
 
 - `-v`/`--verbose` now enables debug output, including the resolved `SITE_ENV` and content directory.
+- Every file under `content/media/` is now published (previously a whitelist silently dropped files); `media/branding/*` still flattens to `/images/*` and `.dot` sources still render to PNG.
 
 
 ## [3.3.0.0] - 2026-11-10

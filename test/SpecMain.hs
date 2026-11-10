@@ -18,6 +18,7 @@ import Cozyll.FormatSpec qualified as Format
 import Cozyll.HtmlSpec qualified as Html
 import Cozyll.JsonLdSpec qualified as JsonLd
 import Cozyll.LanguageSpec qualified as Language
+import Cozyll.MediaSpec qualified as Media
 import Cozyll.MetadataSpec qualified as Metadata
 import Cozyll.NavSpec qualified as Nav
 import Cozyll.PostSpec qualified as Post
@@ -60,6 +61,7 @@ main = do
             , Html.tests
             , JsonLd.tests
             , Language.tests
+            , Media.tests
             , Metadata.tests
             , Nav.tests
             , Post.tests

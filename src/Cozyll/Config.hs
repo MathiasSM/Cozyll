@@ -11,6 +11,7 @@ module Cozyll.Config (
     -- * Files
     requiredContent,
     mediaDir,
+    staticDir,
     projectsGroup,
     postSnapshot,
 
@@ -25,6 +26,7 @@ module Cozyll.Config (
     dataSchemaPattern,
     templatePattern,
     contentCssPattern,
+    staticPattern,
 
     -- * Directories
     dataDir,
@@ -49,8 +51,8 @@ import Cozyll.Domain.Author (Author)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle)
 import Cozyll.Ruby.Index (RubyData)
 import Data.String (fromString)
-import Hakyll (Configuration, Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, (.||.))
-import System.FilePath.Posix ((<.>), (</>))
+import Hakyll (Configuration, Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, ignoreFile, (.||.))
+import System.FilePath.Posix (takeFileName, (<.>), (</>))
 
 {- | The build environment: 'Dev' shows drafts for the real content, 'Example'
 builds the example content as the whole site, and 'Prod' is the production
@@ -108,17 +110,59 @@ data SiteConfig = SiteConfig
     -- ^ Severity of the ruby coverage check (site default; front matter may override)
     }
 
--- | Hakyll's default configuration
+{- | Hakyll's default configuration, except that @.nojekyll@ is not ignored:
+it is a site file users put in 'staticDir', not a build dropping.
+
+Hakyll's ignore hook only sees each entry's base name, so this cannot be
+scoped to 'staticDir'; dot-directories such as @.git@ stay ignored.
+-}
 siteConfiguration :: Configuration
-siteConfiguration = defaultConfiguration
+siteConfiguration = defaultConfiguration{ignoreFile = ignoreFile'}
+  where
+    ignoreFile' path
+        | takeFileName path == ".nojekyll" = False
+        | otherwise = ignoreFile defaultConfiguration path
 
 -- | Public origin of the site, without trailing slash
 baseUrl :: SiteConfig -> String
 baseUrl cfg = "https://" ++ siteDomain cfg
 
--- | Where the site's media lives: `branding/`, `icons/`, `photos/` (published at `images/`)
+{- | Where the site's media lives. Every file under it is published under
+@images\/@:
+
+| source | published |
+|---|---|
+| @content\/media\/photos\/x.png@ | @\/images\/photos\/x.png@ |
+| @content\/media\/icons\/x.svg@ | @\/images\/icons\/x.svg@ (also inlined as @$iconRaw$@) |
+| @content\/media\/branding\/x@ | @\/images\/x@ (also inlined as @$partial$@ when SVG) |
+| @content\/media\/<any>\/x@ | @\/images\/<any>\/x@ |
+| @content\/media\/x@ | @\/images\/x@ |
+
+Graphviz sources (@**\/*.dot@) are the one exception: they are rendered to PNG
+at the same published path. See 'Cozyll.Rules.Assets.processAssets'.
+-}
 mediaDir :: SiteConfig -> FilePath
 mediaDir cfg = contentDir cfg </> "media"
+
+{- | Where files copied verbatim to the site root live (@CNAME@, @.nojekyll@,
+@_headers@, verification files, hand-made icons):
+
+| source | published |
+|---|---|
+| @content\/static\/x@ | @\/x@ |
+| @content\/static\/a\/x@ | @\/a\/x@ |
+
+No media processing applies. Identifiers that would escape the site root
+(absolute paths, @..@ segments) are rejected before the build. When a static
+file targets the same path as a generated file, the static file wins; the
+rules that generate that file are responsible for yielding (see
+'Cozyll.Rules.Favicon').
+
+Hakyll ignores dotfiles by default; @.nojekyll@ is explicitly allowed in
+'siteConfiguration' because it is a normal static file.
+-}
+staticDir :: SiteConfig -> FilePath
+staticDir cfg = contentDir cfg </> "static"
 
 {- | Files the site cannot build without, relative to the repo root
 (@website.yaml@ is loaded separately by "Cozyll.Domain.Website")
@@ -173,6 +217,10 @@ templatePattern cfg = fromString (templatesDir cfg </> "*") .||. fromString (con
 -- | Content-provided styles, loaded after the vendored ones
 contentCssPattern :: SiteConfig -> Pattern
 contentCssPattern cfg = fromString $ contentCssDir cfg </> "*.css"
+
+-- | Every file under 'staticDir', copied verbatim to the site root
+staticPattern :: SiteConfig -> Pattern
+staticPattern cfg = fromString $ staticDir cfg </> "**"
 
 -- | The snapshot holding each published post of a single group, as rendered HTML (before templates)
 postSnapshot :: String -> Snapshot

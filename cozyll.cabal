@@ -153,6 +153,7 @@ test-suite spec
                   , Cozyll.HtmlSpec
                   , Cozyll.JsonLdSpec
                   , Cozyll.LanguageSpec
+                  , Cozyll.MediaSpec
                   , Cozyll.MetadataSpec
                   , Cozyll.NavSpec
                   , Cozyll.PostSpec
