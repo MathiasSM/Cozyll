@@ -1,7 +1,7 @@
 -- | Tests for the ruby index schema, normalisation, and canonical encoding
-module Cozyll.RubyDataSpec (tests) where
+module Cozyll.RubyIndexSpec (tests) where
 
-import Cozyll.Ruby.Data (
+import Cozyll.Ruby.Index (
     Index (..),
     KanjiRow (..),
     Level (..),
@@ -15,7 +15,6 @@ import Cozyll.Ruby.Data (
     levelText,
     normalizeKey,
     parseLevel,
-    sha256Hex,
  )
 import Data.Text (Text)
 import Data.Text qualified as T
@@ -75,11 +74,6 @@ tests =
                 case decodeIndex (T.replace "\"schemaVersion\": 1" "\"schemaVersion\": 2" (encodeIndex (Index [] [] []))) of
                     Left message -> assertBool message ("schemaVersion" `T.isInfixOf` T.pack message)
                     Right _ -> assertBool "expected a failure" False
-            ]
-        , testGroup
-            "hashing"
-            [ testCase "hashes SHA-256" $
-                sha256Hex "abc" @?= "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
             ]
         ]
 

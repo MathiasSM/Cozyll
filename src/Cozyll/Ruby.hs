@@ -1,7 +1,7 @@
 -- | The build checks that run on rendered page bodies
-module Cozyll.Ruby (checkCoverage) where
+module Cozyll.Ruby (checkKanjiCoverage) where
 
-import Cozyll.Ruby.Data (RubyData (rdKanji), isHan)
+import Cozyll.Ruby.Index (RubyData (rdKanji), isHan)
 import Data.Char (isAsciiUpper)
 import Data.List (nub, sortOn)
 import Data.Map.Strict qualified as Map
@@ -13,10 +13,10 @@ import Text.HTML.TagSoup (Tag (..), parseTags)
 
 @pageLang@ is the item's front matter language; elements may override it with
 @lang=@. Only @ja*@ subtrees are inspected. @<rt>@, @<rp>@, whole @<ruby>@
-sections, code-ish elements and the @rubySkip@ words are ignored.
+sections, code-ish elements and the @jaRubySkip@ words are ignored.
 -}
-checkCoverage :: String -> [Text] -> RubyData -> String -> [String]
-checkCoverage pageLang skipWords rubyData html =
+checkKanjiCoverage :: String -> [Text] -> RubyData -> String -> [String]
+checkKanjiCoverage pageLang skipWords rubyData html =
     nub
         [ "non-jōyō kanji “" ++ [c] ++ "” in “" ++ T.unpack run ++ "” has no ruby"
         | (inJapanese, run) <- hanRuns

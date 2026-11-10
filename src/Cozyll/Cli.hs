@@ -1,13 +1,14 @@
 {-# LANGUAGE Trustworthy #-}
 
 -- | The command-line interface and its subcommands
-module Cozyll.Cli (cli, contentDirIO) where
+module Cozyll.Cli (cli) where
 
 import Control.Monad (filterM, unless)
+import Cozyll.Cli.Data (runDataCommand)
 import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Website qualified as Web
-import Cozyll.Ruby.Data (dataDirName, indexFileName, loadIndexFile)
+import Cozyll.Ruby.Index (dataDirName, indexFileName, indexLimitIO, loadIndexFile)
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
 import Data.Maybe (fromMaybe)
@@ -37,6 +38,14 @@ cli = do
     let contentDir = contentDirFor env
     -- 1. Parse args
     args <- getArgs
+    -- 2. `data` is a pre-Hakyll command and must not require website.yaml
+    case args of
+        ("data" : rest) -> runDataCommand contentDir rest
+        _ -> runBuild env contentDir args
+
+-- | The build/server/clean commands, which need @website.yaml@ and Hakyll
+runBuild :: Env -> FilePath -> [String] -> IO ()
+runBuild env contentDir args = do
     -- 2. Get and validate website files/config
     -- (`website.yaml` is always required, even for `clean`)
     website <- Web.loadWebsite contentDir
@@ -45,10 +54,11 @@ cli = do
     cfg <- loadSiteConfig env contentDir website
     unless ("clean" `elem` args) (ensureContentExists cfg)
     -- 4. Load the derived ruby index (if the content provides one)
+    limit <- indexLimitIO
     rubyData <-
         if "clean" `elem` args
             then pure Nothing
-            else loadIndexFile (contentDir </> dataDirName </> indexFileName) >>= either die pure
+            else loadIndexFile limit (contentDir </> dataDirName </> indexFileName) >>= either die pure
     -- 5. Run command
     hakyllWith siteConfiguration (rules cfg{siteRubyData = rubyData} website)
 
@@ -131,7 +141,3 @@ parseEnv (Just other) = die $ "unknown SITE_ENV \"" ++ other ++ "\" (expected pr
 contentDirFor :: Env -> FilePath
 contentDirFor Example = "example-content"
 contentDirFor _ = "content"
-
--- | The content directory for the current environment (for tooling that runs before Hakyll)
-contentDirIO :: IO FilePath
-contentDirIO = contentDirFor <$> (parseEnv =<< lookupEnv "SITE_ENV")

@@ -47,7 +47,7 @@ where
 
 import Cozyll.Domain.Author (Author)
 import Cozyll.Domain.Website (HighlightStyle)
-import Cozyll.Ruby.Data (RubyData)
+import Cozyll.Ruby.Index (RubyData)
 import Data.String (fromString)
 import Hakyll (Configuration, Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, (.||.))
 import System.FilePath.Posix ((<.>), (</>))

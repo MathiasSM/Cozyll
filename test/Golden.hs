@@ -17,7 +17,7 @@ import Cozyll.Config (Env (Example), SiteConfig (..), siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Website (loadWebsite)
 import Cozyll.Domain.Website qualified as Web
-import Cozyll.Ruby.Data (RubyData, loadIndexFile)
+import Cozyll.Ruby.Index (RubyData, defaultMaxIndexBytes, loadIndexFile)
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
 import Data.ByteString (ByteString)
@@ -80,7 +80,7 @@ buildSiteSnapshot root = do
     website <- loadWebsite (root </> "example-content")
     contentTemplateNames <- discoverContentTemplateNames (root </> "example-content" </> "templates")
     authors <- Author.loadAuthors (root </> "example-content")
-    loaded <- loadIndexFile (root </> "example-content" </> "ruby-data" </> "index.json")
+    loaded <- loadIndexFile defaultMaxIndexBytes (root </> "example-content" </> "ruby-data" </> "index.json")
     rubyData <- either error pure loaded
     let cfg = mkSiteConfig website authors contentTemplateNames rubyData
     createDirectoryIfMissing True buildDir

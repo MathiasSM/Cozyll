@@ -10,9 +10,9 @@ import Cozyll.Content (tocLabelOf)
 import Cozyll.Context.SocialMeta (MainImage, mainImageOf)
 import Cozyll.Filters (processRubyText)
 import Cozyll.Html (readonlyCheckboxes)
-import Cozyll.Metadata (Key (Language, RubySkip), lookupKey, lookupKeyList)
-import Cozyll.Ruby (checkCoverage)
-import Cozyll.Ruby.Data (RubyData)
+import Cozyll.Metadata (Key (JaRubySkip, Language), lookupKey, lookupKeyList)
+import Cozyll.Ruby (checkKanjiCoverage)
+import Cozyll.Ruby.Index (RubyData)
 import Data.Maybe (fromMaybe, isJust)
 import Data.Text qualified as T
 import Hakyll (
@@ -58,15 +58,15 @@ runPandocWith rubyData item = do
     let pandoc' = walk processRubyText (itemBody pandocItem)
         body = renderPandoc pandocItem pandoc'
         tocHtml = if toc then "<nav id=\"TOC\">" ++ renderPandoc pandocItem (tocPandoc pandoc') ++ "</nav>" else ""
-    checkCoverageWith rubyData metadata body
+    checkKanjiCoverageWith rubyData metadata body
     pure (item{itemBody = body}, tocHtml, mainImageOf (itemBody pandocItem))
   where
-    checkCoverageWith Nothing _ _ = pure ()
-    checkCoverageWith (Just rubyData') metadata body = do
+    checkKanjiCoverageWith Nothing _ _ = pure ()
+    checkKanjiCoverageWith (Just rubyData') metadata body = do
         path <- toFilePath <$> getUnderlying
         let pageLang = fromMaybe "en" (lookupKey Language metadata)
-            skipWords = map T.pack (fromMaybe [] (lookupKeyList RubySkip metadata))
-            problems = checkCoverage pageLang skipWords rubyData' body
+            skipWords = maybe [] (map T.pack) (lookupKeyList JaRubySkip metadata)
+            problems = checkKanjiCoverage pageLang skipWords rubyData' body
         unless (null problems) $ throwError (map ((path ++ ": ") ++) problems)
 
     renderPandoc ident pandoc = itemBody (writePandocWith writerOptions (ident{itemBody = pandoc}))
