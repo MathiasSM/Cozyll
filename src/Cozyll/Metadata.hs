@@ -83,8 +83,10 @@ data Key
       the table of contents' label (@TOC: Contents@).
       -}
       TOC
-    | -- | Enables: The ruby-annotation toggle; the value is the control's label (markdown).
-      RubyToggle
+    | -- | Enables: The ruby-level control; the value is the control's label (markdown).
+      RubyControl
+    | -- | Enables: The unknown-level ruby checkbox; the value is its label (markdown).
+      RubyUnknown
     | -- | Words that may appear without furigana (coverage exemption).
       RubySkip
     | -- | Ruby surfaces (or @surface:reading@ pairs) accepted without a dictionary match.
@@ -141,7 +143,8 @@ keyName key = case key of
     Team -> "team"
     Templated -> "templated"
     TOC -> "TOC"
-    RubyToggle -> "rubyToggle"
+    RubyControl -> "rubyControl"
+    RubyUnknown -> "rubyUnknown"
     RubySkip -> "rubySkip"
     RubyAllow -> "rubyAllow"
     RubyCheck -> "rubyCheck"

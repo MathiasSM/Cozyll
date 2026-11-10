@@ -1,5 +1,6 @@
 /* Print */
-@media print   {
+@media print {
+  ruby.ruby-hidden rt {visibility: visible;}
   body {
     font: 90%/1.5 var(--font-latin-sans), var(--font-cjk-ja-sans);
     color:black;

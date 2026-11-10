@@ -10,9 +10,11 @@ The pieces of a control:
   * membership in @controlKeys@;
   * a @toggleLabelField <Key> "<name>ToggleLabel"@ line in 'asideContext' (the
       label is rendered from inline markdown);
-  * the @controls--<name>-toggle.html@ partial, and a gated @<li>@ in
-      @site-aside.html@ wired through the shared @[data-toggle-class]@ script;
+  * the control's partial, and a gated @<li>@ in @site-aside.html@;
   * the CSS rule that hides elements while the class is set.
+
+The ruby control is special: its @<select>@ stores a reader preference in
+@localStorage@, while checkbox controls toggle a class on @<html>@.
 
 'hasAnyControl' and 'hasAside' gate whether the aside renders at all. The
 step-by-step recipe lives in @CONTRIBUTING.md@ ("Adding a control (toggle)").
@@ -50,7 +52,7 @@ import Text.Pandoc (
 
 -- | The labeled toggles the controls menu can show; each key's value is its label
 controlKeys :: [Key]
-controlKeys = [RubyToggle, ImagesToggle]
+controlKeys = [RubyControl, RubyUnknown, ImagesToggle]
 
 -- | Whether any labeled toggle is enabled on the page
 hasAnyControl :: Metadata -> Bool
@@ -67,7 +69,8 @@ asideContext :: String -> Context String
 asideContext tocHtml =
     field "toc" (tocField tocHtml)
         <> tocLabelField
-        <> toggleLabelField RubyToggle "rubyToggleLabel"
+        <> toggleLabelField RubyControl "rubyControlLabel"
+        <> toggleLabelField RubyUnknown "rubyUnknownLabel"
         <> toggleLabelField ImagesToggle "imagesToggleLabel"
         <> boolFieldM "hasControls" (\_ -> hasAnyControl <$> metadata)
         <> boolFieldM "hasAside" (\_ -> hasAside <$> metadata)

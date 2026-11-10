@@ -72,9 +72,23 @@
     <header>コントロール</header>
     <menu>
       
-      <li><label class="ruby-toggle">
-  <input type="checkbox" checked data-toggle-class="no-ruby" />
+      <li><label class="ruby-control">
+  <select data-ruby-threshold>
+    <option value="all">すべて</option>
+    <option value="n5">N5</option>
+    <option value="n4">N4</option>
+    <option value="n3">N3</option>
+    <option value="n2">N2</option>
+    <option value="n1">N1</option>
+  </select>
   <span lang="ja">ふりがな</span>
+</label>
+</li>
+      
+      
+      <li><label class="ruby-unknown">
+  <input type="checkbox" checked data-ruby-unknown />
+  <span lang="en">unknown</span>
 </label>
 </li>
       
@@ -88,6 +102,29 @@
         const update = () => document.documentElement.classList.toggle(input.dataset.toggleClass, !input.checked);
         input.addEventListener('change', update);
       }
+
+      const select = document.querySelector('[data-ruby-threshold]');
+      const unknown = document.querySelector('[data-ruby-unknown]');
+      if (!select && !unknown) return;
+      const ranks = { all: 0, n5: 1, n4: 2, n3: 3, n2: 4, n1: 5 };
+      const selectKey = 'cozyll:ruby-threshold';
+      const unknownKey = 'cozyll:ruby-unknown';
+      if (select) select.value = localStorage.getItem(selectKey) ?? 'all';
+      if (unknown) unknown.checked = localStorage.getItem(unknownKey) !== 'hide';
+      const apply = () => {
+        const threshold = select ? (ranks[select.value] ?? 0) : 0;
+        const showUnknown = unknown ? unknown.checked : true;
+        for (const ruby of document.querySelectorAll('ruby[data-jlpt]')) {
+          const level = ruby.dataset.jlpt;
+          const hidden = level === 'unknown' ? !showUnknown : (ranks[level] ?? 0) <= threshold;
+          ruby.classList.toggle('ruby-hidden', hidden);
+        }
+        if (select) localStorage.setItem(selectKey, select.value);
+        if (unknown) localStorage.setItem(unknownKey, unknown.checked ? 'show' : 'hide');
+      };
+      if (select) select.addEventListener('change', apply);
+      if (unknown) unknown.addEventListener('change', apply);
+      apply();
     })();
   </script>
   

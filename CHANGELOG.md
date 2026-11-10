@@ -22,7 +22,15 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Changed
 
+- **Breaking:** `rubyToggle` is now `rubyControl`. The ruby control is a threshold
+  `<select>` (`All`/`N5`–`N1`) with an independent unknown-level checkbox; the reader's
+  choice is stored in `localStorage` and there is no article default. Content repos must
+  add `ruby.all` to `localization.yaml`.
 - The ruby filter HTML-escapes base and reading; every `[base](-reading)` link still becomes ruby.
+
+### Removed
+
+- The `rubyToggle` front matter key and the `no-ruby` toggle.
 
 ## [3.2.0.0] - 2026-11-10
 

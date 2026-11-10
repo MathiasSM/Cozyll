@@ -29,7 +29,9 @@ tests =
         , testGroup
             "hasAnyControl"
             [ testCase "detects a ruby toggle" $
-                hasAnyControl (metadata "rubyToggle: ふりがな") @?= True
+                hasAnyControl (metadata "rubyControl: ふりがな") @?= True
+            , testCase "detects an unknown-ruby control" $
+                hasAnyControl (metadata "rubyUnknown: unknown") @?= True
             , testCase "detects an images toggle" $
                 hasAnyControl (metadata "imagesToggle: Images") @?= True
             , testCase "ignores TOC" $
@@ -40,7 +42,7 @@ tests =
         , testGroup
             "hasAside"
             [ testCase "true with a toggle" $
-                hasAside (metadata "rubyToggle: ふりがな") @?= True
+                hasAside (metadata "rubyControl: ふりがな") @?= True
             , testCase "true with a TOC" $
                 hasAside (metadata "TOC: Contents") @?= True
             , testCase "false without either" $
