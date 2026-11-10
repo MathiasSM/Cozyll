@@ -11,6 +11,7 @@ import Cozyll.Context.Author (authorPages, authorPosts)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Metadata qualified as K
 import Cozyll.Rules.AuthorPages (authorPageIdentifier)
+import Cozyll.Theme (themeFingerprint)
 import Data.Maybe (catMaybes)
 import Data.Time (Day, defaultTimeLocale, formatTime)
 import Data.Time.Format (parseTimeM)
@@ -42,6 +43,7 @@ processSitemap :: SiteConfig -> Rules ()
 processSitemap cfg = create ["sitemap.xml"] $ do
     route idRoute
     compile $ do
+        themeFingerprint cfg
         groups <- discoverGroups cfg
         postsByGroup <- forM groups $ \group -> recentFirst =<< loadAll (postsPattern cfg group)
         pages <- loadAll $ pagesPattern cfg "*"

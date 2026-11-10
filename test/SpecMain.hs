@@ -6,6 +6,7 @@ module Main (main) where
 import Cozyll.AccessibilitySpec qualified as Accessibility
 import Cozyll.AsideSpec qualified as Aside
 import Cozyll.AuthorSpec qualified as Author
+import Cozyll.CacheSpec qualified as Cache
 import Cozyll.CleanURLSpec qualified as CleanURL
 import Cozyll.CliDataSpec qualified as CliData
 import Cozyll.CliSpec qualified as Cli
@@ -30,11 +31,15 @@ import Cozyll.RubyVerifySpec qualified as RubyVerify
 import Cozyll.SocialMetaSpec qualified as SocialMeta
 import Cozyll.SocialSpec qualified as Social
 import Cozyll.ThemeSpec qualified as Theme
+import System.Environment (setEnv)
 import Test.Tasty (defaultIngredients, defaultMainWithIngredients, testGroup)
 import Test.Tasty.Runners.AntXML (antXMLRunner)
 
 main :: IO ()
-main =
+main = do
+    -- Fixture builds change the process working directory, so tests that read
+    -- repository files must not run concurrently with them.
+    setEnv "TASTY_NUM_THREADS" "1"
     defaultMainWithIngredients
         (antXMLRunner : defaultIngredients)
         ( testGroup
@@ -42,6 +47,7 @@ main =
             [ Accessibility.tests
             , Aside.tests
             , Author.tests
+            , Cache.tests
             , CleanURL.tests
             , CliData.tests
             , Cli.tests

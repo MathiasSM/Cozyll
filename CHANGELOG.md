@@ -11,6 +11,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 - `cozyll --help` and `--version` work without a content repo; unknown commands are rejected instead of silently building, and `clean`/`check` no longer require content or a valid `SITE_ENV`.
 - Non-ASCII content no longer crashes the build under a non-UTF-8 locale (`LC_ALL=C`); the build pins UTF-8 for its inputs and output.
+- Template overrides in `content/templates/` now take effect on the next `cozyll build`; no `clean` needed.
 
 ### Changed
 

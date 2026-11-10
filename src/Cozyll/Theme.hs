@@ -3,22 +3,26 @@ vendored defaults, file by file.
 -}
 module Cozyll.Theme (
     discoverContentTemplateNames,
+    themeFingerprint,
     rewritePartials,
     rewritingTemplateCompiler,
     applyContentAsTemplate,
 ) where
 
-import Control.Monad (filterM)
-import Cozyll.Config (SiteConfig, resolveTemplate, templatesDir)
+import Control.Monad (filterM, void)
+import Cozyll.Config (SiteConfig, resolveTemplate, templatePattern, templatesDir)
 import Data.List (isPrefixOf, stripPrefix)
 import Hakyll (
     Compiler,
     Context,
+    Identifier,
     Item,
     Template,
     applyAsTemplate,
     compileTemplateItem,
+    getMatches,
     getResourceString,
+    loadAll,
     toFilePath,
  )
 import System.Directory (doesDirectoryExist, doesFileExist, listDirectory)
@@ -32,11 +36,31 @@ discoverContentTemplateNames dir = do
         then pure []
         else filterM (doesFileExist . (dir </>)) =<< listDirectory dir
 
+{- | Makes the current item depend on the *set* of available templates, so
+adding or removing a @content\/templates\/…@ override marks it out of date.
+
+Hakyll decides what to rebuild from the previous run's dependency set: a new
+override is a new 'Hakyll.Core.Identifier.Identifier' that nothing references
+yet, so it would be ignored until a clean build. 'loadAll' instead records a
+'Hakyll.Core.Dependencies.PatternDependency', whose match set is re-checked on
+every run; a changed match set invalidates every dependent item. Compiling the
+templates here adds no output, because they are already built as rules.
+-}
+themeFingerprint :: SiteConfig -> Compiler ()
+themeFingerprint cfg = void (loadAll (templatePattern cfg) :: Compiler [Item Template])
+
 {- | Compiles a template, rewriting its @$partial("templates/…")$@ paths through
 the override map so content-provided partials are picked up.
+
+The template also depends on the whole template pattern: an override added
+since the last run changes how the partials are rewritten, so the compiled
+template must not be reused. It records the pattern with 'getMatches' rather
+than 'themeFingerprint', because loading the pattern would require the very
+template being compiled.
 -}
 rewritingTemplateCompiler :: SiteConfig -> Compiler (Item Template)
 rewritingTemplateCompiler cfg = do
+    void (getMatches (templatePattern cfg) :: Compiler [Identifier])
     item <- getResourceString
     tpl <- compileTemplateItem (fmap (rewritePartials cfg) item)
     pure (fmap (const tpl) item)

@@ -9,6 +9,7 @@ import Cozyll.Domain.Author (authorName)
 import Cozyll.Domain.Feed (Feed (..), absoluteUrl, feeds)
 import Cozyll.Domain.Post (Post (..))
 import Cozyll.Domain.Website (Website (websiteFeed), feedSize)
+import Cozyll.Theme (themeFingerprint)
 import Data.Maybe (fromMaybe)
 import Data.Time (Day, defaultTimeLocale, formatTime)
 import Hakyll (
@@ -44,6 +45,7 @@ processFeeds cfg website = do
             create [fromFilePath $ feedFile feed] $ do
                 route idRoute
                 compile $ do
+                    themeFingerprint cfg
                     posts <- recentFirst =<< loadAllSnapshots (postsPattern cfg $ feedGroup feed) (postSnapshot $ feedGroup feed)
                     feedTemplate <- loadBody (resolveTemplate cfg "atom-feed.xml")
                     itemTemplate <- loadBody (resolveTemplate cfg "atom-item.xml")

@@ -137,9 +137,11 @@ test-suite spec
   main-is:          SpecMain.hs
   hs-source-dirs:   test
   other-modules:    Cozyll.TestUtils
+                  , Cozyll.Fixture
                   , Cozyll.AccessibilitySpec
                   , Cozyll.AsideSpec
                   , Cozyll.AuthorSpec
+                  , Cozyll.CacheSpec
                   , Cozyll.CleanURLSpec
                   , Cozyll.CliSpec
                   , Cozyll.ContentSpec
@@ -170,11 +172,14 @@ test-suite spec
                   , aeson
                   , bytestring
                   , containers
+                  , directory
+                  , filepath
                   , pandoc
                   , tasty
                   , tasty-ant-xml
                   , tasty-hunit
                   , tasty-quickcheck
+                  , temporary
                   , text
                   , time
   ghc-options:      -threaded
@@ -184,7 +189,8 @@ test-suite golden
   type:             exitcode-stdio-1.0
   main-is:          GoldenMain.hs
   hs-source-dirs:   test
-  other-modules:    Golden
+  other-modules:    Cozyll.Fixture
+                  , Golden
   build-depends:    base
                   , hakyll
                   , cozyll
