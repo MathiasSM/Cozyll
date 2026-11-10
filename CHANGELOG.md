@@ -33,6 +33,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 - `-v`/`--verbose` now enables debug output, including the resolved `SITE_ENV` and content directory.
 - Every file under `content/media/` is now published (previously a whitelist silently dropped files); `media/branding/*` still flattens to `/images/*` and `.dot` sources still render to PNG.
+- Build errors now list the required content tree, explain a group without an index page, and report every item missing `path:` in one go.
 
 
 ## [3.3.0.0] - 2026-11-10

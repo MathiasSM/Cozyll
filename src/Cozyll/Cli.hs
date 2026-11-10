@@ -37,7 +37,7 @@ import Paths_cozyll (version)
 import System.Directory (doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs, lookupEnv)
 import System.Exit (ExitCode (ExitSuccess), die, exitWith)
-import System.FilePath.Posix ((</>))
+import System.FilePath.Posix (takeFileName, (</>))
 import System.IO (hPutStrLn, stderr)
 import Text.Read (readMaybe)
 
@@ -125,6 +125,7 @@ dispatch options = case optCommand options of
             building = startsBuild command
         debugLog options $ "SITE_ENV=" ++ envText env ++ ", content dir: " ++ contentDir
         -- Get and validate website files/config (`website.yaml` is always required)
+        ensureWebsiteExists contentDir
         website <- Web.loadWebsite contentDir
         Web.validateSecurityExpiration website
         -- Check content exists
@@ -213,6 +214,38 @@ debugLog options message =
         Logger.debug logger message
         Logger.flush logger
 
+{- | Throws before @website.yaml@ is read when the site's entry point is missing
+
+A first build in an empty directory would otherwise fail with only
+@content/website.yaml not found@, hiding the rest of the required tree.
+-}
+ensureWebsiteExists :: FilePath -> IO ()
+ensureWebsiteExists contentDir = do
+    let website = contentDir </> "website.yaml"
+    present <- doesFileExist website
+    unless present
+        $ die
+        $ website
+            ++ " not found.\n\nA Cozyll site needs, under "
+            ++ contentDir
+            ++ "/:\n"
+            ++ unlines (map (\(path, hint) -> "  " ++ pad path ++ hint) requiredTree)
+            ++ "\nRun 'cozyll init' to create these, or see the README."
+
+-- | The files a site needs, relative to the content directory, with a hint for each
+requiredTree :: [(FilePath, String)]
+requiredTree =
+    [ ("website.yaml", "site identity and output switches  (schema/example.website.yaml)")
+    , ("socials.yaml", "your accounts                      (schema/example.socials.yaml)")
+    , ("authors.yaml", "author map, one siteDefault: true  (schema/example.authors.yaml)")
+    , ("localization.yaml", "UI strings per language            (schema/example.localization.yaml)")
+    , ("writings/", "pages and posts (markdown)")
+    ]
+
+-- | Pads a file name so every hint in 'requiredTree' lines up
+pad :: FilePath -> String
+pad path = path ++ replicate (max 0 (19 - length path)) ' '
+
 {- | Throws if the content repo is missing, or lacks a file the site needs
 
 (Hakyll would otherwise build whatever it finds, possibly silently leaving out missing pages)
@@ -226,7 +259,10 @@ ensureContentExists cfg = do
     missing <- filterM (fmap not . doesFileExist) (requiredContent cfg)
     unless (null missing)
         $ die
-        $ "Missing required content:\n" ++ unlines (map ("  " ++) missing)
+        $ "Missing required content:\n"
+            ++ unlines ["  " ++ path ++ "  " ++ hintFor path | path <- missing]
+  where
+    hintFor path = fromMaybe "" $ lookup (takeFileName path) requiredTree
 
 -- | Builds the site configuration from @website.yaml@, with env variables overrides.
 loadSiteConfig :: Env -> FilePath -> Web.Website -> IO SiteConfig

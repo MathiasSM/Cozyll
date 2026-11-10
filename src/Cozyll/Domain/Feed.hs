@@ -1,15 +1,15 @@
 -- | The Atom feeds: one per post group, described by the group's index page
-module Cozyll.Domain.Feed (Feed (..), feedHref, feeds, absoluteUrl) where
+module Cozyll.Domain.Feed (Feed (..), feedHref, feeds, missingIndexPageMessage, absoluteUrl) where
 
 import Cozyll.CleanURL (outputPath)
-import Cozyll.Config (SiteConfig, pagesPattern, projectsGroup, siteTitle)
+import Cozyll.Config (SiteConfig, contentDir, pagesPattern, projectsGroup, siteTitle)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Metadata (Key (Description, Path, Title), lookupKey)
 import Data.Either (lefts, rights)
-import Data.List (isPrefixOf)
+import Data.List (intercalate, isPrefixOf)
 import Data.Maybe (fromMaybe)
 import Hakyll (MonadMetadata (getMatches, getMetadata), toFilePath)
-import System.FilePath.Posix (takeDirectory, (</>))
+import System.FilePath.Posix (takeDirectory, (<.>), (</>))
 
 -- | An Atom feed, described by its group's index page
 data Feed = Feed
@@ -43,7 +43,7 @@ feedOf :: (MonadMetadata m) => SiteConfig -> String -> m (Either String Feed)
 feedOf cfg group = do
     indexPages <- getMatches (pagesPattern cfg group)
     case indexPages of
-        [] -> pure $ Left $ "no index page for the group " ++ group
+        [] -> pure $ Left $ missingIndexPageMessage (contentDir cfg) group
         page : _ -> do
             metadata <- getMetadata page
             pure $ case lookupKey Path metadata of
@@ -56,6 +56,24 @@ feedOf cfg group = do
                             , feedDescription = fromMaybe "" (lookupKey Description metadata)
                             , feedFile = takeDirectory (outputPath path) </> "atom.xml"
                             }
+
+{- | Explains a group folder that has no index page, naming the page to create
+
+A group is described by a flat page under @writings/@ marked @index: true@; without
+one there is no title, description or path to hang the group's feed on.
+-}
+missingIndexPageMessage :: FilePath -> String -> String
+missingIndexPageMessage contentDir group =
+    intercalate
+        "\n"
+        [ "no index page for the group " ++ show group ++ ": create " ++ indexPage ++ " with"
+        , "  index: true"
+        , "  group: " ++ group
+        , "  path: /" ++ group
+        , "(see the README, \"Groups\")"
+        ]
+  where
+    indexPage = contentDir </> "writings" </> group <.> "md"
 
 {- | Makes a root-relative URL (`/contact`) absolute, as feed readers have no page to resolve it against.
 

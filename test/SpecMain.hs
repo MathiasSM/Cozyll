@@ -34,6 +34,7 @@ import Cozyll.RubyVerifySpec qualified as RubyVerify
 import Cozyll.SocialMetaSpec qualified as SocialMeta
 import Cozyll.SocialSpec qualified as Social
 import Cozyll.ThemeSpec qualified as Theme
+import Cozyll.ValidateSpec qualified as Validate
 import System.Environment (setEnv)
 import Test.Tasty (defaultIngredients, defaultMainWithIngredients, testGroup)
 import Test.Tasty.Runners.AntXML (antXMLRunner)
@@ -78,5 +79,6 @@ main = do
             , SocialMeta.tests
             , Social.tests
             , Theme.tests
+            , Validate.tests
             ]
         )
