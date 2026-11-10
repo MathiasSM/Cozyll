@@ -25,12 +25,16 @@ Posts resolve their authors from @author:@ (an id or list of ids), falling back
 to the site-default author; see "Cozyll.Context.Author". Every author gets a
 profile page at @/authors/<id>@; see "Cozyll.Rules.AuthorPages".
 
+Hakyll decodes content with the process locale; @app/Main.hs@ pins that locale to
+UTF-8, so @authors.yaml@ is the only file read here and it is decoded explicitly.
+
 See also @schema/authors.schema.json@.
 -}
 module Cozyll.Domain.Author (
     Author (..),
     AuthorType (..),
     parseAuthorsYaml,
+    decodeAuthorsUtf8,
     loadAuthors,
     defaultAuthor,
     authorUrlPath,
@@ -43,10 +47,13 @@ import Cozyll.Yaml (Check (..), decodeYaml)
 import Data.Aeson (Object, Value (..))
 import Data.Aeson.Key (Key, fromString, toString)
 import Data.Aeson.KeyMap qualified as KeyMap
+import Data.ByteString (ByteString)
+import Data.ByteString qualified as BS
 import Data.Char (isAsciiLower, isDigit)
 import Data.Foldable (toList)
 import Data.Scientific (Scientific, floatingOrInteger)
 import Data.Text qualified as T
+import Data.Text.Encoding (decodeUtf8')
 import System.Directory (doesFileExist)
 import System.Exit (die)
 import System.FilePath.Posix ((</>))
@@ -96,8 +103,19 @@ loadAuthors contentDir = do
     let path = contentDir </> "authors.yaml"
     exists <- doesFileExist path
     unless exists $ die $ path ++ " not found"
-    result <- readFile path
-    either (\problems -> die $ "Invalid " ++ path ++ ":\n" ++ unlines problems) pure (parseAuthorsYaml result)
+    bytes <- BS.readFile path
+    either (\problem -> die $ "Invalid " ++ path ++ ":\n" ++ problem) pure (decodeAuthorsUtf8 bytes)
+
+{- | Decodes @authors.yaml@ bytes as UTF-8 and parses them, independently of the
+process locale
+
+The file is decoded strictly: invalid UTF-8 is an error rather than a crash
+from 'readFile' under a non-UTF-8 locale (e.g. @LC_ALL=C@).
+-}
+decodeAuthorsUtf8 :: ByteString -> Either String [Author]
+decodeAuthorsUtf8 bytes = case decodeUtf8' bytes of
+    Left err -> Left $ "authors.yaml: not valid UTF-8: " ++ show err
+    Right text -> either (Left . unlines) Right (parseAuthorsYaml (T.unpack text))
 
 -- | The author marked @siteDefault: true@ (exactly one is required)
 defaultAuthor :: [Author] -> Either [String] Author

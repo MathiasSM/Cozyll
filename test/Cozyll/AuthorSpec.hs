@@ -3,14 +3,17 @@ module Cozyll.AuthorSpec (tests) where
 
 import Cozyll.Config (Env (Dev), SiteConfig (..))
 import Cozyll.Context.Author (authoredBy, copyrightYears, resolveAuthors)
-import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, defaultAuthor, parseAuthorsYaml)
+import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, decodeAuthorsUtf8, defaultAuthor, parseAuthorsYaml)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Metadata qualified as Meta
 import Data.Aeson (Value (..), toJSON)
 import Data.Aeson.Key qualified as AesonKey
 import Data.Aeson.KeyMap qualified as KeyMap
-import Data.List (isInfixOf)
+import Data.ByteString qualified as BS
+import Data.List (isInfixOf, sort)
 import Data.Text (Text)
+import Data.Text qualified as T
+import Data.Text.Encoding (encodeUtf8)
 import Hakyll (Metadata)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
@@ -20,6 +23,7 @@ tests =
     testGroup
         "Author"
         [ parseTests
+        , decodeTests
         , defaultAuthorTests
         , authorUrlPathTests
         , resolveAuthorsTests
@@ -84,6 +88,34 @@ parseTests =
                     assertBool "name problem" (any ("name: missing" `isInfixOf`) problems)
                     assertBool "links problem" (any ("links[0]:" `isInfixOf`) problems)
                 Right _ -> assertFailure "expected parsing to fail"
+        ]
+
+decodeTests :: TestTree
+decodeTests =
+    testGroup
+        "decodeAuthorsUtf8"
+        [ testCase "decodes UTF-8 names regardless of the locale" $
+            case decodeAuthorsUtf8 (encodeUtf8 (T.pack nonAsciiAuthors)) of
+                Left problem -> assertFailure problem
+                Right authors -> sort (map authorName authors) @?= sort ["Marta Ibáñez", "山田 太郎"]
+        , testCase "rejects invalid UTF-8 bytes" $
+            case decodeAuthorsUtf8 ("marta:\n  name: " <> BS.singleton 0xff <> "\n  siteDefault: true\n") of
+                Left problem ->
+                    assertBool
+                        ("expected a problem mentioning UTF-8, got " ++ show problem)
+                        ("UTF-8" `isInfixOf` problem)
+                Right _ -> assertFailure "expected invalid UTF-8 to fail"
+        ]
+
+-- | An @authors.yaml@ with non-ASCII names
+nonAsciiAuthors :: String
+nonAsciiAuthors =
+    unlines
+        [ "marta:"
+        , "  name: Marta Ibáñez"
+        , "  siteDefault: true"
+        , "kanji:"
+        , "  name: 山田 太郎"
         ]
 
 defaultAuthorTests :: TestTree
