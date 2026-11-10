@@ -1,11 +1,6 @@
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to the [Haskell Package Versioning Policy](https://pvp.haskell.org/).
-
 ## [Unreleased]
+
+## [3.3.1.0] - 2026-11-10
 
 ### Fixed
 
@@ -36,7 +31,6 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - `funding:` may be omitted from `website.yaml`; a site without it publishes no `funding.json` and no `.well-known/funding-manifest-urls`.
 - Every file under `content/media/` is now published (previously a whitelist silently dropped files); `media/branding/*` still flattens to `/images/*` and `.dot` sources still render to PNG.
 - Build errors now list the required content tree, explain a group without an index page, and report every item missing `path:` in one go.
-
 
 ## [3.3.0.0] - 2026-11-10
 
@@ -407,6 +401,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 
 [Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.3.0.0...master
+[3.3.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.3.0.0...v3.3.1.0
 [3.3.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.2.0.0...v3.3.0.0
 [3.2.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.1...v3.2.0.0
 [3.1.0.1]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.0...v3.1.0.1
