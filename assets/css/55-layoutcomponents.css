@@ -101,7 +101,7 @@
     }
 
     /* Control toggles: see templates/controls--*-toggle.html */
-    .ruby-toggle, .images-toggle {
+    .ruby-toggle, .ruby-control, .images-toggle {
       padding:.5rem;
       background: var(--color-surface-weak);
       &:hover {
@@ -116,6 +116,7 @@
     padding:0;
   }
 }
+ruby.ruby-hidden rt {visibility: hidden;}
 .no-ruby rt {visibility: hidden;}
 .no-images img, .no-images figure {display: none;}
 

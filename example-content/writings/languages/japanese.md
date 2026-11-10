@@ -4,7 +4,8 @@ date: 2024-05-02
 language: ja
 description: "日本語の記事の例です。"
 path: /languages/japanese
-rubyToggle: "[ふりがな]{lang=ja}"
+rubyControl: "[ふりがな]{lang=ja}"
+rubyUnknown: "[unknown]{lang=en}"
 ---
 
 この記事は日本語で書かれています。ルビを振ることもできます。

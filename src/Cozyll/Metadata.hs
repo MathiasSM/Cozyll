@@ -83,8 +83,14 @@ data Key
       the table of contents' label (@TOC: Contents@).
       -}
       TOC
-    | -- | Enables: The ruby-annotation toggle; the value is the control's label (markdown).
+    | {- | Deprecated: the legacy all-or-nothing ruby toggle. Kept for
+      compatibility; new content should use 'RubyControl'.
+      -}
       RubyToggle
+    | -- | Enables: The ruby-level control; the value is the control's label (markdown).
+      RubyControl
+    | -- | Enables: The unknown-level ruby checkbox; the value is its label (markdown).
+      RubyUnknown
     | -- | Words that may appear without furigana (coverage exemption).
       JaRubySkip
     | -- | Japanese ruby surfaces (or @surface:reading@ pairs) accepted without a dictionary match.
@@ -142,6 +148,8 @@ keyName key = case key of
     Templated -> "templated"
     TOC -> "TOC"
     RubyToggle -> "rubyToggle"
+    RubyControl -> "rubyControl"
+    RubyUnknown -> "rubyUnknown"
     JaRubySkip -> "jaRubySkip"
     JaRubyAllow -> "jaRubyAllow"
     JaRubyCheck -> "jaRubyCheck"

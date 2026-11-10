@@ -23,7 +23,16 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Changed
 
+- The ruby control is a threshold `<select>` (`All`/`N5`–`N1`) with an independent
+  unknown-level checkbox (`rubyControl`/`rubyUnknown`); the reader's choice is stored in
+  `localStorage` and there is no article default. Content repos must add `ruby.all` to
+  `localization.yaml` if they use the new control.
 - The ruby filter HTML-escapes base and reading; every `[base](-reading)` link still becomes ruby.
+
+### Deprecated
+
+- `rubyToggle` is deprecated in favour of `rubyControl`; it still works as the legacy
+  all-or-nothing toggle and will be removed in a future major release.
 
 ## [3.2.0.0] - 2026-11-10
 
