@@ -31,6 +31,7 @@ mkConfig names =
         , contentCssDir = "content/css"
         , contentTemplateNames = names
         , siteEnv = Dev
+        , siteRubyData = Nothing
         }
 
 tests :: TestTree

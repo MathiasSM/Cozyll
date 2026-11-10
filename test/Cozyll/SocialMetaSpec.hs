@@ -59,6 +59,7 @@ mkConfig =
         , contentCssDir = "content/css"
         , contentTemplateNames = []
         , siteEnv = Dev
+        , siteRubyData = Nothing
         }
 
 -- | Parses Markdown the way the site does

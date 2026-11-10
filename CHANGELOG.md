@@ -12,6 +12,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - `cozyll data fetch|verify|fmt|manifest`: derive and maintain the committed ruby index
   (`ruby-data/index.json`) from kanji-data, yomitan-jlpt-vocab, JmdictFurigana and
   JmnedictFurigana. Builds read the index offline; the content repo commits it.
+- Ruby coverage check: Japanese content must annotate non-jōyō kanji with ruby; `rubySkip`
+  exempts words. Requires `content/ruby-data/index.json`.
 
 ## [3.2.0.0] - 2026-11-10
 

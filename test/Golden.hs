@@ -17,6 +17,7 @@ import Cozyll.Config (Env (Example), SiteConfig (..), siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Website (loadWebsite)
 import Cozyll.Domain.Website qualified as Web
+import Cozyll.Ruby.Data (RubyData, loadIndexFile)
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
 import Data.ByteString (ByteString)
@@ -39,8 +40,8 @@ import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsFile, writeBinaryFile)
 
 -- | Builds a 'SiteConfig' from a parsed @website.yaml@ (no environment overrides)
-mkSiteConfig :: Web.Website -> [Author.Author] -> [FilePath] -> SiteConfig
-mkSiteConfig website authors contentTemplateNames =
+mkSiteConfig :: Web.Website -> [Author.Author] -> [FilePath] -> Maybe RubyData -> SiteConfig
+mkSiteConfig website authors contentTemplateNames rubyData =
     let site = Web.websiteSite website
         defaultAuthor' = either (error . unlines) id (Author.defaultAuthor authors)
      in SiteConfig
@@ -62,6 +63,7 @@ mkSiteConfig website authors contentTemplateNames =
             , contentCssDir = "content/css"
             , contentTemplateNames = contentTemplateNames
             , siteEnv = Example
+            , siteRubyData = rubyData
             }
 
 {- | Builds the fixture site in a fresh temporary directory and mirrors its
@@ -78,7 +80,9 @@ buildSiteSnapshot root = do
     website <- loadWebsite (root </> "example-content")
     contentTemplateNames <- discoverContentTemplateNames (root </> "example-content" </> "templates")
     authors <- Author.loadAuthors (root </> "example-content")
-    let cfg = mkSiteConfig website authors contentTemplateNames
+    loaded <- loadIndexFile (root </> "example-content" </> "ruby-data" </> "index.json")
+    rubyData <- either error pure loaded
+    let cfg = mkSiteConfig website authors contentTemplateNames rubyData
     createDirectoryIfMissing True buildDir
     copyTree (root </> "templates") (buildDir </> "templates")
     copyTree (root </> "assets") (buildDir </> "assets")

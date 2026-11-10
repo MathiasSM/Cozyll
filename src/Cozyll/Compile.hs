@@ -1,7 +1,8 @@
 -- | Pandoc compilation and the post-processing shared by every page
-module Cozyll.Compile (runPandoc, applyTemplates, finish) where
+module Cozyll.Compile (runPandoc, runPandocWith, applyTemplates, finish) where
 
-import Control.Monad (foldM)
+import Control.Monad (foldM, unless)
+import Control.Monad.Except (throwError)
 import Cozyll.Accessibility (checkAccessibility)
 import Cozyll.CleanURL (cleanIndexHtmls, cleanIndexUrls)
 import Cozyll.Config (SiteConfig, siteTemplate)
@@ -9,7 +10,11 @@ import Cozyll.Content (tocLabelOf)
 import Cozyll.Context.SocialMeta (MainImage, mainImageOf)
 import Cozyll.Filters (processRubyText)
 import Cozyll.Html (readonlyCheckboxes)
-import Data.Maybe (isJust)
+import Cozyll.Metadata (Key (Language, RubySkip), lookupKey, lookupKeyList)
+import Cozyll.Ruby (checkCoverage)
+import Cozyll.Ruby.Data (RubyData)
+import Data.Maybe (fromMaybe, isJust)
+import Data.Text qualified as T
 import Hakyll (
     Compiler,
     Context,
@@ -22,6 +27,7 @@ import Hakyll (
     loadAndApplyTemplate,
     readPandocWith,
     relativizeUrls,
+    toFilePath,
     writePandocWith,
  )
 import Text.Pandoc (Pandoc (Pandoc), nullMeta)
@@ -41,15 +47,28 @@ of contents (when @TOC@ is set), and the page's main image (when one is tagged
 can use the image.
 -}
 runPandoc :: Item String -> Compiler (Item String, String, Maybe MainImage)
-runPandoc item = do
+runPandoc = runPandocWith Nothing
+
+-- | Like 'runPandoc', but checks the rendered body against the ruby index
+runPandocWith :: Maybe RubyData -> Item String -> Compiler (Item String, String, Maybe MainImage)
+runPandocWith rubyData item = do
     metadata <- getUnderlying >>= getMetadata
     let toc = isJust (tocLabelOf metadata)
     pandocItem <- readPandocWith defaultHakyllReaderOptions item
     let pandoc' = walk processRubyText (itemBody pandocItem)
         body = renderPandoc pandocItem pandoc'
         tocHtml = if toc then "<nav id=\"TOC\">" ++ renderPandoc pandocItem (tocPandoc pandoc') ++ "</nav>" else ""
+    checkCoverageWith rubyData metadata body
     pure (item{itemBody = body}, tocHtml, mainImageOf (itemBody pandocItem))
   where
+    checkCoverageWith Nothing _ _ = pure ()
+    checkCoverageWith (Just rubyData') metadata body = do
+        path <- toFilePath <$> getUnderlying
+        let pageLang = fromMaybe "en" (lookupKey Language metadata)
+            skipWords = map T.pack (fromMaybe [] (lookupKeyList RubySkip metadata))
+            problems = checkCoverage pageLang skipWords rubyData' body
+        unless (null problems) $ throwError (map ((path ++ ": ") ++) problems)
+
     renderPandoc ident pandoc = itemBody (writePandocWith writerOptions (ident{itemBody = pandoc}))
 
     tocPandoc pandoc = Pandoc nullMeta [toTableOfContents writerOptions (blocksOf pandoc)]

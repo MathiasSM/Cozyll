@@ -2,8 +2,8 @@
 module Cozyll.Rules.SinglePages (Page (..), page, processPage, pageCompiler) where
 
 import Cozyll.CleanURL (pathRoute)
-import Cozyll.Compile (applyTemplates, finish, runPandoc)
-import Cozyll.Config (SiteConfig, contentTemplate, pageTemplate, pagesPattern, siteEnv)
+import Cozyll.Compile (applyTemplates, finish, runPandocWith)
+import Cozyll.Config (SiteConfig, contentTemplate, pageTemplate, pagesPattern, siteEnv, siteRubyData)
 import Cozyll.Content (isHidden, isIndex, isTemplated)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
@@ -49,7 +49,7 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates, pageListItems} = do
     ctx <- pageContext
     templated <- isTemplated
     body <- getResourceString >>= (if templated then applyContentAsTemplate cfg ctx else return)
-    (item', tocHtml, mainImg) <- runPandoc body
+    (item', tocHtml, mainImg) <- runPandocWith (siteRubyData cfg) body
     underlying <- getUnderlying
     metadata <- getMetadata underlying
     kind <- pageKind metadata

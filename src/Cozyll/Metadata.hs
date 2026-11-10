@@ -85,6 +85,8 @@ data Key
       TOC
     | -- | Enables: The ruby-annotation toggle; the value is the control's label (markdown).
       RubyToggle
+    | -- | Words that may appear without furigana (coverage exemption).
+      RubySkip
     | -- | Enables: The hide-images toggle; the value is the control's label (markdown).
       ImagesToggle
     | -- | A social account's username/handle.
@@ -136,6 +138,7 @@ keyName key = case key of
     Templated -> "templated"
     TOC -> "TOC"
     RubyToggle -> "rubyToggle"
+    RubySkip -> "rubySkip"
     ImagesToggle -> "imagesToggle"
     Username -> "username"
 

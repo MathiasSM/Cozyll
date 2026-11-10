@@ -85,6 +85,7 @@ library
                   , Cozyll.Rules.Sitemap
                   , Cozyll.Rules.Validate
                   , Cozyll.Rules.WellKnown
+                  , Cozyll.Ruby
                   , Cozyll.Ruby.Data
                   , Cozyll.Ruby.Derive
                   , Cozyll.Ruby.Manifest
@@ -153,6 +154,7 @@ test-suite spec
                   , Cozyll.PostSpec
                   , Cozyll.ProjectSpec
                   , Cozyll.RedirectsSpec
+                  , Cozyll.RubySpec
                   , Cozyll.RubyDataSpec
                   , Cozyll.RubyDeriveSpec
                   , Cozyll.SocialMetaSpec
