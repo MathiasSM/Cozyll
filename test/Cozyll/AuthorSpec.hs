@@ -250,6 +250,7 @@ cfg =
         , contentCssDir = "content/css"
         , contentTemplateNames = []
         , siteEnv = Dev
+        , siteRubyData = Nothing
         }
 
 exampleAuthor :: Author

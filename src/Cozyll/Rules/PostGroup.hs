@@ -2,8 +2,8 @@
 module Cozyll.Rules.PostGroup (processPostGroup) where
 
 import Cozyll.CleanURL (pathRoute)
-import Cozyll.Compile (applyTemplates, finish, runPandoc)
-import Cozyll.Config (SiteConfig, contentTemplate, postSnapshot, postTemplate, postsPattern, resolveTemplate, siteEnv)
+import Cozyll.Compile (applyTemplates, finish, runPandocWith)
+import Cozyll.Config (SiteConfig, contentTemplate, postSnapshot, postTemplate, postsPattern, resolveTemplate, siteEnv, siteRubyData)
 import Cozyll.Content (isHidden, isTemplated, requirePost)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
@@ -61,7 +61,7 @@ processPostGroupItems cfg groupName =
             templated <- isTemplated
             getResourceString
                 >>= (if templated then applyContentAsTemplate cfg (globalContext cfg) else return)
-                >>= runPandoc
+                >>= runPandocWith (siteRubyData cfg)
                 >>= \(item', tocHtml, mainImg) -> do
                     metadata <- getUnderlying >>= getMetadata
                     let pageMeta = pageMetaOf cfg metadata

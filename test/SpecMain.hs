@@ -23,6 +23,7 @@ import Cozyll.RedirectsSpec qualified as Redirects
 import Cozyll.RubyDeriveSpec qualified as RubyDerive
 import Cozyll.RubyIndexSpec qualified as RubyIndex
 import Cozyll.RubySourcesSpec qualified as RubySources
+import Cozyll.RubySpec qualified as Ruby
 import Cozyll.SocialMetaSpec qualified as SocialMeta
 import Cozyll.SocialSpec qualified as Social
 import Cozyll.ThemeSpec qualified as Theme
@@ -52,6 +53,7 @@ main =
             , Post.tests
             , Project.tests
             , Redirects.tests
+            , Ruby.tests
             , RubyIndex.tests
             , RubyDerive.tests
             , RubySources.tests

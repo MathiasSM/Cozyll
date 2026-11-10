@@ -47,6 +47,7 @@ where
 
 import Cozyll.Domain.Author (Author)
 import Cozyll.Domain.Website (HighlightStyle)
+import Cozyll.Ruby.Index (RubyData)
 import Data.String (fromString)
 import Hakyll (Configuration, Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, (.||.))
 import System.FilePath.Posix ((<.>), (</>))
@@ -101,6 +102,8 @@ data SiteConfig = SiteConfig
     -- ^ The template names (relative to 'contentTemplatesDir') the content provides
     , siteEnv :: Env
     -- ^ The build environment (see 'Env')
+    , siteRubyData :: Maybe RubyData
+    -- ^ The derived ruby index, when the content provides @ruby-data/index.json@
     }
 
 -- | Hakyll's default configuration
