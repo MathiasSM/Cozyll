@@ -43,6 +43,7 @@ library
   import:           shared
   hs-source-dirs:   src
   exposed-modules:  Cozyll.Accessibility
+                  , Cozyll.BuildState
                   , Cozyll.CleanURL
                   , Cozyll.Cli
                   , Cozyll.Cli.Data
@@ -141,6 +142,7 @@ test-suite spec
                   , Cozyll.AccessibilitySpec
                   , Cozyll.AsideSpec
                   , Cozyll.AuthorSpec
+                  , Cozyll.BuildStateSpec
                   , Cozyll.CacheSpec
                   , Cozyll.CleanURLSpec
                   , Cozyll.CliSpec

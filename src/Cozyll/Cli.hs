@@ -1,9 +1,20 @@
 {-# LANGUAGE Trustworthy #-}
 
 -- | The command-line interface and its subcommands
-module Cozyll.Cli (Invocation (..), cli, invocationFor, versionString) where
+module Cozyll.Cli (Invocation (..), cli, invocationFor, parseEnvValue, versionString) where
 
 import Control.Monad (filterM, unless, void, when)
+import Cozyll.BuildState (
+    BuildStart (..),
+    BuildState (..),
+    applyBuildStart,
+    decideBuildStart,
+    envText,
+    newestContentChange,
+    readBuildState,
+    siteOutputExists,
+    writeBuildState,
+ )
 import Cozyll.Cli.Data (runDataCommand)
 import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
@@ -11,18 +22,22 @@ import Cozyll.Domain.Website qualified as Web
 import Cozyll.Ruby.Index (dataDirName, indexFileName, indexLimitIO, loadIndexFile)
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
+import Data.Either (fromRight, isRight)
 import Data.Maybe (fromMaybe)
+import Data.Text qualified as T
 import Data.Time (getCurrentTime, utctDay)
 import Data.Time.Calendar (toGregorian)
 import Data.Version (showVersion)
-import Hakyll (Command (..), Options (..), defaultParserInfo, defaultParserPrefs, hakyllWithArgs)
+import Hakyll (Command (..), Options (..), defaultParserInfo, defaultParserPrefs, hakyllWithArgs, hakyllWithExitCodeAndArgs)
 import Hakyll.Core.Logger qualified as Logger
+import Hakyll.Core.Runtime (RunMode (..))
 import Options.Applicative qualified as OA
 import Paths_cozyll (version)
 import System.Directory (doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs, lookupEnv)
-import System.Exit (die)
+import System.Exit (ExitCode (ExitSuccess), die, exitWith)
 import System.FilePath.Posix ((</>))
+import System.IO (hPutStrLn, stderr)
 import Text.Read (readMaybe)
 
 -- | What the command line asks for before Hakyll's parser gets to see it
@@ -49,12 +64,13 @@ argument
 [@-v@, @--verbose@]: Enable debug logging (including the resolved @SITE_ENV@ and
 content directory)
 
-[@build@]: Generate the site into @_site@
+[@build@]: Generate the site into @_site@, clearing stale output when @SITE_ENV@ changed
 [@clean@]: Clean the generated files from @_site@ (needs no content)
 [@rebuild@]: Runs @clean@ + @build@
 [@server@]: Setup a quick dev server serving the files in @_site@
 [@watch@]: Build, serve and rebuild site pieces as code changes
-[@check@]: Verify broken links in @_site@ files (needs no content)
+[@check@]: Verify broken links in @_site@ files, refusing a missing, foreign-env or
+stale tree (needs no content)
 
 Note: build commands check for required content before running.
 -}
@@ -99,11 +115,14 @@ dispatch options = case optCommand options of
     -- These only touch the generated files, so they must work without content
     -- (and without a valid SITE_ENV)
     Clean -> hakyllWithArgs siteConfiguration options (pure ())
-    Check _ -> hakyllWithArgs siteConfiguration options (pure ())
-    _ -> do
+    Check _ -> do
+        guardCheck
+        hakyllWithArgs siteConfiguration options (pure ())
+    command -> do
         env <- parseEnv =<< lookupEnv "SITE_ENV"
         let contentDir = contentDirFor env
-        debugLog options $ "SITE_ENV=" ++ show env ++ ", content dir: " ++ contentDir
+            building = startsBuild command
+        debugLog options $ "SITE_ENV=" ++ envText env ++ ", content dir: " ++ contentDir
         -- Get and validate website files/config (`website.yaml` is always required)
         website <- Web.loadWebsite contentDir
         Web.validateSecurityExpiration website
@@ -114,8 +133,76 @@ dispatch options = case optCommand options of
         limit <- indexLimitIO
         rubyData <-
             loadIndexFile limit (contentDir </> dataDirName </> indexFileName) >>= either die pure
-        -- Run command
-        hakyllWithArgs siteConfiguration options (rules cfg{siteRubyData = rubyData} website)
+        let cfg' = cfg{siteRubyData = rubyData}
+        -- Only real builds (not watch/server, and not `build --dry-run`) may
+        -- clear output or record provenance
+        when building $ prepareBuild options env
+        if building
+            then runBuild options env cfg' website
+            else hakyllWithArgs siteConfiguration options (rules cfg' website)
+
+-- | Clears stale output and reports why, when the current env cannot reuse it
+prepareBuild :: Options -> Env -> IO ()
+prepareBuild options env = do
+    start <- decideBuildStart <$> readBuildState <*> pure env <*> siteOutputExists
+    let describe Proceed = "proceed"
+        describe (Reset message) = "reset (" ++ T.unpack message ++ ")"
+    debugLog options $ "build state: " ++ describe start
+    applyBuildStart start
+
+-- | Runs a build and records the provenance once Hakyll succeeds
+runBuild :: Options -> Env -> SiteConfig -> Web.Website -> IO ()
+runBuild options env cfg website = do
+    code <- hakyllWithExitCodeAndArgs siteConfiguration options (rules cfg website)
+    when (code == ExitSuccess) $ do
+        builtAt <- getCurrentTime
+        writeBuildState
+            BuildState
+                { buildStateVersion = showVersion version
+                , buildStateEnv = env
+                , buildStateBuiltAt = builtAt
+                , buildStateContentDir = contentDir cfg
+                }
+    exitWith code
+
+-- | Whether a command produces @_site@ with this environment
+startsBuild :: Command -> Bool
+startsBuild Rebuild = True
+startsBuild (Build RunModeNormal) = True
+startsBuild _ = False
+
+{- | Refuses to audit a missing or foreign-env @_site@, and warns when the
+output may be stale. @check@ deliberately does not require a valid @SITE_ENV@;
+an unknown value only disables the environment comparison.
+-}
+guardCheck :: IO ()
+guardCheck = do
+    envValue <- lookupEnv "SITE_ENV"
+    built <- siteOutputExists
+    unless built $ die "no built site in _site; run 'cozyll build'"
+    state <- readBuildState
+    let parsedEnv = parseEnvValue envValue
+        env = fromRight Prod parsedEnv
+    case parsedEnv of
+        Left message -> hPutStrLn stderr $ "warning: " ++ message ++ "; skipping the environment comparison"
+        Right _ -> pure ()
+    case state of
+        Nothing ->
+            hPutStrLn stderr "warning: no build state found; cannot verify that _site matches the content; run 'cozyll build'"
+        Just previous -> do
+            when (isRight parsedEnv && buildStateEnv previous /= env)
+                $ die
+                $ "_site was built with SITE_ENV="
+                    ++ envText (buildStateEnv previous)
+                    ++ "; run 'cozyll build'"
+            newer <- newestContentChange (buildStateContentDir previous) (buildStateBuiltAt previous)
+            mapM_ warnNewer newer
+  where
+    warnNewer file =
+        hPutStrLn stderr $
+            "warning: _site was built before " ++ file ++ " changed; run 'cozyll build'"
+
+-- | Emits a debug line only when @-v@/@--verbose@ was passed
 
 -- | Emits a debug line only when @-v@/@--verbose@ was passed
 debugLog :: Options -> String -> IO ()
@@ -195,11 +282,17 @@ loadSiteConfig env contentDir website = do
 other value fails the build.
 -}
 parseEnv :: Maybe String -> IO Env
-parseEnv Nothing = pure Prod
-parseEnv (Just "prod") = pure Prod
-parseEnv (Just "dev") = pure Dev
-parseEnv (Just "example") = pure Example
-parseEnv (Just other) = die $ "unknown SITE_ENV \"" ++ other ++ "\" (expected prod, dev, or example)"
+parseEnv = either die pure . parseEnvValue
+
+{- | Pure @SITE_ENV@ parser. Unset is 'Prod'; unknown values are reported as a
+'Left' so @check@ can warn and continue where a build would fail.
+-}
+parseEnvValue :: Maybe String -> Either String Env
+parseEnvValue Nothing = Right Prod
+parseEnvValue (Just "prod") = Right Prod
+parseEnvValue (Just "dev") = Right Dev
+parseEnvValue (Just "example") = Right Example
+parseEnvValue (Just other) = Left $ "unknown SITE_ENV \"" ++ other ++ "\" (expected prod, dev, or example)"
 
 -- | The content directory an environment builds (@example@ builds the example content)
 contentDirFor :: Env -> FilePath

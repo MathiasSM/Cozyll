@@ -1,10 +1,12 @@
 -- | Tests for the command-line argument classification
 module Cozyll.CliSpec (tests) where
 
-import Cozyll.Cli (Invocation (..), invocationFor, versionString)
+import Cozyll.Cli (Invocation (..), invocationFor, parseEnvValue, versionString)
+import Cozyll.Config (Env (..))
 import Data.Char (isDigit)
+import Data.List (isInfixOf)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase, (@?=))
+import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
 
 -- | The CLI tests
 tests :: TestTree
@@ -34,5 +36,20 @@ tests =
                 let v = drop 7 versionString
                 assertBool "version is not empty" (not (null v))
                 assertBool "version only has digits and dots" (all (\c -> isDigit c || c == '.') v)
+            ]
+        , testGroup
+            "parseEnvValue"
+            [ testCase "defaults an unset SITE_ENV to prod" $
+                parseEnvValue Nothing @?= Right Prod
+            , testCase "parses prod" $
+                parseEnvValue (Just "prod") @?= Right Prod
+            , testCase "parses dev" $
+                parseEnvValue (Just "dev") @?= Right Dev
+            , testCase "parses example" $
+                parseEnvValue (Just "example") @?= Right Example
+            , testCase "reports unknown values" $
+                case parseEnvValue (Just "bogus") of
+                    Left message -> assertBool "names the variable" ("SITE_ENV" `isInfixOf` message)
+                    Right _ -> assertFailure "bogus SITE_ENV should be rejected"
             ]
         ]

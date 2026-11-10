@@ -6,6 +6,7 @@ module Main (main) where
 import Cozyll.AccessibilitySpec qualified as Accessibility
 import Cozyll.AsideSpec qualified as Aside
 import Cozyll.AuthorSpec qualified as Author
+import Cozyll.BuildStateSpec qualified as BuildState
 import Cozyll.CacheSpec qualified as Cache
 import Cozyll.CleanURLSpec qualified as CleanURL
 import Cozyll.CliDataSpec qualified as CliData
@@ -48,6 +49,7 @@ main = do
             , Aside.tests
             , Author.tests
             , Cache.tests
+            , BuildState.tests
             , CleanURL.tests
             , CliData.tests
             , Cli.tests
