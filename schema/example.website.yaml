@@ -52,6 +52,8 @@ robots:
 trust:
   trainingAllowed: "no"
 
+# Optional: omit the whole section if you have no funding programme (then no
+# funding.json and no .well-known/funding-manifest-urls are published).
 # funding.json manifest.
 funding:
   entity:

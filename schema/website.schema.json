@@ -5,7 +5,7 @@
   "description": "Site configuration, as read from website.yaml.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["site", "contact", "manifest", "mathjax", "highlight", "feed", "robots", "security", "trust", "funding"],
+  "required": ["site", "contact", "manifest", "mathjax", "highlight", "feed", "robots", "security", "trust"],
   "properties": {
     "jaRubyCheck": {
       "type": "string",

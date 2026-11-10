@@ -20,10 +20,6 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - The sitemap's home entry now ends with a trailing slash, matching the canonical URL.
 - Links inside prose are underlined, so in-text links no longer rely on colour alone (WCAG 1.4.1).
 
-### Changed
-
-- `scripts/check-site.sh` treats accessibility findings as advisory unless `--a11y-fail true` is passed, matching CI.
-
 ### Added
 
 - Raster logos are supported: `media/branding/logo.png` is used when no `logo.svg` exists, and `content/static/` files override the generated icon at the same path.
@@ -32,6 +28,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 ### Changed
 
 - `-v`/`--verbose` now enables debug output, including the resolved `SITE_ENV` and content directory.
+- `scripts/check-site.sh` treats accessibility findings as advisory unless `--a11y-fail true` is passed, matching CI.
+- `funding:` may be omitted from `website.yaml`; a site without it publishes no `funding.json` and no `.well-known/funding-manifest-urls`.
 - Every file under `content/media/` is now published (previously a whitelist silently dropped files); `media/branding/*` still flattens to `/images/*` and `.dot` sources still render to PNG.
 - Build errors now list the required content tree, explain a group without an index page, and report every item missing `path:` in one go.
 

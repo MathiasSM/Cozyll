@@ -79,4 +79,6 @@ the available checks and their tool requirements.
 - The workflow assumes your content repo is checked out at `content/`. That is the directory
   Cozyll reads for production builds.
 - `site-domain` is passed as `SITE_DOMAIN`; leave it empty to use `website.yaml`.
+- `funding.json` and `.well-known/funding-manifest-urls` are published only when `website.yaml`
+  has a `funding:` section; the well-known check validates `funding.json` when present.
 - External link and spelling checks are advisory or opt-in on purpose.

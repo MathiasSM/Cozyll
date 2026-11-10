@@ -1,5 +1,5 @@
 -- | Generates the site's well-known and metadata files (robots.txt, funding.json, …) from @website.yaml@
-module Cozyll.Rules.WellKnown (processWellKnownFiles, manifestTxt) where
+module Cozyll.Rules.WellKnown (processWellKnownFiles, fundingFiles, manifestTxt) where
 
 import Cozyll.Brand (SiteIcon (..), brandIcons, iconHref, manifestIcons)
 import Cozyll.Config (SiteConfig, baseUrl, siteBrand, siteDefaultAuthor, siteTitle, socialsFile)
@@ -41,8 +41,7 @@ processWellKnownFiles cfg website = do
     createFile "robots.txt" (robotsTxt url (robotsDisallow (websiteRobots website)))
     createFile "manifest.webmanifest" (manifestTxt (siteTitle cfg) (websiteManifest website) icons)
     createFile ".well-known/security.txt" (securityTxt url (contactPage contact) (websiteSecurity website))
-    createFile ".well-known/funding-manifest-urls" (fundingManifestUrls url)
-    createFile "funding.json" (fundingJson (authorName (siteDefaultAuthor cfg)) url (websiteFunding website))
+    mapM_ (uncurry createFile) (fundingFiles (authorName (siteDefaultAuthor cfg)) url (websiteFunding website))
     createFileCompiler ".well-known/trust.txt" $ do
         socials <- socialHrefs cfg
         pure (trustTxt url (contactPage contact) socials (websiteTrust website))
@@ -91,6 +90,19 @@ securityTxt url contactPage security =
 
 fundingManifestUrls :: String -> String
 fundingManifestUrls url = url ++ "/funding.json\n"
+
+{- | The files generated from the optional @funding:@ section, in build order.
+Empty when @website.yaml@ has no @funding:@ section, so such a site publishes
+neither @funding.json@ nor @.well-known/funding-manifest-urls@.
+-}
+fundingFiles :: String -> String -> Maybe Funding -> [(FilePath, String)]
+fundingFiles author url funding =
+    case funding of
+        Nothing -> []
+        Just value ->
+            [ (".well-known/funding-manifest-urls", fundingManifestUrls url)
+            , ("funding.json", fundingJson author url value)
+            ]
 
 trustTxt :: String -> String -> [String] -> Trust -> String
 trustTxt url contactPage socials trust =

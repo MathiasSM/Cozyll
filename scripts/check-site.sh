@@ -222,7 +222,7 @@ run_wellknown() {
   local d="$site_dir"
   local fail=0
   local f
-  for f in robots.txt manifest.webmanifest funding.json sitemap.xml .well-known/security.txt .well-known/trust.txt; do
+  for f in robots.txt manifest.webmanifest sitemap.xml .well-known/security.txt .well-known/trust.txt; do
     if [ ! -f "$d/$f" ]; then
       info "missing $d/$f"
       fail=1
@@ -250,12 +250,20 @@ if when <= datetime.now(timezone.utc):
     print(f"security.txt Expires is in the past: {raw}")
     sys.exit(1)
 PY
-  python3 - "$d/manifest.webmanifest" "$d/funding.json" <<'PY'
+  python3 - "$d/manifest.webmanifest" <<'PY'
 import json, sys
-for path in sys.argv[1:]:
-    with open(path, encoding="utf-8") as fh:
-        json.load(fh)
+with open(sys.argv[1], encoding="utf-8") as fh:
+    json.load(fh)
 PY
+  if [ -f "$d/funding.json" ]; then
+    python3 - "$d/funding.json" <<'PY'
+import json, sys
+with open(sys.argv[1], encoding="utf-8") as fh:
+    json.load(fh)
+PY
+  else
+    info "no funding.json (no funding section); skipping"
+  fi
 }
 
 run_spelling() {

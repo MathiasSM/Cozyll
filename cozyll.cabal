@@ -173,6 +173,7 @@ test-suite spec
                   , Cozyll.SocialSpec
                   , Cozyll.ThemeSpec
                   , Cozyll.ValidateSpec
+                  , Cozyll.WebsiteSpec
   build-depends:    base
                   , hakyll
                   , cozyll
