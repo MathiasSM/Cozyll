@@ -233,8 +233,11 @@ JSON-LD; when it is unset it defaults to the brand logo's published path.
 
 Every post group has its own Atom feed at `/<group>/atom.xml`, built from the group's
 newest posts. The feed's title and subtitle come from the group's index page, and its size
-is `feed.size` in `website.yaml`. The page head links every group feed it finds. There is
-no site-wide feed yet.
+is `feed.size` in `website.yaml`.
+
+The site as a whole has `/atom.xml`: every non-showcase group's posts, merged and sorted
+newest first, also capped by `feed.size`, with the site title and description. Every page
+head lists the site feed first, then the group feeds.
 
 ## What the build checks
 

@@ -208,7 +208,8 @@ cozyll --version
 Pages are flat files under `content/writings/`; posts sit in a group folder and carry a
 `date:`. A group is an index page (`writings/<group>.md` with `index: true`, `group:` and
 `path:`) plus a `writings/<group>/` folder, and it gets a listing and a feed at
-`/<group>/atom.xml`. Every item needs an explicit `path:`; drafts use `draft: true`, and
+`/<group>/atom.xml`. The site as a whole has `/atom.xml` (every group's posts, newest
+first, up to `feed.size`). Every item needs an explicit `path:`; drafts use `draft: true`, and
 `aliases:` publishes redirects. Dates stay ISO `YYYY-MM-DD` by design.
 
 The full guide — front matter, groups, media routes, `content/static/`, feeds and the

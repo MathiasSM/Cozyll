@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title><![CDATA[Example]]></title>
+    <subtitle><![CDATA[An example site]]></subtitle>
+    <link href="https://example.com/atom.xml" rel="self" />
+    <link href="https://example.com" />
+    <id>https://example.com/atom.xml</id>
+    <author>
+        <name><![CDATA[Example Author]]></name>
+    </author>
+    <updated>2024-06-05T00:00:00Z</updated>
+<entry>
+    <title><![CDATA[Figures]]></title>
+    <link href="https://example.com/elements/figures" />
+    <id>https://example.com/elements/figures</id>
+    <published>2024-06-05T00:00:00Z</published>
+    <updated>2024-06-05T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Images can appear inline, as figures, or in a <code>.figures</code> group.</p>
+<h2 id="inline">Inline</h2>
+<p>An inline image sits in a paragraph: <img src="https://example.com/images/logo.svg" alt="the logo" /> right here.</p>
+<h2 id="a-figure">A figure</h2>
+<p>An image standing alone becomes a figure:</p>
+<figure>
+<img src="https://placehold.co/500x40" alt="A caption for the figure" />
+<figcaption aria-hidden="true">A caption for the figure</figcaption>
+</figure>
+<h2 id="a-group-of-figures">A group of figures</h2>
+<div class="figures">
+<p><img src="https://placehold.co/200x100" alt="First caption" />
+<img src="https://placehold.co/200x100" alt="Second caption" /></p>
+</div>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Spans and attributes]]></title>
+    <link href="https://example.com/elements/spans" />
+    <id>https://example.com/elements/spans</id>
+    <published>2024-06-04T00:00:00Z</published>
+    <updated>2024-06-04T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Inline elements can carry attributes.</p>
+<h2 id="inline-spans">Inline spans</h2>
+<p>A bracketed span: <span class="example-note">this one</span>. A link with a class: <a href="https://example.com/prose" class="example-note">a link</a>.</p>
+<h2 id="header-identifiers">Header identifiers</h2>
+<p>A heading can carry a custom identifier. Jump to <a href="#custom-id">the custom section</a>.</p>
+<h3 id="custom-id">A custom section</h3>
+<p>Content under a heading with a custom identifier.</p>
+<h2 id="implicit-references">Implicit references</h2>
+<p>Jump to <a href="#inline-spans">Inline spans</a> using an implicit header reference.</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Checkboxes]]></title>
+    <link href="https://example.com/elements/checkboxes" />
+    <id>https://example.com/elements/checkboxes</id>
+    <published>2024-06-03T00:00:00Z</published>
+    <updated>2024-06-03T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Task-list checkboxes render read-only, since a static page can’t persist their state.</p>
+<h2 id="read-only-by-default">Read-only by default</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />An unchecked item</label></li>
+<li><label><input type="checkbox" checked />A checked item</label></li>
+</ul>
+<h2 id="opt-in-to-interactive">Opt in to interactive</h2>
+<p>Wrap a task list in an <code>interactive</code> div to keep its checkboxes editable:</p>
+<div class="interactive">
+<ul class="task-list">
+<li><label><input type="checkbox" />Toggle me</label></li>
+<li><label><input type="checkbox" checked />Me too</label></li>
+</ul>
+</div>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Forms]]></title>
+    <link href="https://example.com/elements/forms" />
+    <id>https://example.com/elements/forms</id>
+    <published>2024-06-02T00:00:00Z</published>
+    <updated>2024-06-02T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Form controls are styled by the generator; whether a site uses them is up to its content.</p>
+<form action="#">
+  <fieldset>
+    <legend>An example form</legend>
+    <p><label>Name <input type="text" placeholder="Jane Doe" /></label></p>
+    <p><label>Role <select><option>Developer</option><option>Designer</option><option>Writer</option></select></label></p>
+    <p><label>Message <textarea rows="3" placeholder="Say something…"></textarea></label></p>
+    <p><button type="button">Send</button></p>
+  </fieldset>
+</form>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[HTML]]></title>
+    <link href="https://example.com/elements/html" />
+    <id>https://example.com/elements/html</id>
+    <published>2024-06-01T00:00:00Z</published>
+    <updated>2024-06-01T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>This post demonstrates raw HTML and richer block constructs.</p>
+<h2 id="definition-lists">Definition lists</h2>
+<dl>
+<dt>Term</dt>
+<dd>
+A definition list entry.
+</dd>
+</dl>
+<h2 id="fenced-divs">Fenced divs</h2>
+<div class="example-note">
+<p>This paragraph sits inside a <code>{.example-note}</code> div, styled by the example stylesheet.</p>
+</div>
+<h2 id="raw-html">Raw HTML</h2>
+<p>A raw HTML block passes through:</p>
+<details>
+  <summary>Click to expand</summary>
+  <p>This is raw HTML, inserted verbatim.</p>
+</details>
+<h2 id="inline-html">Inline HTML</h2>
+<p>Inline elements: <kbd>Ctrl</kbd> for a key, <mark>marked</mark> text, a variable <var>x</var>, sample output <samp>OK</samp>, an <ins>insertion</ins>, a <del>deletion</del>, and a date: <time datetime="2024-06-01">June 2024</time>.</p>
+A <dfn>defined term</dfn>, an <abbr title="HyperText Markup Language">HTML</abbr> abbreviation, a <cite>cited work</cite>, an inline <q>quotation</q>, and an
+<address>
+example@example.com
+</address>
+<p>address.</p>
+<h2 id="raw-html-inside-markdown">Raw HTML inside markdown</h2>
+<p>A blockquote containing a raw inline element:</p>
+<blockquote>
+<p>A quoted line with a <mark>highlighted</mark> word.</p>
+</blockquote>
+<p>A list with an inline element:</p>
+<ul>
+<li>An item with a <kbd>key</kbd> inside.</li>
+</ul>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[ルビの確認]]></title>
+    <link href="https://example.com/languages/ruby-check" />
+    <id>https://example.com/languages/ruby-check</id>
+    <published>2024-05-04T00:00:00Z</published>
+    <updated>2024-05-04T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p><ruby data-jlpt="unknown" data-jlpt-source="unknown">薔薇<rp>(</rp><rt>ばら</rt><rp>)</rp></ruby>はルビがあります。薔薇はスキップされます。</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Polyglot]]></title>
+    <link href="https://example.com/languages/polyglot" />
+    <id>https://example.com/languages/polyglot</id>
+    <published>2024-05-03T00:00:00Z</published>
+    <updated>2024-05-03T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>An English post that mixes in other scripts with language spans, so the right font is selected.</p>
+<h2 id="japanese">Japanese</h2>
+<p>The word <span lang="ja">日本語</span> means “Japanese”.</p>
+<h2 id="chinese">Chinese</h2>
+<p><span lang="zh-Hans">中文</span> means “Chinese”. <span lang="zh-Hant">繁體</span> is traditional Chinese.</p>
+<h2 id="korean">Korean</h2>
+<p><span lang="ko">한국어</span> means “Korean”.</p>
+<h2 id="spanish">Spanish</h2>
+<p><span lang="es">Español</span> means “Spanish”.</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[日本語の記事]]></title>
+    <link href="https://example.com/languages/japanese" />
+    <id>https://example.com/languages/japanese</id>
+    <published>2024-05-02T00:00:00Z</published>
+    <updated>2024-05-02T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>この記事は日本語で書かれています。ルビを振ることもできます。</p>
+<h2 id="見出し">見出し</h2>
+<p><ruby data-jlpt="n5" data-jlpt-source="word">日本語<rp>(</rp><rt>にほんご</rt><rp>)</rp></ruby>はルビで読み方を示せます。<ruby data-jlpt="n3" data-jlpt-source="kanji">漢字<rp>(</rp><rt>かんじ</rt><rp>)</rp></ruby>も同様です。</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Un escrito]]></title>
+    <link href="https://example.com/languages/spanish" />
+    <id>https://example.com/languages/spanish</id>
+    <published>2024-05-01T00:00:00Z</published>
+    <updated>2024-05-01T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Este escrito está en español. Demuestra la localización de las plantillas: la fecha se muestra en español.</p>
+<h2 id="un-subtítulo">Un subtítulo</h2>
+<p>Aquí hay más texto en español.</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Code attributes]]></title>
+    <link href="https://example.com/code/attributes" />
+    <id>https://example.com/code/attributes</id>
+    <published>2024-04-03T00:00:00Z</published>
+    <updated>2024-04-03T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Fenced code blocks can carry attributes.</p>
+<h2 id="line-numbers">Line numbers</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource python numberLines"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-label="1"></a><span class="kw">def</span> greet(name):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-label="2"></a>    <span class="cf">return</span> <span class="st">&quot;Hello, &quot;</span> <span class="op">+</span> name</span></code></pre></div>
+<h2 id="a-caption">A caption</h2>
+<p>A code block with a caption attribute:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="fu">putStrLn</span> <span class="st">&quot;hi&quot;</span></span></code></pre></div>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Math]]></title>
+    <link href="https://example.com/code/math" />
+    <id>https://example.com/code/math</id>
+    <published>2024-04-02T00:00:00Z</published>
+    <updated>2024-04-02T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Mathematics is rendered with MathJax. Inline math sits in a sentence, like <span class="math inline">\(E = mc^2\)</span> or <span class="math inline">\(e^{i\pi} + 1 = 0\)</span>.</p>
+<h2 id="display-math">Display math</h2>
+<p>Display math is set on its own line:</p>
+<p><span class="math display">\[\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}\]</span></p>
+<p>Another:</p>
+<p><span class="math display">\[\sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}\]</span></p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Syntax highlighting]]></title>
+    <link href="https://example.com/code/highlighting" />
+    <id>https://example.com/code/highlighting</id>
+    <published>2024-04-01T00:00:00Z</published>
+    <updated>2024-04-01T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Fenced code blocks highlight according to their language.</p>
+<h2 id="haskell">Haskell</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ot">main ::</span> <span class="dt">IO</span> ()</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="fu">putStrLn</span> <span class="st">&quot;Hello&quot;</span></span></code></pre></div>
+<h2 id="python">Python</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet(name):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f&quot;Hello, </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">&quot;</span></span></code></pre></div>
+<h2 id="javascript">JavaScript</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">greet</span>(name) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> <span class="vs">`Hello, </span><span class="sc">${</span>name<span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Multiline tables]]></title>
+    <link href="https://example.com/tables/multiline" />
+    <id>https://example.com/tables/multiline</id>
+    <published>2024-03-04T00:00:00Z</published>
+    <updated>2024-03-04T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>A multiline table needs a full separator line at the top:</p>
+<table style="width:27%;">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 13%" />
+</colgroup>
+<thead>
+<tr>
+<th style="text-align: left;">Left</th>
+<th style="text-align: left;">Right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">alpha
+gamma</td>
+<td style="text-align: left;">beta
+delta</td>
+</tr>
+</tbody>
+</table>
+<h2 id="a-too-wide-table">A too-wide table</h2>
+<p>A table with a very long, unbroken cell overflows its column. The example stylesheet wraps it in a scrollable <code>.wide</code> container.</p>
+<div class="wide">
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Key</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>short</td>
+<td>short</td>
+</tr>
+<tr>
+<td>a-long-unbroken-token</td>
+<td>this-cell-contains-an-extremely-long-unbroken-string-that-forces-the-table-wider-than-the-page-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
+</tr>
+</tbody>
+</table>
+</div>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Grid tables]]></title>
+    <link href="https://example.com/tables/grid" />
+    <id>https://example.com/tables/grid</id>
+    <published>2024-03-03T00:00:00Z</published>
+    <updated>2024-03-03T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>A grid table draws cell borders with <code>+</code> and <code>-</code>.</p>
+<table style="width:36%;">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grid table</td>
+<td>Cells are
+drawn with +</td>
+</tr>
+</tbody>
+</table>
+<p>A grid table can carry a footer, marked by an extra <code>=</code> separator:</p>
+<table style="width:22%;">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 10%" />
+</colgroup>
+<thead>
+<tr>
+<th>Item</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Eggs</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Milk</td>
+<td>3</td>
+</tr>
+</tbody><tfoot>
+<tr>
+<td>Total</td>
+<td>8</td>
+</tr>
+</tfoot>
+
+</table>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Simple tables]]></title>
+    <link href="https://example.com/tables/simple" />
+    <id>https://example.com/tables/simple</id>
+    <published>2024-03-02T00:00:00Z</published>
+    <updated>2024-03-02T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>A simple table uses a single <code>-</code> row under the header:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">data</td>
+<td>path to data files.</td>
+</tr>
+<tr>
+<td style="text-align: left;">engine</td>
+<td>template engine used.</td>
+</tr>
+</tbody>
+</table>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Pipe tables]]></title>
+    <link href="https://example.com/tables/pipe" />
+    <id>https://example.com/tables/pipe</id>
+    <published>2024-03-01T00:00:00Z</published>
+    <updated>2024-03-01T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Pipe tables are the most common table syntax.</p>
+<h2 id="alignment">Alignment</h2>
+<p>Alignment is expressed with colons on the separator row:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Left</th>
+<th style="text-align: center;">Center</th>
+<th style="text-align: right;">Right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">alpha</td>
+<td style="text-align: center;">beta</td>
+<td style="text-align: right;">gamma</td>
+</tr>
+<tr>
+<td style="text-align: left;">one</td>
+<td style="text-align: center;">two</td>
+<td style="text-align: right;">three</td>
+</tr>
+</tbody>
+</table>
+<h2 id="captions">Captions</h2>
+<p>A table can carry a caption:</p>
+<table>
+<caption>A captioned pipe table.</caption>
+<thead>
+<tr>
+<th>Name</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>alpha</td>
+<td>1</td>
+</tr>
+<tr>
+<td>beta</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[A tour of the example content]]></title>
+    <link href="https://example.com/prose/tour" />
+    <id>https://example.com/prose/tour</id>
+    <published>2024-02-20T00:00:00Z</published>
+    <updated>2024-02-20T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>This post is a longer, flowing piece of prose. It exists because most of the other posts in the example content are short demonstrations that jump straight from one construct to the next, while real writing is mostly paragraphs.</p>
+<figure>
+<img src="https://example.com/images/logo.svg" alt="A regular image" />
+<figcaption aria-hidden="true">A regular image</figcaption>
+</figure>
+<h2 id="why-longer-text-matters">Why longer text matters</h2>
+<p>A real post is not a list of features. It is a sequence of paragraphs, each building on the last, with the occasional heading to give the reader a place to rest and a way to find their place again. Short posts do not exercise the styles that make longer text comfortable to read: the space between paragraphs, the measure of a line, and the way a heading clears the text around it.</p>
+<p>So this post stretches those styles. It also, as a matter of course, mixes in several of the constructs the example content demonstrates elsewhere, so they can be seen working together rather than in isolation.</p>
+<h2 id="the-example-content-at-a-glance">The example content at a glance</h2>
+<p>The example content is organized into a handful of groups, each focused on one area of the generator’s input:</p>
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Focus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>prose</td>
+<td>Core Markdown text, lists, and footnotes</td>
+</tr>
+<tr>
+<td>tables</td>
+<td>The four Pandoc table syntaxes</td>
+</tr>
+<tr>
+<td>code</td>
+<td>Syntax highlighting and math</td>
+</tr>
+<tr>
+<td>languages</td>
+<td>Language front matter, CJK, and ruby</td>
+</tr>
+<tr>
+<td>elements</td>
+<td>Raw HTML, forms, and controls</td>
+</tr>
+</tbody>
+</table>
+<h2 id="a-note-on-footnotes">A note on footnotes</h2>
+<p>Footnotes keep an aside out of the flow of a sentence.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> They are useful in longer writing, where a sentence needs a caveat that would otherwise interrupt the argument.</p>
+<h2 id="code-in-prose">Code in prose</h2>
+<p>Longer writing also leaves room for a short code block without it feeling forced:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ot">main ::</span> <span class="dt">IO</span> ()</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="fu">putStrLn</span> <span class="st">&quot;An example&quot;</span></span></code></pre></div>
+<p>And a quote, for good measure:</p>
+<blockquote>
+<p>A paragraph is not a luxury; it is the basic unit of argument.</p>
+</blockquote>
+<figure id="main-image">
+<img src="https://example.com/images/photos/og-post.png" alt="Example post" />
+<figcaption aria-hidden="true">Example post</figcaption>
+</figure>
+<h2 id="where-to-go-next">Where to go next</h2>
+<p>From here, the other groups show the remaining features in detail: the <a href="https://example.com/languages">languages</a> posts for ruby and CJK, the <a href="https://example.com/tables">tables</a> posts for table syntax, and the <a href="https://example.com/elements">elements</a> posts for raw HTML and controls.</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Like this one, which is an inline footnote. It stays near its marker, and a back-link returns the reader to where they left off.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Long form]]></title>
+    <link href="https://example.com/prose/long-form" />
+    <id>https://example.com/prose/long-form</id>
+    <published>2024-02-10T00:00:00Z</published>
+    <updated>2024-02-10T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>A longer document with several sections, demonstrating the generated table of contents.</p>
+<h2 id="first-section">First section</h2>
+<p>Some content under the first section.</p>
+<h3 id="a-subsection">A subsection</h3>
+<p>Content under a subsection.</p>
+<h2 id="second-section">Second section</h2>
+<p>Content under the second section.</p>
+<h3 id="another-subsection">Another subsection</h3>
+<p>More content.</p>
+<h2 id="third-section">Third section</h2>
+<p>Content under the third section.</p>
+<h2 id="fourth-section">Fourth section</h2>
+<p>Content under the fourth section.</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Smart typography]]></title>
+    <link href="https://example.com/prose/smart-typography" />
+    <id>https://example.com/prose/smart-typography</id>
+    <published>2024-02-01T00:00:00Z</published>
+    <updated>2024-02-01T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Pandoc rewrites punctuation as it parses.</p>
+<h2 id="what-gets-rewritten">What gets rewritten</h2>
+<p>“Double quotes” and ‘single quotes’ become curly, two hyphens – become an en dash, three — become an em dash, and trailing dots… become an ellipsis.</p>
+<h2 id="escaping">Escaping</h2>
+<p>A backslash keeps characters literal: -- stays two hyphens, ... stays three dots. Code spans are never rewritten: <code>--flag</code>.</p>
+<h2 id="subscript-and-superscript">Subscript and superscript</h2>
+<p>Water is H<sub>2</sub>O and a square is x<sup>2</sup>. This is separate from math, which uses <code>$...$</code>.</p>]]></content>
+</entry>
+<entry>
+    <title><![CDATA[Lists]]></title>
+    <link href="https://example.com/prose/lists" />
+    <id>https://example.com/prose/lists</id>
+    <published>2024-01-20T00:00:00Z</published>
+    <updated>2024-01-20T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p>Lists come in several flavours.</p>
+<h2 id="bulleted-and-ordered">Bulleted and ordered</h2>
+<ul>
+<li>one item</li>
+<li>another item
+<ul>
+<li>a nested item</li>
+<li>another nested item</li>
+</ul></li>
+<li>back to the top level</li>
+</ul>
+<ol type="1">
+<li>first</li>
+<li>second</li>
+<li>third</li>
+</ol>
+<h2 id="ordered-lists-with-a-start-value">Ordered lists with a start value</h2>
+<p>Any number starts the list at that value:</p>
+<ol start="3" type="1">
+<li>Starts at three.</li>
+<li>Then four.</li>
+</ol>
+<h2 id="task-lists">Task lists</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked />a completed item</label></li>
+<li><label><input type="checkbox" />a to-do item</label></li>
+</ul>
+<h2 id="example-lists">Example lists</h2>
+<p>Mark a list with <code>(@)</code> for an “example” list:</p>
+<ol class="example" type="1">
+<li>First example.</li>
+<li>Second example.</li>
+</ol>
+<h2 id="fancy-lists">Fancy lists</h2>
+<p>A letter or roman numeral controls the numbering:</p>
+<ol type="a">
+<li>Lowercase letters.</li>
+<li>Keep going.</li>
+</ol>
+<ol start="2" type="i">
+<li>Roman numerals.</li>
+<li>Continue.</li>
+</ol>
+<h2 id="line-blocks">Line blocks</h2>
+<p>A line block preserves line breaks:</p>
+<div class="line-block">A line block<br />
+keeps each line<br />
+   and leading spaces<br />
+   on its own line.</div>
+<h2 id="definition-lists">Definition lists</h2>
+<dl>
+<dt>Term</dt>
+<dd>
+A definition rendered as a <code>&lt;dl&gt;</code>.
+</dd>
+</dl>]]></content>
+</entry>
+
+</feed>

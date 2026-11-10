@@ -1,8 +1,10 @@
--- | The Atom feeds: one per post group, described by the group's index page
-module Cozyll.Domain.Feed (Feed (..), feedHref, feeds, missingIndexPageMessage, absoluteUrl) where
+{- | The Atom feeds: one per post group, described by the group's index page,
+plus the site-wide feed
+-}
+module Cozyll.Domain.Feed (Feed (..), feedHref, feeds, siteFeed, missingIndexPageMessage, absoluteUrl) where
 
 import Cozyll.CleanURL (outputPath)
-import Cozyll.Config (SiteConfig, contentDir, pagesPattern, projectsGroup, siteTitle)
+import Cozyll.Config (SiteConfig, contentDir, pagesPattern, projectsGroup, siteDescription, siteTitle)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Metadata (Key (Description, Path, Title), lookupKey)
 import Data.Either (lefts, rights)
@@ -11,9 +13,12 @@ import Data.Maybe (fromMaybe)
 import Hakyll (MonadMetadata (getMatches, getMetadata), toFilePath)
 import System.FilePath.Posix (takeDirectory, (<.>), (</>))
 
--- | An Atom feed, described by its group's index page
+{- | An Atom feed, described by its group's index page or, for the site feed, by
+@website.yaml@
+-}
 data Feed = Feed
-    { feedGroup :: String
+    { feedGroup :: Maybe String
+    -- ^ The post group, or 'Nothing' for the site-wide feed
     , feedTitle :: String
     , feedDescription :: String
     , feedFile :: FilePath
@@ -24,6 +29,16 @@ data Feed = Feed
 -- | Where the feed is served from
 feedHref :: Feed -> String
 feedHref feed = '/' : feedFile feed
+
+-- | The site-wide feed: every post of every group, at @/atom.xml@
+siteFeed :: SiteConfig -> Feed
+siteFeed cfg =
+    Feed
+        { feedGroup = Nothing
+        , feedTitle = siteTitle cfg
+        , feedDescription = siteDescription cfg
+        , feedFile = "atom.xml"
+        }
 
 {- | The feed of every post group, or every problem found
 
@@ -51,7 +66,7 @@ feedOf cfg group = do
                 Just path ->
                     Right
                         Feed
-                            { feedGroup = group
+                            { feedGroup = Just group
                             , feedTitle = fromMaybe group (lookupKey Title metadata) ++ " - " ++ siteTitle cfg
                             , feedDescription = fromMaybe "" (lookupKey Description metadata)
                             , feedFile = takeDirectory (outputPath path) </> "atom.xml"

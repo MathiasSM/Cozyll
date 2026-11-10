@@ -33,6 +33,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 - `docs/authoring.md`, a guide to pages, posts, groups, `path`, drafts, aliases, front matter, media routes and feeds; the build's group and required-content errors now point at it instead of the README.
 - `docs/theming.md`, the theme contract: which templates exist and what they receive, `content.html` being applied by the builder, the CSS custom properties and the override/caching rules.
+- A site-wide Atom feed at `/atom.xml`, aggregating every group's posts newest first (up to `feed.size`), listed first in every page head; per-group feeds are unchanged.
 - Raster logos are supported: `media/branding/logo.png` is used when no `logo.svg` exists, and `content/static/` files override the generated icon at the same path.
 - `content/static/` is copied verbatim to the site root, for files such as `CNAME`, `.nojekyll` and verification files.
 - `schema/example.authors.yaml`, `schema/example.localization.yaml` and `schema/localization.schema.json`, so every required config file has an example and a schema; the content-schema check now validates `localization.yaml` too.
