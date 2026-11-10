@@ -6,6 +6,11 @@ aside.controls:
   es: Controles
   ja: コントロール
 
+ruby.all:
+  en: All
+  es: Todo
+  ja: すべて
+
 post.updated:
   en: Updated
   es: Actualizado
