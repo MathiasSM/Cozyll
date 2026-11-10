@@ -25,8 +25,14 @@ tests =
                 invocationFor ["data", "fetch"] @?= RunDataArgs ["fetch"]
             , testCase "does not treat --version followed by a command as a version request" $
                 invocationFor ["--version", "build"] @?= RunCommand
+            , testCase "recognises init as its own command, with its arguments" $
+                invocationFor ["init", "--dir", "site"] @?= Init ["--dir", "site"]
+            , testCase "keeps init --help for the init parser" $
+                invocationFor ["init", "--help"] @?= Init ["--help"]
             , testCase "runs the command otherwise" $
                 invocationFor ["build"] @?= RunCommand
+            , testCase "does not treat a later init as the init command" $
+                invocationFor ["build", "init"] @?= RunCommand
             ]
         , testGroup
             "versionString"

@@ -77,6 +77,7 @@ library
                   , Cozyll.Filters
                   , Cozyll.Format
                   , Cozyll.Html
+                  , Cozyll.Init
                   , Cozyll.JsonLd
                   , Cozyll.Localization
                   , Cozyll.Metadata
@@ -158,6 +159,7 @@ test-suite spec
                   , Cozyll.Fixture
                   , Cozyll.FormatSpec
                   , Cozyll.HtmlSpec
+                  , Cozyll.InitSpec
                   , Cozyll.JsonLdSpec
                   , Cozyll.LanguageSpec
                   , Cozyll.LocalizationExampleSpec

@@ -129,7 +129,8 @@ this applies.
 
 ## Your first site
 
-Put the four required YAML files and your writing under `content/`:
+Run `cozyll init` to create a working `content/` (the four configs, a home page and a
+`.gitignore`), or write them yourself. The files are:
 
 * [`schema/example.website.yaml`](schema/example.website.yaml) — site identity and output
   switches.
@@ -178,6 +179,10 @@ cozyll [(-v|--verbose)] COMMAND
 | `watch` | Build, serve, and rebuild pieces as content changes. |
 | `check` | Validate links in the built `_site/`. Needs no content. |
 | `data` | `fetch`/`verify`/`fmt`/`sources` maintain the optional derived ruby index; see [Ruby and JLPT levels](#ruby-and-jlpt-levels). |
+| `init` | Create a starter `content/` (four configs, a home page, `.gitignore`). |
+
+`init` creates the required `content/` tree from the kit's `schema/` examples; it refuses a
+non-empty `content/` unless you pass `--force`, and `init --dir DIR` scaffolds elsewhere.
 
 `clean` and `check` work without a content directory or a valid `SITE_ENV`. `check` refuses
 a missing `_site/` and a tree built with another `SITE_ENV`, and warns when content is newer

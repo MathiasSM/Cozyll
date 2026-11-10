@@ -20,10 +20,12 @@ import Cozyll.Cli.Data (runDataCommand)
 import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Website qualified as Web
+import Cozyll.Init (InitOptions (..), defaultInitOptions, initSite)
 import Cozyll.Ruby.Index (dataDirName, indexFileName, indexLimitIO, loadIndexFile)
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
 import Data.Either (fromRight, isRight)
+import Data.List (intercalate, stripPrefix)
 import Data.Maybe (fromMaybe)
 import Data.Text qualified as T
 import Data.Time (getCurrentTime, utctDay)
@@ -36,9 +38,9 @@ import Options.Applicative qualified as OA
 import Paths_cozyll (version)
 import System.Directory (doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs, lookupEnv)
-import System.Exit (ExitCode (ExitSuccess), die, exitWith)
+import System.Exit (ExitCode (ExitSuccess), die, exitFailure, exitWith)
 import System.FilePath.Posix (takeFileName, (</>))
-import System.IO (hPutStrLn, stderr)
+import System.IO (hPutStr, hPutStrLn, stderr)
 import Text.Read (readMaybe)
 
 -- | What the command line asks for before Hakyll's parser gets to see it
@@ -46,6 +48,7 @@ data Invocation
     = ShowHelp
     | ShowVersion
     | RunDataArgs [String]
+    | Init [String]
     | RunCommand
     deriving (Eq, Show)
 
@@ -62,6 +65,8 @@ first.
 arguments prints)
 [@--version@, @-V@]: Print @cozyll \<version\>@; only recognised as the sole
 argument
+[@init@]: Scaffold a working @content\/@ directory from the kit's schema examples
+(needs neither content nor @SITE_ENV@); see 'runInit'
 [@-v@, @--verbose@]: Enable debug logging (including the resolved @SITE_ENV@ and
 content directory)
 
@@ -84,21 +89,96 @@ cli = do
         RunDataArgs rest -> do
             env <- parseEnv =<< lookupEnv "SITE_ENV"
             runDataCommand (contentDirFor env) rest
+        Init initArgs -> runInit initArgs
         RunCommand -> run args
 
 {- | Classifies the raw arguments: empty means help, a lone @--version@/@-V@
-means version, @data@ is a pre-Hakyll command, everything else is Hakyll's.
+means version; @data@ (pre-Hakyll) and @init@ are our own subcommands.
 -}
 invocationFor :: [String] -> Invocation
 invocationFor [] = ShowHelp
 invocationFor ["--version"] = ShowVersion
 invocationFor ["-V"] = ShowVersion
 invocationFor ("data" : rest) = RunDataArgs rest
+invocationFor ("init" : initArgs) = Init initArgs
 invocationFor _ = RunCommand
 
 -- | The @--version@ output, e.g. @cozyll 3.3.0.0@
 versionString :: String
 versionString = "cozyll " ++ showVersion version
+
+-- | What @cozyll init@'s arguments ask for
+data InitInvocation = InitHelp | InitRun InitOptions
+
+{- | Runs @cozyll init@: its own tiny parser, no content repo and no @SITE_ENV@
+
+Only the files the scaffold owns are written, so @--force@ never deletes
+anything a user added to @content\/@.
+-}
+runInit :: [String] -> IO ()
+runInit args =
+    case parseInitArgs args of
+        Left problem -> do
+            hPutStrLn stderr $ "error: " ++ problem
+            hPutStr stderr initUsage
+            exitFailure
+        Right InitHelp -> putStr initUsage
+        Right (InitRun options) -> do
+            result <- initSite options
+            case result of
+                Left problem -> die problem
+                Right files -> reportInit options files
+
+{- | Parses @cozyll init@'s flags: @--dir DIR@, @--force@, @-h@/@--help@
+
+Anything else is an error, so a typo never silently scaffolds in the wrong
+place.
+-}
+parseInitArgs :: [String] -> Either String InitInvocation
+parseInitArgs = go defaultInitOptions
+  where
+    go options [] = Right $ InitRun options
+    go _ ("--help" : _) = Right InitHelp
+    go _ ("-h" : _) = Right InitHelp
+    go options ("--force" : rest) = go options{initForce = True} rest
+    go options ("--dir" : dir : rest)
+        | null dir = Left "option --dir requires a directory"
+        | otherwise = go options{initDir = dir} rest
+    go _ ["--dir"] = Left "option --dir requires a directory"
+    go options (arg : rest)
+        | Just dir <- stripPrefix "--dir=" arg = go options{initDir = dir} rest
+        | otherwise = Left $ "unknown option `" ++ arg ++ "'"
+
+-- | The @cozyll init --help@ text
+initUsage :: String
+initUsage =
+    unlines
+        [ "Usage: cozyll init [--dir DIR] [--force]"
+        , ""
+        , "Scaffold a working content/ directory from the kit's schema examples."
+        , ""
+        , "Options:"
+        , "  --dir DIR   create the site under DIR (default: the current directory)"
+        , "  --force     write the scaffold into a non-empty content/ directory"
+        , "  -h, --help  show this help"
+        , ""
+        , "Run it from the unpacked kit directory (the one with schema/, templates/ and assets/)."
+        ]
+
+-- | Prints the scaffold's files and the next step
+reportInit :: InitOptions -> [FilePath] -> IO ()
+reportInit options files = do
+    -- 'initSite' lists the four config files first, then the pages and .gitignore
+    let (configs, rest) = splitAt 4 files
+    case configs of
+        website : others -> putStrLn $ intercalate ", " (display website : map takeFileName others)
+        [] -> pure ()
+    mapM_ (putStrLn . display) rest
+    putStrLn "Next: edit content/website.yaml, then run 'cozyll build'."
+  where
+    display path
+        | initDir options == "." = path
+        | otherwise = initDir options </> path
 
 -- | Hakyll's parser, fed with our 'siteConfiguration'
 parseOptions :: [String] -> OA.ParserResult Options
@@ -230,7 +310,7 @@ ensureWebsiteExists contentDir = do
             ++ contentDir
             ++ "/:\n"
             ++ unlines (map (\(path, hint) -> "  " ++ pad path ++ hint) requiredTree)
-            ++ "\nSee docs/authoring.md for what each file needs (the kit ships it)."
+            ++ "\nRun 'cozyll init' to create these, or see docs/authoring.md (the kit ships it)."
 
 -- | The files a site needs, relative to the content directory, with a hint for each
 requiredTree :: [(FilePath, String)]

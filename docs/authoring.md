@@ -9,7 +9,7 @@ are covered in [theming.md](theming.md).
 ## The content directory
 
 Cozyll reads a content directory named `content/` (or `example-content/` when
-`SITE_ENV=example`). A site needs these files:
+`SITE_ENV=example`). `cozyll init` creates a working tree with these files. A site needs:
 
 | File | Purpose | Example |
 |---|---|---|

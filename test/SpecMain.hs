@@ -18,6 +18,7 @@ import Cozyll.DataSpec qualified as Data
 import Cozyll.FeedSpec qualified as Feed
 import Cozyll.FormatSpec qualified as Format
 import Cozyll.HtmlSpec qualified as Html
+import Cozyll.InitSpec qualified as Init
 import Cozyll.JsonLdSpec qualified as JsonLd
 import Cozyll.LanguageSpec qualified as Language
 import Cozyll.LocalizationExampleSpec qualified as LocalizationExample
@@ -66,6 +67,7 @@ main = do
             , Feed.tests
             , Format.tests
             , Html.tests
+            , Init.tests
             , JsonLd.tests
             , Language.tests
             , Media.tests
