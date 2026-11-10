@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [3.4.1.0] - 2026-11-10
+
 ### Changed
 
 - Release kits are built on a pinned Debian 12 baseline (glibc 2.36) and no longer write `cozyll.tix`; see the release notes for the glibc floor.
@@ -415,6 +417,7 @@
 
 
 [Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.3.0.0...master
+[3.4.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.0.0...v3.4.1.0
 [3.4.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.3.1.0...v3.4.0.0
 [3.3.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.3.0.0...v3.3.1.0
 [3.3.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.2.0.0...v3.3.0.0
