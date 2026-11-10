@@ -6,7 +6,7 @@
 
 ### Changed
 
-- Release kits are built on a pinned Debian 12 baseline (glibc 2.36) and no longer write `cozyll.tix`; see the release notes for the glibc floor.
+- Release kits are built on a digest-pinned Debian 12 baseline: the binary needs glibc 2.36+ and `libgmp10`, `libffi8`, `libnuma1`, `zlib1g`, and no longer writes `cozyll.tix`.
 
 ## [3.4.0.0] - 2026-11-10
 
