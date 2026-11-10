@@ -1,13 +1,35 @@
--- | The build checks that run on rendered page bodies
-module Cozyll.Ruby (checkKanjiCoverage) where
+-- | Level assignment and the build checks that run on rendered page bodies
+module Cozyll.Ruby (LevelSource (..), levelOf, checkKanjiCoverage) where
 
-import Cozyll.Ruby.Index (RubyData (rdKanji), isHan)
+import Cozyll.Ruby.Index (Level, RubyData (rdKanji, rdWords), isHan, levelRank, normalizeKey)
 import Data.Char (isAsciiUpper)
-import Data.List (nub, sortOn)
-import Data.Map.Strict qualified as Map
+import Data.List (maximumBy, nub, sortOn)
+import Data.Map.Strict qualified as Maple
+import Data.Ord (comparing)
 import Data.Text (Text)
 import Data.Text qualified as T
 import Text.HTML.TagSoup (Tag (..), parseTags)
+
+-- | Where a level came from
+data LevelSource = FromWord | FromKanji | FromUnknown
+    deriving (Eq, Show)
+
+{- | Word first, then the hardest constituent kanji, else unknown.
+
+@rdWords@ is keyed by the normalised surface and reading, so the caller does not
+have to normalise.
+-}
+levelOf :: RubyData -> Text -> Text -> (Maybe Level, LevelSource)
+levelOf rubyData base reading =
+    case Maple.lookup (normalizeKey base, normalizeKey reading) (rdWords rubyData) of
+        Just level -> (Just level, FromWord)
+        Nothing -> case filter isHan (T.unpack (normalizeKey base)) of
+            [] -> (Nothing, FromUnknown)
+            chars -> case traverse charLevel chars of
+                Just levels -> (Just (maximumBy (comparing levelRank) levels), FromKanji)
+                Nothing -> (Nothing, FromUnknown)
+  where
+    charLevel c = Maple.lookup c (rdKanji rubyData) >>= snd
 
 {- | Fails when a non-jōyō kanji in Japanese text is not inside a @<ruby>@ base.
 
@@ -34,7 +56,7 @@ checkKanjiCoverage pageLang skipWords rubyData html =
         , not (T.null run)
         ]
     stripSkips text = foldl' (\acc w -> T.replace w "" acc) text (sortOn (negate . T.length) skipWords)
-    isJoyo c = case Map.lookup c (rdKanji rubyData) of
+    isJoyo c = case Maple.lookup c (rdKanji rubyData) of
         Just (Just grade, _) -> grade `elem` ([1 .. 6] ++ [8])
         _ -> False
 

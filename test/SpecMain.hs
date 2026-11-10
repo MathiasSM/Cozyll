@@ -21,6 +21,7 @@ import Cozyll.PostSpec qualified as Post
 import Cozyll.ProjectSpec qualified as Project
 import Cozyll.RedirectsSpec qualified as Redirects
 import Cozyll.RubyDeriveSpec qualified as RubyDerive
+import Cozyll.RubyFilterSpec qualified as RubyFilter
 import Cozyll.RubyIndexSpec qualified as RubyIndex
 import Cozyll.RubySourcesSpec qualified as RubySources
 import Cozyll.RubySpec qualified as Ruby
@@ -56,6 +57,7 @@ main =
             , Ruby.tests
             , RubyIndex.tests
             , RubyDerive.tests
+            , RubyFilter.tests
             , RubySources.tests
             , SocialMeta.tests
             , Social.tests

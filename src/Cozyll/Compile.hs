@@ -1,16 +1,17 @@
 -- | Pandoc compilation and the post-processing shared by every page
 module Cozyll.Compile (runPandoc, runPandocWith, applyTemplates, finish) where
 
-import Control.Monad (foldM, unless)
+import Control.Monad (foldM, forM_, unless)
 import Control.Monad.Except (throwError)
 import Cozyll.Accessibility (checkAccessibility)
 import Cozyll.CleanURL (cleanIndexHtmls, cleanIndexUrls)
 import Cozyll.Config (SiteConfig, siteTemplate)
 import Cozyll.Content (tocLabelOf)
 import Cozyll.Context.SocialMeta (MainImage, mainImageOf)
-import Cozyll.Filters (processRubyText)
+import Cozyll.Domain.Website (CheckMode (..), parseCheckMode)
+import Cozyll.Filters (processRubyTextWith)
 import Cozyll.Html (readonlyCheckboxes)
-import Cozyll.Metadata (Key (JaRubySkip, Language), lookupKey, lookupKeyList)
+import Cozyll.Metadata (Key (JaRubyCheck, JaRubySkip, Language), lookupKey, lookupKeyList)
 import Cozyll.Ruby (checkKanjiCoverage)
 import Cozyll.Ruby.Index (RubyData)
 import Data.Maybe (fromMaybe, isJust)
@@ -28,8 +29,10 @@ import Hakyll (
     readPandocWith,
     relativizeUrls,
     toFilePath,
+    unsafeCompiler,
     writePandocWith,
  )
+import System.IO (hPutStrLn, stderr)
 import Text.Pandoc (Pandoc (Pandoc), nullMeta)
 import Text.Pandoc.Options (MathMethod (MathJax), writerMathMethod)
 import Text.Pandoc.Walk (walk)
@@ -47,15 +50,15 @@ of contents (when @TOC@ is set), and the page's main image (when one is tagged
 can use the image.
 -}
 runPandoc :: Item String -> Compiler (Item String, String, Maybe MainImage)
-runPandoc = runPandocWith Nothing
+runPandoc = runPandocWith Nothing CheckError
 
--- | Like 'runPandoc', but checks the rendered body against the ruby index
-runPandocWith :: Maybe RubyData -> Item String -> Compiler (Item String, String, Maybe MainImage)
-runPandocWith rubyData item = do
+-- | Like 'runPandoc', but annotates ruby and checks the body against the ruby index
+runPandocWith :: Maybe RubyData -> CheckMode -> Item String -> Compiler (Item String, String, Maybe MainImage)
+runPandocWith rubyData checkMode item = do
     metadata <- getUnderlying >>= getMetadata
     let toc = isJust (tocLabelOf metadata)
     pandocItem <- readPandocWith defaultHakyllReaderOptions item
-    let pandoc' = walk processRubyText (itemBody pandocItem)
+    let pandoc' = walk (processRubyTextWith rubyData) (itemBody pandocItem)
         body = renderPandoc pandocItem pandoc'
         tocHtml = if toc then "<nav id=\"TOC\">" ++ renderPandoc pandocItem (tocPandoc pandoc') ++ "</nav>" else ""
     checkKanjiCoverageWith rubyData metadata body
@@ -66,8 +69,12 @@ runPandocWith rubyData item = do
         path <- toFilePath <$> getUnderlying
         let pageLang = fromMaybe "en" (lookupKey Language metadata)
             skipWords = maybe [] (map T.pack) (lookupKeyList JaRubySkip metadata)
-            problems = checkKanjiCoverage pageLang skipWords rubyData' body
-        unless (null problems) $ throwError (map ((path ++ ": ") ++) problems)
+            problems = map ((path ++ ": ") ++) (checkKanjiCoverage pageLang skipWords rubyData' body)
+            effective = maybe checkMode (fromMaybe checkMode . parseCheckMode) (lookupKey JaRubyCheck metadata)
+        case effective of
+            CheckOff -> pure ()
+            CheckWarn -> unsafeCompiler (forM_ problems (hPutStrLn stderr))
+            CheckError -> unless (null problems) (throwError problems)
 
     renderPandoc ident pandoc = itemBody (writePandocWith writerOptions (ident{itemBody = pandoc}))
 

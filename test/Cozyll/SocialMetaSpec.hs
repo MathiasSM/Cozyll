@@ -19,7 +19,7 @@ import Cozyll.Context.SocialMeta (
     titleOf,
  )
 import Cozyll.Domain.Author (Author (..))
-import Cozyll.Domain.Website (HighlightStyle (Pygments))
+import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.TestUtils (mkAuthor)
 import Cozyll.Yaml (decodeYaml)
@@ -60,6 +60,7 @@ mkConfig =
         , contentTemplateNames = []
         , siteEnv = Dev
         , siteRubyData = Nothing
+        , siteJaRubyCheck = CheckError
         }
 
 -- | Parses Markdown the way the site does

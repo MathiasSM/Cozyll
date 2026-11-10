@@ -34,6 +34,11 @@ module Cozyll.Domain.Website (
     -- ** security:
     Security (..),
 
+    -- ** ruby:
+    CheckMode (..),
+    checkModeName,
+    parseCheckMode,
+
     -- ** robots:
     Robots (..),
 
@@ -96,6 +101,23 @@ data Highlight = Highlight
     { highlightStyle :: HighlightStyle
     }
     deriving (Eq, Show)
+
+-- | Severity of the ruby coverage check
+data CheckMode = CheckOff | CheckWarn | CheckError
+    deriving (Eq, Show, Enum, Bounded)
+
+-- | How a check mode is spelled
+checkModeName :: CheckMode -> String
+checkModeName CheckOff = "off"
+checkModeName CheckWarn = "warn"
+checkModeName CheckError = "error"
+
+instance FromJSON CheckMode where
+    parseJSON = enumFromJSON "ruby check mode" checkModeName
+
+-- | Resolves a 'CheckMode' from its spelling, if known
+parseCheckMode :: String -> Maybe CheckMode
+parseCheckMode name = lookup name [(checkModeName mode, mode) | mode <- [minBound .. maxBound]]
 
 -- | A pandoc syntax-highlighting style, as spelled in @highlight.style@
 data HighlightStyle = Pygments | Espresso | Zenburn | Tango | Kate | Monochrome | BreezeDark | Haddock
@@ -216,6 +238,7 @@ data Website = Website
     , websiteRobots :: Robots
     , websiteTrust :: Trust
     , websiteFeed :: FeedConfig
+    , websiteJaRubyCheck :: CheckMode
     }
     deriving (Eq, Show)
 
@@ -314,6 +337,7 @@ instance FromJSON Website where
             <*> o .: "robots"
             <*> o .: "trust"
             <*> o .: "feed"
+            <*> o .:? "jaRubyCheck" .!= CheckError
 
 -- | Reads and parses @<contentDir>/website.yaml@, failing with a clear message
 loadWebsite :: FilePath -> IO Website
