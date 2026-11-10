@@ -8,6 +8,7 @@ import Cozyll.Cli.Data (runDataCommand)
 import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Website qualified as Web
+import Cozyll.Ruby.Index (dataDirName, indexFileName, indexLimitIO, loadIndexFile)
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
 import Data.Maybe (fromMaybe)
@@ -52,8 +53,14 @@ runBuild env contentDir args = do
     -- 3. Check content exists
     cfg <- loadSiteConfig env contentDir website
     unless ("clean" `elem` args) (ensureContentExists cfg)
-    -- 4. Run command
-    hakyllWith siteConfiguration (rules cfg website)
+    -- 4. Load the derived ruby index (if the content provides one)
+    limit <- indexLimitIO
+    rubyData <-
+        if "clean" `elem` args
+            then pure Nothing
+            else loadIndexFile limit (contentDir </> dataDirName </> indexFileName) >>= either die pure
+    -- 5. Run command
+    hakyllWith siteConfiguration (rules cfg{siteRubyData = rubyData} website)
 
 {- | Throws if the content repo is missing, or lacks a file the site needs
 
@@ -106,6 +113,7 @@ loadSiteConfig env contentDir website = do
             , contentCssDir = contentDir </> "css"
             , contentTemplateNames = contentTemplates
             , siteEnv = env
+            , siteRubyData = Nothing
             }
   where
     override :: (Read a) => String -> a -> IO a

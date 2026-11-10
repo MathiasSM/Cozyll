@@ -8,7 +8,15 @@
     <author>
         <name><![CDATA[Example Author]]></name>
     </author>
-    <updated>2024-05-03T00:00:00Z</updated>
+    <updated>2024-05-04T00:00:00Z</updated>
+<entry>
+    <title><![CDATA[ルビの確認]]></title>
+    <link href="https://example.com/languages/ruby-check" />
+    <id>https://example.com/languages/ruby-check</id>
+    <published>2024-05-04T00:00:00Z</published>
+    <updated>2024-05-04T00:00:00Z</updated>
+    <content type="html"><![CDATA[<p><ruby>薔薇<rp>(</rp><rt>ばら</rt><rp>)</rp></ruby>はルビがあります。薔薇はスキップされます。</p>]]></content>
+</entry>
 <entry>
     <title><![CDATA[Polyglot]]></title>
     <link href="https://example.com/languages/polyglot" />

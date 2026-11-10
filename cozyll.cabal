@@ -87,6 +87,7 @@ library
                   , Cozyll.Rules.Sitemap
                   , Cozyll.Rules.Validate
                   , Cozyll.Rules.WellKnown
+                  , Cozyll.Ruby
                   , Cozyll.Ruby.Derive
                   , Cozyll.Ruby.Index
                   , Cozyll.Ruby.Sources
@@ -151,6 +152,7 @@ test-suite spec
                   , Cozyll.PostSpec
                   , Cozyll.ProjectSpec
                   , Cozyll.RedirectsSpec
+                  , Cozyll.RubySpec
                   , Cozyll.RubySourcesSpec
                   , Cozyll.CliDataSpec
                   , Cozyll.RubyIndexSpec

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "derivationVersion": 1,
+  "kanji": [
+    ["事", 8, null],
+    ["出", 8, null],
+    ["同", 8, null],
+    ["字", 8, null],
+    ["振", 8, null],
+    ["方", 8, null],
+    ["日", 8, null],
+    ["書", 8, null],
+    ["本", 8, null],
+    ["様", 8, null],
+    ["漢", 8, null],
+    ["示", 8, null],
+    ["見", 8, null],
+    ["記", 8, null],
+    ["語", 8, null],
+    ["読", 8, null]
+  ],
+  "words": [],
+  "segments": []
+}

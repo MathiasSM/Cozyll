@@ -13,6 +13,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   (`ruby-data/index.json`) from configurable upstream sources. The default list is
   `schema/example.ruby-sources.yaml`; copy it to `ruby-data/sources.yaml` to override
   versions or locations. Builds read the index offline; the content repo commits it.
+- Ruby coverage check: Japanese content must annotate non-jōyō kanji with ruby; `jaRubySkip`
+  exempts words. Requires `content/ruby-data/index.json`.
 
 ## [3.2.0.0] - 2026-11-10
 
