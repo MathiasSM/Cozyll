@@ -7,6 +7,7 @@ import Cozyll.AccessibilitySpec qualified as Accessibility
 import Cozyll.AsideSpec qualified as Aside
 import Cozyll.AuthorSpec qualified as Author
 import Cozyll.CleanURLSpec qualified as CleanURL
+import Cozyll.CliDataSpec qualified as CliData
 import Cozyll.ContentSpec qualified as Content
 import Cozyll.DataSpec qualified as Data
 import Cozyll.FeedSpec qualified as Feed
@@ -19,6 +20,9 @@ import Cozyll.NavSpec qualified as Nav
 import Cozyll.PostSpec qualified as Post
 import Cozyll.ProjectSpec qualified as Project
 import Cozyll.RedirectsSpec qualified as Redirects
+import Cozyll.RubyDeriveSpec qualified as RubyDerive
+import Cozyll.RubyIndexSpec qualified as RubyIndex
+import Cozyll.RubySourcesSpec qualified as RubySources
 import Cozyll.SocialMetaSpec qualified as SocialMeta
 import Cozyll.SocialSpec qualified as Social
 import Cozyll.ThemeSpec qualified as Theme
@@ -35,6 +39,7 @@ main =
             , Aside.tests
             , Author.tests
             , CleanURL.tests
+            , CliData.tests
             , Content.tests
             , Data.tests
             , Feed.tests
@@ -47,6 +52,9 @@ main =
             , Post.tests
             , Project.tests
             , Redirects.tests
+            , RubyIndex.tests
+            , RubyDerive.tests
+            , RubySources.tests
             , SocialMeta.tests
             , Social.tests
             , Theme.tests

@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=./ruby-sources.schema.json
+#
+# Upstream files used by `cozyll data fetch` to derive ruby-data/index.json.
+# This is the default shipped with Cozyll. To customise it, copy it to
+# <content>/ruby-data/sources.yaml (or run `cozyll data sources --write`),
+# edit, and commit it. The content-repo copy wins when present.
+#
+#   kind: repo     — fetch file(s) from a repository at `{ref}` (commit SHA)
+#   kind: release  — fetch a release asset at `{ref}` (tag); `entry` is the
+#                    file inside the archive
+#   ref: latest    — resolved via the GitHub API at fetch time. Non-GitHub
+#                    locations must pin a commit/tag instead.
+#
+# Licences are recorded so consumers know what attribution to carry; Cozyll
+# itself ships none of this data.
+sources:
+  # Kanji metadata: school grade (jōyō = 1–6 and 8) and JLPT N1–N5, per character.
+  # Feeds the `kanji` table: coverage (is this kanji jōyō?) and the level fallback.
+  - id: kanji-data
+    kind: repo
+    ref: latest
+    license: MIT
+    files:
+      - name: kanji.json
+        url: https://raw.githubusercontent.com/davidluzgouveia/kanji-data/{ref}/kanji.json
+
+  # JLPT vocabulary, one CSV per level (n5 = easiest … n1 = hardest).
+  # Each row is `jmdict_seq, kana, kanji, definition`; feeds the `words` table
+  # (surface + reading → JLPT level). Kana-only rows are dropped.
+  - id: yomitan-jlpt-vocab
+    kind: repo
+    ref: latest
+    license: CC-BY-SA-4.0
+    files:
+      - name: n5.csv
+        url: https://raw.githubusercontent.com/stephenmk/yomitan-jlpt-vocab/{ref}/original_data/n5.csv
+      - name: n4.csv
+        url: https://raw.githubusercontent.com/stephenmk/yomitan-jlpt-vocab/{ref}/original_data/n4.csv
+      - name: n3.csv
+        url: https://raw.githubusercontent.com/stephenmk/yomitan-jlpt-vocab/{ref}/original_data/n3.csv
+      - name: n2.csv
+        url: https://raw.githubusercontent.com/stephenmk/yomitan-jlpt-vocab/{ref}/original_data/n2.csv
+      - name: n1.csv
+        url: https://raw.githubusercontent.com/stephenmk/yomitan-jlpt-vocab/{ref}/original_data/n1.csv
+
+  # JMdict words broken into kanji-runs and their readings (e.g. 大人→おとな).
+  # Feeds the `segments` table, used to verify authored ruby readings.
+  # The archive contains JmdictFurigana.json (33 MB uncompressed).
+  - id: jmdict-furigana
+    kind: release
+    ref: latest
+    license: CC-BY-SA-4.0
+    files:
+      - name: JmdictFurigana.json
+        url: https://github.com/Doublevil/JmdictFurigana/releases/download/{ref}/JmdictFurigana.json.zip
+        entry: JmdictFurigana.json
+
+  # The same alignment data for proper names (JMnedict). Covers surname and
+  # given-name readings such as 健→たけし; feeds `segments` as well.
+  # The archive contains JmnedictFurigana.json.
+  - id: jmnedict-furigana
+    kind: release
+    ref: latest
+    license: CC-BY-SA-4.0
+    files:
+      - name: JmnedictFurigana.json
+        url: https://github.com/Doublevil/JmdictFurigana/releases/download/{ref}/JmnedictFurigana.json.zip
+        entry: JmnedictFurigana.json

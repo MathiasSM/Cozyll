@@ -1,0 +1,13 @@
+[
+  {"text":"大人買い","reading":"おとながい","furigana":[{"ruby":"大人","rt":"おとな"},{"ruby":"買","rt":"が"},{"ruby":"い"}]},
+  {"text":"大人","reading":"おとな","furigana":[{"ruby":"大人","rt":"おとな"}]},
+  {"text":"日本語","reading":"にほんご","furigana":[{"ruby":"日本","rt":"にほん"},{"ruby":"語","rt":"ご"}]},
+  {"text":"学校","reading":"がっこう","furigana":[{"ruby":"学","rt":"がっ"},{"ruby":"校","rt":"こう"}]},
+  {"text":"手紙","reading":"てがみ","furigana":[{"ruby":"手","rt":"て"},{"ruby":"紙","rt":"がみ"}]},
+  {"text":"下々","reading":"げげ","furigana":[{"ruby":"下々","rt":"げげ"}]},
+  {"text":"時々","reading":"ときどき","furigana":[{"ruby":"時々","rt":"ときどき"}]},
+  {"text":"真っ青","reading":"まっさお","furigana":[{"ruby":"真っ","rt":"まっ"},{"ruby":"青","rt":"さお"}]},
+  {"text":"Ｔシャツ","reading":"ティーシャツ","furigana":[{"ruby":"Ｔ","rt":"ティー"},{"ruby":"シャツ"}]},
+  {"text":"薔薇","reading":"ばら","furigana":[{"ruby":"薔薇","rt":"ばら"}]},
+  {"text":"ひらがな","reading":"ひらがな","furigana":[{"ruby":"ひらがな"}]}
+]
