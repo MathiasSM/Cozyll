@@ -2,7 +2,7 @@
 module Cozyll.AuthorSpec (tests) where
 
 import Cozyll.Config (Env (Dev), SiteConfig (..))
-import Cozyll.Context.Author (authoredBy, copyrightYears, resolveAuthors)
+import Cozyll.Context.Author (authoredBy, copyrightYears, profileImageUrl, resolveAuthors)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, decodeAuthorsUtf8, defaultAuthor, parseAuthorsYaml)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Metadata qualified as Meta
@@ -26,6 +26,7 @@ tests =
         , decodeTests
         , defaultAuthorTests
         , authorUrlPathTests
+        , profileImageUrlTests
         , resolveAuthorsTests
         , lookupKeyListTests
         , copyrightYearsTests
@@ -140,6 +141,20 @@ authorUrlPathTests =
         [ testCase "is the author page path" $ do
             author <- oneAuthor happyAuthor
             authorUrlPath author @?= "/authors/example"
+        ]
+
+profileImageUrlTests :: TestTree
+profileImageUrlTests =
+    testGroup
+        "profileImageUrl"
+        [ testCase "makes a site-relative path root-relative" $
+            profileImageUrl exampleAuthor{authorProfileImage = Just "images/photos/marta.png"}
+                @?= Just "/images/photos/marta.png"
+        , testCase "does not double the slash of a root-relative path" $
+            profileImageUrl exampleAuthor{authorProfileImage = Just "/images/photos/marta.png"}
+                @?= Just "/images/photos/marta.png"
+        , testCase "stays Nothing without a profile image" $
+            profileImageUrl exampleAuthor @?= Nothing
         ]
 
 -- | Parses a single-author document and returns the author

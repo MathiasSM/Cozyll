@@ -16,7 +16,8 @@ duplicates are de-duplicated.
   [@$path$@] @/authors/<id>@.
   [@$url$@] the absolute profile URL.
   [@$description$@] the bio (@""@ when absent).
-  [@$profileImage$@] the absolute image URL (@""@ when absent).
+  [@$profileImage$@] the image URL, root-relative so that it is rewritten per
+      page (@""@ when absent).
   [@$type$@] @person@ or @organization@.
   [@$for(links)$@] the profile links, with @$url$@ per link.
 
@@ -27,16 +28,16 @@ post, years from @date@ to @lastModifiedAt@, not shown in lists or feeds).
 
 An author's page ('authorPageContext') exposes @$title$@, @$path$@, @$name$@,
 @$displayName$@, @$url$@, @$type$@, @$links$@, and @$profileImage$@ and
-@$description$@ (each only when set).
+@$description$@ (each only when set). @$profileImage$@ is root-relative, like
+the item context's.
 
 == Author pages
 
 Every author gets a profile page at @/authors/<id>@ (included in
-@sitemap.xml@) showing their display name (or name), description, profile
-image, links, and every post they authored; a post without @author:@ counts for
-the site-default author. The canonical URL and @og:url@ are
-@https://<domain>/authors/<id>@, and @og:image@ is the profile image when one is
-set.
+@sitemap.xml@) showing their full name, description, profile image, links, and
+every post they authored; a post without @author:@ counts for the site-default
+author. The canonical URL and @og:url@ are @https://<domain>/authors/<id>@, and
+@og:image@ is the absolute profile image URL when one is set.
 -}
 module Cozyll.Context.Author (
     resolveAuthors,
@@ -46,13 +47,13 @@ module Cozyll.Context.Author (
     authorPages,
     authorPosts,
     authoredBy,
+    profileImageUrl,
     displayNameOf,
     copyrightYears,
 ) where
 
 import Control.Monad (filterM)
 import Cozyll.Config (SiteConfig, baseUrl, postSnapshot, postsPattern, projectsGroup, siteAuthors, siteDefaultAuthor)
-import Cozyll.Context.SocialMeta (absoluteImageUrl)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Domain.Author (Author (..), authorTypeName, authorUrlPath)
 import Cozyll.Format (yearRange)
@@ -98,7 +99,7 @@ authorItemContext cfg =
         <> field "path" (return . authorUrlPath . itemBody)
         <> field "url" (return . authorUrl cfg . itemBody)
         <> field "description" (return . fromMaybe "" . authorDescription . itemBody)
-        <> field "profileImage" (return . maybe "" (absoluteImageUrl cfg) . authorProfileImage . itemBody)
+        <> field "profileImage" (return . fromMaybe "" . profileImageUrl . itemBody)
         <> field "type" (return . authorTypeName . authorType . itemBody)
         <> listFieldWith "links" linkItemContext (return . map linkItem . authorLinks . itemBody)
 
@@ -169,14 +170,20 @@ authorPageContext cfg author =
         <> constField "displayName" displayName
         <> constField "url" (authorUrl cfg author)
         <> constField "type" (authorTypeName (authorType author))
-        <> maybe
-            mempty
-            (constField "profileImage" . absoluteImageUrl cfg)
-            (authorProfileImage author)
+        <> maybe mempty (constField "profileImage") (profileImageUrl author)
         <> maybe mempty (constField "description") (authorDescription author)
         <> listField "links" linkItemContext (return (map linkItem (authorLinks author)))
   where
     displayName = displayNameOf author
+
+{- | The profile image as a root-relative URL, so 'relativizeUrls' rewrites it
+per page ('Nothing' when the author has no image)
+
+@profileImage@ in @authors.yaml@ is site-relative (@images/<path>@); an
+already-root-relative value is not double-slashed.
+-}
+profileImageUrl :: Author -> Maybe String
+profileImageUrl author = ("/" ++) . dropWhile (== '/') <$> authorProfileImage author
 
 -- | The display name, falling back to the full name
 displayNameOf :: Author -> String

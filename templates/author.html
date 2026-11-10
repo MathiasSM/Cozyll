@@ -1,7 +1,7 @@
 <article class="main-article">
   <header>
-    <h1>$t("author.by")$: $displayName$</h1>
-    $if(profileImage)$<img src="$profileImage$" alt="$displayName$" />$endif$
+    <h1>$name$</h1>
+    $if(profileImage)$<img src="$profileImage$" alt="$name$" />$endif$
     $if(description)$<p>$description$</p>$endif$
     $if(links)$<ul class="author-links">$for(links)$<li><a href="$url$">$url$</a></li>$endfor$</ul>$endif$
   </header>
