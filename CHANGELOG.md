@@ -30,6 +30,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ### Changed
 
+- The README now documents the workspace layout (kit vs content repo), install, commands, authoring, localisation, theming and checks, and the kit ships those docs.
 - `-v`/`--verbose` now enables debug output, including the resolved `SITE_ENV` and content directory.
 - `scripts/check-site.sh` treats accessibility findings as advisory unless `--a11y-fail true` is passed, matching CI.
 - `funding:` may be omitted from `website.yaml`; a site without it publishes no `funding.json` and no `.well-known/funding-manifest-urls`.

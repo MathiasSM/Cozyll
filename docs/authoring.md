@@ -21,7 +21,8 @@ Cozyll reads a content directory named `content/` (or `example-content/` when
 
 Optional directories are `media/` (images and other assets), `static/` (files copied to
 the site root), `data/` (YAML exposed to templates), `projects/` (the showcase), `templates/`
-(theme overrides) and `css/` (extra styles).
+(theme overrides), `css/` (extra styles) and `ruby-data/` (the optional derived ruby index
+and its `NOTICE`; see the README's "Ruby and JLPT levels").
 
 If `content/website.yaml` is missing, the build stops before Hakyll runs and prints the
 required tree above, with the schema example for each file. Missing required files are
