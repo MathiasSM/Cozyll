@@ -11,8 +11,8 @@ import Cozyll.Context.SocialMeta (MainImage, mainImageOf)
 import Cozyll.Domain.Website (CheckMode (..), parseCheckMode)
 import Cozyll.Filters (processRubyTextWith)
 import Cozyll.Html (readonlyCheckboxes)
-import Cozyll.Metadata (Key (Language, RubyCheck, RubySkip), lookupKey, lookupKeyList)
-import Cozyll.Ruby (checkCoverage)
+import Cozyll.Metadata (Key (Language, RubyAllow, RubyCheck, RubySkip), lookupKey, lookupKeyList)
+import Cozyll.Ruby (checkCoverage, checkReadings)
 import Cozyll.Ruby.Index (RubyData)
 import Data.Maybe (fromMaybe, isJust)
 import Data.Text qualified as T
@@ -69,7 +69,11 @@ runPandocWith rubyData checkMode item = do
         path <- toFilePath <$> getUnderlying
         let pageLang = fromMaybe "en" (lookupKey Language metadata)
             skipWords = maybe [] (map T.pack) (lookupKeyList RubySkip metadata)
-            problems = map ((path ++ ": ") ++) (checkCoverage pageLang skipWords rubyData' body)
+            allowReadings = maybe [] (map T.pack) (lookupKeyList RubyAllow metadata)
+            problems =
+                map
+                    ((path ++ ": ") ++)
+                    (checkCoverage pageLang skipWords rubyData' body <> checkReadings allowReadings rubyData' body)
             effective = maybe checkMode (fromMaybe checkMode . parseCheckMode) (lookupKey RubyCheck metadata)
         case effective of
             CheckOff -> pure ()

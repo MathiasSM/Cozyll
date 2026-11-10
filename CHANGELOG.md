@@ -17,6 +17,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
   exempts words. Requires `content/ruby-data/index.json`.
 - Rendered ruby carries `data-jlpt` and `data-jlpt-source` (`word`, `kanji`, or `unknown`).
 - `rubyCheck` (`off`, `warn`, `error`) controls the ruby check per site (`website.yaml`) or page.
+- Ruby readings are checked against the derived alignment index; `rubyAllow` exempts a surface
+  or a `surface:reading` pair.
 
 ### Changed
 

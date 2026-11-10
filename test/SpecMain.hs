@@ -25,6 +25,7 @@ import Cozyll.RubyFilterSpec qualified as RubyFilter
 import Cozyll.RubyIndexSpec qualified as RubyIndex
 import Cozyll.RubySourcesSpec qualified as RubySources
 import Cozyll.RubySpec qualified as Ruby
+import Cozyll.RubyVerifySpec qualified as RubyVerify
 import Cozyll.SocialMetaSpec qualified as SocialMeta
 import Cozyll.SocialSpec qualified as Social
 import Cozyll.ThemeSpec qualified as Theme
@@ -59,6 +60,7 @@ main =
             , RubyDerive.tests
             , RubyFilter.tests
             , RubySources.tests
+            , RubyVerify.tests
             , SocialMeta.tests
             , Social.tests
             , Theme.tests

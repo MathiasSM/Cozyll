@@ -87,6 +87,8 @@ data Key
       RubyToggle
     | -- | Words that may appear without furigana (coverage exemption).
       RubySkip
+    | -- | Ruby surfaces (or @surface:reading@ pairs) accepted without a dictionary match.
+      RubyAllow
     | -- | Overrides the site's ruby check severity (@off@, @warn@, @error@).
       RubyCheck
     | -- | Enables: The hide-images toggle; the value is the control's label (markdown).
@@ -141,6 +143,7 @@ keyName key = case key of
     TOC -> "TOC"
     RubyToggle -> "rubyToggle"
     RubySkip -> "rubySkip"
+    RubyAllow -> "rubyAllow"
     RubyCheck -> "rubyCheck"
     ImagesToggle -> "imagesToggle"
     Username -> "username"

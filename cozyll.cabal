@@ -157,6 +157,7 @@ test-suite spec
                   , Cozyll.RubyIndexSpec
                   , Cozyll.RubyDeriveSpec
                   , Cozyll.RubyFilterSpec
+                  , Cozyll.RubyVerifySpec
                   , Cozyll.SocialMetaSpec
                   , Cozyll.SocialSpec
                   , Cozyll.ThemeSpec

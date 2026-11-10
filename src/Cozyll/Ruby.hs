@@ -1,14 +1,16 @@
 -- | Level assignment and the build checks that run on rendered page bodies
-module Cozyll.Ruby (LevelSource (..), levelOf, checkCoverage) where
+module Cozyll.Ruby (LevelSource (..), levelOf, checkCoverage, checkReadings) where
 
-import Cozyll.Ruby.Index (Level, RubyData (rdKanji, rdWords), isHan, levelRank, normalizeKey)
+import Cozyll.Ruby.Index (Level, RubyData (rdKanji, rdSegments, rdWords), isHan, levelRank, normalizeKey)
 import Data.Char (isAsciiUpper)
 import Data.List (maximumBy, nub, sortOn)
 import Data.Map.Strict qualified as Maple
+import Data.Maybe (maybeToList)
 import Data.Ord (comparing)
+import Data.Set qualified as Set
 import Data.Text (Text)
 import Data.Text qualified as T
-import Text.HTML.TagSoup (Tag (..), parseTags)
+import Text.HTML.TagSoup (Tag (..), isTagCloseName, parseTags)
 
 -- | Where a level came from
 data LevelSource = FromWord | FromKanji | FromUnknown
@@ -81,6 +83,108 @@ toLowerAscii :: Char -> Char
 toLowerAscii c
     | isAsciiUpper c = toEnum (fromEnum c + 32)
     | otherwise = c
+
+{- | Fails when a ruby reading is not attested in the derived index.
+
+@allow@ entries are either a surface (@薔薇@) or a surface/reading pair
+(@薔薇:ばら@). A base with no Han characters (katakana/emphasis ruby) is skipped.
+-}
+checkReadings :: [Text] -> RubyData -> String -> [String]
+checkReadings allow rubyData html =
+    nub
+        [ "ruby [" ++ T.unpack base ++ "](-" ++ T.unpack reading ++ "): reading “" ++ T.unpack reading ++ "” not attested for “" ++ T.unpack base ++ "”"
+        | (base, reading) <- rubyPairs (parseTags html)
+        , T.any isHan base
+        , not (T.null reading)
+        , not (allowed base reading)
+        , not (attested rubyData (normalizeKey base) (normalizeKey reading))
+        ]
+  where
+    allowed base reading =
+        any
+            ( \entry -> case T.breakOn ":" entry of
+                (surface, rest)
+                    | T.null rest -> normalizeKey surface == normalizeKey base
+                    | otherwise -> normalizeKey surface == normalizeKey base && normalizeKey (T.drop 1 rest) == normalizeKey reading
+            )
+            allow
+
+-- | The (base, reading) pairs of every @<ruby>@ on the page
+rubyPairs :: [Tag String] -> [(Text, Text)]
+rubyPairs = go
+  where
+    go (TagOpen "ruby" _ : rest) =
+        let (content, after) = break (isTagCloseName "ruby") rest
+         in rubyPair content : go (drop 1 after)
+    go (_ : rest) = go rest
+    go [] = []
+
+    rubyPair content =
+        let (_, _, base, reading) = foldl' collect (False, False, T.empty, T.empty) content
+         in (T.strip base, T.strip reading)
+
+    collect (inRt, inRp, base, reading) tag = case tag of
+        TagOpen "rt" _ -> (True, False, base, reading)
+        TagClose "rt" -> (False, False, base, reading)
+        TagOpen "rp" _ -> (inRt, True, base, reading)
+        TagClose "rp" -> (inRt, False, base, reading)
+        TagText text
+            | inRt -> (inRt, inRp, base, reading <> T.pack text)
+            | inRp -> (inRt, inRp, base, reading)
+            | otherwise -> (inRt, inRp, base <> T.pack text, reading)
+        _ -> (inRt, inRp, base, reading)
+
+-- | Whether a (normalised) base/reading pair is attested
+attested :: RubyData -> Text -> Text -> Bool
+attested rubyData base reading
+    | Maple.member (base, reading) (rdWords rubyData) = True
+    | maybe False (Set.member reading) (Maple.lookup base (rdSegments rubyData)) = True
+    | dp rubyData base reading = True
+    | T.any (== '\x3005') base = dp rubyData (expandIteration base) reading
+    | otherwise = False
+
+{- | Dynamic programming over the segment table: literal kana edges plus every
+attested run that matches a prefix of the remaining reading.
+-}
+dp :: RubyData -> Text -> Text -> Bool
+dp rubyData base reading
+    | baseLength > 512 || readingLength > 1024 = False
+    | otherwise = search (Set.singleton (0, 0))
+  where
+    baseLength = T.length base
+    readingLength = T.length reading
+
+    search seen
+        | Set.member (baseLength, readingLength) seen = True
+        | Set.null next = False
+        | otherwise = search (seen <> next)
+      where
+        next =
+            Set.fromList
+                [ position
+                | (i, j) <- Set.toList seen
+                , i < baseLength
+                , j < readingLength
+                , position <- step i j
+                ]
+
+    step i j =
+        [(i + 1, j + 1) | not (isHan (T.index base i)), T.index base i == T.index reading j]
+            <> [ (i + len, j + T.length rt)
+               | len <- [1 .. min 32 (baseLength - i)]
+               , let surface = T.take len (T.drop i base)
+               , Just readings <- [Maple.lookup surface (rdSegments rubyData)]
+               , rt <- Set.toList readings
+               , rt `T.isPrefixOf` T.drop j reading
+               ]
+
+-- | Replaces @々@ with the preceding character
+expandIteration :: Text -> Text
+expandIteration = T.pack . go Nothing . T.unpack
+  where
+    go _ [] = []
+    go previous ('\x3005' : rest) = maybeToList previous <> go previous rest
+    go _ (c : rest) = c : go (Just c) rest
 
 -- TagSoup walking -------------------------------------------------------------
 
