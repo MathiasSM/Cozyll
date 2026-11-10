@@ -7,6 +7,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 ## [Unreleased]
 
+## [3.2.0.0] - 2026-11-10
+
 ### Fixed
 
 - Author pages omit the profile image when an author has no image, instead of rendering an `img` with an empty `src`.
@@ -344,8 +346,9 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.1...master
-[3.1.0.1]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.0...v3.1,0,1
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.2.0.0...master
+[3.2.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.1...v3.2.0.0
+[3.1.0.1]: https://github.com/MathiasSM/Cozyll/compare/v3.1.0.0...v3.1.0.1
 [3.1.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.2...v3.1.0.0
 [3.0.0.2]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.1...v3.0.0.2
 [3.0.0.1]: https://github.com/MathiasSM/Cozyll/compare/v3.0.0.0...v3.0.0.1
