@@ -46,7 +46,7 @@ module Cozyll.Config (
 where
 
 import Cozyll.Domain.Author (Author)
-import Cozyll.Domain.Website (HighlightStyle)
+import Cozyll.Domain.Website (CheckMode (..), HighlightStyle)
 import Cozyll.Ruby.Index (RubyData)
 import Data.String (fromString)
 import Hakyll (Configuration, Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, (.||.))
@@ -104,6 +104,8 @@ data SiteConfig = SiteConfig
     -- ^ The build environment (see 'Env')
     , siteRubyData :: Maybe RubyData
     -- ^ The derived ruby index, when the content provides @ruby-data/index.json@
+    , siteJaRubyCheck :: CheckMode
+    -- ^ Severity of the ruby coverage check (site default; front matter may override)
     }
 
 -- | Hakyll's default configuration

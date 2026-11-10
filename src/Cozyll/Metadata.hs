@@ -87,6 +87,8 @@ data Key
       RubyToggle
     | -- | Words that may appear without furigana (coverage exemption).
       JaRubySkip
+    | -- | Overrides the site's Japanese ruby check severity (@off@, @warn@, @error@).
+      JaRubyCheck
     | -- | Enables: The hide-images toggle; the value is the control's label (markdown).
       ImagesToggle
     | -- | A social account's username/handle.
@@ -139,6 +141,7 @@ keyName key = case key of
     TOC -> "TOC"
     RubyToggle -> "rubyToggle"
     JaRubySkip -> "jaRubySkip"
+    JaRubyCheck -> "jaRubyCheck"
     ImagesToggle -> "imagesToggle"
     Username -> "username"
 

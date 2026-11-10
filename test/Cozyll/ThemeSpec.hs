@@ -2,7 +2,7 @@
 module Cozyll.ThemeSpec (tests) where
 
 import Cozyll.Config (Env (Dev), SiteConfig (..), resolveTemplate)
-import Cozyll.Domain.Website (HighlightStyle (Pygments))
+import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.TestUtils (mkAuthor)
 import Cozyll.Theme (rewritePartials)
 import Hakyll (toFilePath)
@@ -32,6 +32,7 @@ mkConfig names =
         , contentTemplateNames = names
         , siteEnv = Dev
         , siteRubyData = Nothing
+        , siteJaRubyCheck = CheckError
         }
 
 tests :: TestTree
