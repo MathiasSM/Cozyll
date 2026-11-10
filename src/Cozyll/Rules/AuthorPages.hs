@@ -5,12 +5,13 @@ module Cozyll.Rules.AuthorPages (
 ) where
 
 import Cozyll.Compile (applyTemplates, finish)
-import Cozyll.Config (SiteConfig, baseUrl, resolveTemplate)
+import Cozyll.Config (SiteConfig, baseUrl, resolveTemplate, siteLanguage)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Author (authorPageContext, authorPages, authorPosts, displayNameOf)
 import Cozyll.Context.Nav (navContext)
 import Cozyll.Context.SocialMeta (MainImage (..), PageKind (ProfilePage), PageMeta (..), pageItemOf, socialMetaContext)
 import Cozyll.Domain.Author (Author (..), authorUrlPath)
+import Cozyll.Domain.Language (languageCode)
 import Cozyll.Localization (ogLocaleFor)
 import Hakyll (
     Identifier,
@@ -46,7 +47,7 @@ processAuthorPage cfg author = create [authorPageIdentifier cfg author] $ do
                     { pageMetaTitle = displayName
                     , pageMetaDescription = authorDescription author
                     , pageMetaUrl = baseUrl cfg ++ authorUrlPath author
-                    , pageMetaLanguage = "en"
+                    , pageMetaLanguage = languageCode (siteLanguage cfg)
                     , pageMetaPublished = Nothing
                     , pageMetaModified = Nothing
                     }
@@ -55,4 +56,4 @@ processAuthorPage cfg author = create [authorPageIdentifier cfg author] $ do
         ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
         makeItem ""
             >>= applyTemplates ctx [resolveTemplate cfg "author.html"]
-            >>= finish cfg (socialMetaContext cfg ProfilePage [author] items pageMeta mainImage ogLocale <> navContext cfg "authors" "en" <> ctx)
+            >>= finish cfg (socialMetaContext cfg ProfilePage [author] items pageMeta mainImage ogLocale <> navContext cfg "authors" (languageCode $ siteLanguage cfg) <> ctx)

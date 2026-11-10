@@ -1,16 +1,11 @@
 -- | The site menu, built from the pages that declare a nav entry
-module Cozyll.Context.Nav (
-    navContext,
-
-    -- * Pure helpers (also used by the tests)
-    navEntryLang,
-) where
+module Cozyll.Context.Nav (navContext) where
 
 import Control.Monad (filterM)
-import Cozyll.Config (SiteConfig, pagesPattern, siteEnv)
+import Cozyll.Config (SiteConfig, pagesPattern, siteEnv, siteLanguage)
 import Cozyll.Content (isHidden, requireNav)
-import Cozyll.Domain.Language (languageCode)
-import Cozyll.Domain.Nav (NavEntry (..))
+import Cozyll.Domain.Language (Language (..), languageCode)
+import Cozyll.Domain.Nav (NavEntry (..), resolveNavLabel)
 import Data.List (sortOn)
 import Data.Maybe (catMaybes)
 import Hakyll (
@@ -32,27 +27,33 @@ pages that declare `nav:` and ordered by `navOrder`
 
 @current@ is the name of the page being rendered (its file name without extension, or
 its post group); that menu entry is @active@. @pageLanguage@ is the language of the
-page being rendered: an entry in another language carries a @lang@ attribute, while
-an entry in the page's own language has none.
+page being rendered: each label is resolved for it (see 'resolveNavLabel'), and an
+entry whose rendered label is in another language carries a @lang@ attribute.
 -}
 navContext :: SiteConfig -> String -> String -> Context a
 navContext cfg current pageLanguage = listField "nav" entryContext (navItems cfg)
   where
     entryContext =
-        field "label" (return . navLabel . itemBody)
+        field "label" (fmap fst . resolved)
             <> field "href" (return . navHref . itemBody)
             <> boolField "active" ((== current) . takeBaseName . toFilePath . itemIdentifier)
-            <> field "lang" (maybe (noResult "same language as the page") return . navEntryLang pageLanguage . itemBody)
+            <> field "lang" langOf
 
--- | The @lang@ of a menu entry when it differs from the page's language
-navEntryLang :: String -> NavEntry -> Maybe String
-navEntryLang pageLanguage entry
-    | languageCode (navLanguage entry) == pageLanguage = Nothing
-    | otherwise = Just $ languageCode (navLanguage entry)
+    resolved item =
+        either
+            (\problem -> fail $ toFilePath (itemIdentifier item) ++ ": " ++ problem)
+            pure
+            (resolveNavLabel (Language pageLanguage) (siteLanguage cfg) (itemBody item))
+
+    langOf item = do
+        (_, language) <- resolved item
+        if languageCode language == pageLanguage
+            then noResult "the page's own language"
+            else pure $ languageCode language
 
 navItems :: SiteConfig -> Compiler [Item NavEntry]
 navItems cfg = do
     pages <- getMatches $ pagesPattern cfg "*"
     visible <- filterM (fmap (not . isHidden (siteEnv cfg)) . getMetadata) pages
-    entries <- mapM (\page -> fmap (Item page) <$> requireNav page) visible
+    entries <- mapM (\page -> fmap (Item page) <$> requireNav cfg page) visible
     return $ sortOn (navOrder . itemBody) $ catMaybes entries

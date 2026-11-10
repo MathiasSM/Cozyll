@@ -58,6 +58,7 @@ module Cozyll.Domain.Website (
 ) where
 
 import Control.Monad (unless, when)
+import Cozyll.Domain.Language (Language)
 import Cozyll.Yaml (enumFromJSON)
 import Data.Aeson (FromJSON (parseJSON), withObject, (.!=), (.:), (.:?))
 import Data.Time (getCurrentTime, utctDay)
@@ -75,6 +76,7 @@ data Site = Site
     , siteDescription :: String
     , siteCopyrightYear :: Int
     , siteDomain :: String
+    , siteLanguage :: Maybe Language
     , siteAlternateNames :: [String]
     , siteLogo :: Maybe String
     }
@@ -253,6 +255,7 @@ instance FromJSON Site where
             <*> o .: "description"
             <*> o .: "copyrightYear"
             <*> o .: "domain"
+            <*> o .:? "language"
             <*> o .:? "alternateName" .!= []
             <*> o .:? "logo"
 

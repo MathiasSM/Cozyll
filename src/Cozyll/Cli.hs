@@ -19,6 +19,7 @@ import Cozyll.BuildState (
 import Cozyll.Cli.Data (runDataCommand)
 import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
+import Cozyll.Domain.Language (defaultLanguage)
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.Init (InitOptions (..), defaultInitOptions, initSite)
 import Cozyll.Ruby.Index (dataDirName, indexFileName, indexLimitIO, loadIndexFile)
@@ -371,6 +372,7 @@ loadSiteConfig env contentDir website = do
             , siteCopyrightYear = year
             , siteCurrentYear = currentYear
             , siteDomain = domain
+            , siteLanguage = fromMaybe defaultLanguage (Web.siteLanguage site)
             , siteAlternateNames = Web.siteAlternateNames site
             , siteLogo = logo
             , siteBrand = brand

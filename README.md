@@ -266,12 +266,43 @@ post.updated:
   ja: 更新済み
 ```
 
-The templates call strings with `$t("id")$`; a page's language comes from its `language:`
-front matter (default `en`). Lookup falls back from `xx-YY` to `xx`. The reserved
-`_ogLocaleDefaultRegion` key provides the `og:locale` value. The current ids are
+The templates call strings with `$t("id")$`; lookup falls back from `xx-YY` to `xx`. The
+reserved `_ogLocaleDefaultRegion` key provides the `og:locale` value. The current ids are
 `aside.controls`, `post.updated`, `project.started`, `project.finished`, `ruby.all` and `author.by`
 (the last one is kept for compatibility and is no longer used by the stock theme). See
 [`schema/example.localization.yaml`](schema/example.localization.yaml).
+
+`site.language` in `website.yaml` is the site's own language (ISO 639-1 with an optional
+region, default `en`):
+
+```yaml
+site:
+  language: en
+```
+
+It is the default for pages without `language:`, is used for author pages and for
+`inLanguage`/`og:locale` fallbacks, and marks the site chrome (title and description) with
+`lang` only on pages written in another language. A page overrides it with `language:` in its
+front matter (`language: es-MX`).
+
+Menu labels are a single string, used on every page:
+
+```yaml
+nav: Guides
+navOrder: 2
+```
+
+or a map of language to label:
+
+```yaml
+nav: {en: Guides, es: Guías, ja: ガイド}
+navOrder: 2
+```
+
+When a page is rendered, its label is looked up for the page's language, then its base
+language (`es-MX` → `es`), then the site's language; if none matches, the build fails naming
+the page and the available languages. A label rendered in a language other than the page's
+carries `lang`.
 
 ## Theming
 

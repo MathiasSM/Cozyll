@@ -19,8 +19,8 @@ module Cozyll.Content (
 ) where
 
 import Control.Monad ((>=>))
-import Cozyll.Config (Env (..))
-import Cozyll.Domain.Language (Language, languageOf)
+import Cozyll.Config (Env (..), SiteConfig, siteLanguage)
+import Cozyll.Domain.Language (Language, languageOfWith)
 import Cozyll.Domain.Nav (NavEntry, parseNavEntry)
 import Cozyll.Domain.Post (Post, parsePost)
 import Cozyll.Domain.Project (Project (..), parseProjectYaml)
@@ -129,17 +129,23 @@ requirePostOf ident = do
     metadata <- getMetadata ident
     either (failWith $ toFilePath ident ++ ": invalid front matter") pure (parsePost metadata)
 
--- | The language of an item, failing the build if it's not a known one
-requireLanguage :: Identifier -> Compiler Language
-requireLanguage ident = do
+-- | The language of an item (the site's language unless stated), failing the build if it's not a known one
+requireLanguage :: SiteConfig -> Identifier -> Compiler Language
+requireLanguage cfg ident = do
     metadata <- getMetadata ident
-    either (failWith $ toFilePath ident ++ ": invalid language") pure (runCheck $ languageOf metadata)
+    either
+        (failWith $ toFilePath ident ++ ": invalid language")
+        pure
+        (runCheck $ languageOfWith (siteLanguage cfg) metadata)
 
 -- | The menu entry of any page, failing the build (naming the page) if it's invalid
-requireNav :: Identifier -> Compiler (Maybe NavEntry)
-requireNav ident = do
+requireNav :: SiteConfig -> Identifier -> Compiler (Maybe NavEntry)
+requireNav cfg ident = do
     metadata <- getMetadata ident
-    either (failWith $ toFilePath ident ++ ": invalid menu entry") pure (parseNavEntry metadata)
+    either
+        (failWith $ toFilePath ident ++ ": invalid menu entry")
+        pure
+        (parseNavEntry (siteLanguage cfg) metadata)
 
 -- | Parses a project item (its body is the YAML), failing the build with the problems found
 requireProject :: Item String -> Compiler Project

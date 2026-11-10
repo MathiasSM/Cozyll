@@ -12,6 +12,9 @@ site:
   description: Example description
   copyrightYear: 2013
   domain: example.com
+  # The site's own language: a 2-letter ISO 639-1 code with an optional region.
+  # Defaults to en; pages override it with their own `language:`.
+  # language: en
   alternateName: ["Cozyll Example"]
   logo: images/logo.png
 

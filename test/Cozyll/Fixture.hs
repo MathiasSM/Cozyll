@@ -16,11 +16,13 @@ import Control.Monad (forM_, when)
 import Cozyll.Brand (Brand, brandLogo, discoverBrand)
 import Cozyll.Config (Env (..), SiteConfig (..), siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
+import Cozyll.Domain.Language (defaultLanguage)
 import Cozyll.Domain.Website (loadWebsite)
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.Ruby.Index (RubyData, defaultMaxIndexBytes, loadIndexFile)
 import Cozyll.Rules (rules)
 import Cozyll.Theme (discoverContentTemplateNames)
+import Data.Maybe (fromMaybe)
 import Hakyll.Commands qualified as Commands
 import Hakyll.Core.Logger qualified as Logger
 import Hakyll.Core.Runtime (RunMode (RunModeNormal))
@@ -59,6 +61,7 @@ mkSiteConfigFor env website authors contentTemplateNames brand rubyData =
             , siteCopyrightYear = Web.siteCopyrightYear site
             , siteCurrentYear = 2021
             , siteDomain = Web.siteDomain site
+            , siteLanguage = fromMaybe defaultLanguage (Web.siteLanguage site)
             , siteAlternateNames = Web.siteAlternateNames site
             , siteLogo = logo
             , siteBrand = brand

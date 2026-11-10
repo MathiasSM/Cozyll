@@ -178,7 +178,7 @@ These are the keys most pages and posts use. The canonical list of every key is 
 | `home` | no | `true` marks the site's home page. |
 | `aliases` | no | Old paths that redirect to this item. |
 | `author` | no | An author id (or list) from `authors.yaml`; defaults to the site-default author. |
-| `language` | no | The item's language (`en`, `ja`, `pt-BR`, …); defaults to `en`. |
+| `language` | no | The item's language (`en`, `ja`, `pt-BR`, …); defaults to `site.language` (`en` if unset). |
 | `nav`, `navOrder` | no | Add the page to the site menu, in order. |
 | `sitemap` | no | `false` keeps the item out of `sitemap.xml`. |
 | `schemaType` | no | The schema.org type of a standalone page; posts are always `BlogPosting`. |
@@ -244,7 +244,8 @@ Besides the checks above, the build fails once, naming the files, when:
 * a page or post has no `path:`;
 * a group folder has no index page;
 * an `author:` id is not in `authors.yaml`;
-* a `nav:` entry is invalid;
+* a `nav:` entry is invalid (including a per-language map with an invalid language key or no
+  label for the page's language);
 * an alias is invalid or claimed twice;
 * a static file would be published outside the site root.
 

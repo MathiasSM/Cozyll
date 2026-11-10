@@ -49,6 +49,7 @@ where
 
 import Cozyll.Brand (Brand)
 import Cozyll.Domain.Author (Author)
+import Cozyll.Domain.Language (Language)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle)
 import Cozyll.Ruby.Index (RubyData)
 import Data.String (fromString)
@@ -76,6 +77,10 @@ data SiteConfig = SiteConfig
     -- ^ The build year, exposed as @site-copyrightRange@ (the end of the range)
     , siteDomain :: String
     -- ^ Domain without scheme, exposed as @site-domain@
+    , siteLanguage :: Language
+    {- ^ The site's own language (from @site.language@, default @en@): the
+    language of the site chrome and the default for pages without @language:@
+    -}
     , siteAlternateNames :: [String]
     -- ^ Alternate site names, exposed as @site-alternateNames@ (JSON-LD only for now)
     , siteLogo :: Maybe String

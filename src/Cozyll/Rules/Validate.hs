@@ -2,7 +2,7 @@
 module Cozyll.Rules.Validate (missingPaths, validateAuthorRefs, validateNavEntries, validatePaths) where
 
 import Control.Monad (unless)
-import Cozyll.Config (Env, SiteConfig, pagesPattern, postsPattern, projectsGroup, siteAuthors, siteEnv, writingsPattern)
+import Cozyll.Config (Env, SiteConfig, pagesPattern, postsPattern, projectsGroup, siteAuthors, siteEnv, siteLanguage, writingsPattern)
 import Cozyll.Content (isHidden)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Domain.Author (authorId)
@@ -18,7 +18,7 @@ Without this each page would report the same problem while rendering the menu.
 validateNavEntries :: SiteConfig -> Rules ()
 validateNavEntries cfg = do
     pages <- getAllMetadata $ pagesPattern cfg "*"
-    let problems = [toFilePath page ++ ": " ++ problem | (page, metadata) <- pages, Left found <- [parseNavEntry metadata], problem <- found]
+    let problems = [toFilePath page ++ ": " ++ problem | (page, metadata) <- pages, Left found <- [parseNavEntry (siteLanguage cfg) metadata], problem <- found]
     unless (null problems)
         $ preprocess
         $ ioError

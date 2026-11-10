@@ -10,6 +10,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 ### Added
 
 - `cozyll init` scaffolds a working `content/` (four configs, a home page, `.gitignore`).
+- `site.language` in `website.yaml` (ISO 639-1 with an optional region, default `en`) sets the site's own language: it is the default page language, drives author pages and social metadata, and marks only the site chrome of pages written in another language.
+- `nav:` accepts a map of language to label (e.g. `nav: {en: Guides, es: Guías}`) in addition to a single string; labels resolve for the rendering page's language, then its base language, then the site's language.
 
 
 ## [3.3.1.0] - 2026-11-10
@@ -39,6 +41,7 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 
 - The README now documents the workspace layout (kit vs content repo), install, commands, authoring, localisation, theming and checks, and the kit ships those docs.
 - `-v`/`--verbose` now enables debug output, including the resolved `SITE_ENV` and content directory.
+- Site chrome and author pages now follow `site.language` instead of assuming English; the chrome only claims a language on pages written in another language.
 - `scripts/check-site.sh` treats accessibility findings as advisory unless `--a11y-fail true` is passed, matching CI.
 - `funding:` may be omitted from `website.yaml`; a site without it publishes no `funding.json` and no `.well-known/funding-manifest-urls`.
 - Every file under `content/media/` is now published (previously a whitelist silently dropped files); `media/branding/*` still flattens to `/images/*` and `.dot` sources still render to PNG.

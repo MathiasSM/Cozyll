@@ -50,7 +50,7 @@ module Cozyll.Context.SocialMeta (
 ) where
 
 import Control.Applicative ((<|>))
-import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLogo, siteTitle)
+import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLanguage, siteLogo, siteTitle)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorName, authorSchemaType, authorUrlPath)
 import Cozyll.Domain.Language qualified as L
 import Cozyll.Format (yearRange)
@@ -124,7 +124,7 @@ pageMetaOf cfg metadata =
         { pageMetaTitle = titleOf metadata
         , pageMetaDescription = descriptionOf metadata
         , pageMetaUrl = pageUrl cfg metadata
-        , pageMetaLanguage = languageOf metadata
+        , pageMetaLanguage = languageOf cfg metadata
         , pageMetaPublished = lookupKey Date metadata
         , pageMetaModified = lookupKey LastModifiedAt metadata
         }
@@ -457,11 +457,11 @@ nonEmpty :: Maybe String -> Maybe String
 nonEmpty (Just "") = Nothing
 nonEmpty value = value
 
--- | The item's normalized language code (English by default)
-languageOf :: Metadata -> String
-languageOf metadata = case runCheck (L.languageOf metadata) of
+-- | The item's normalized language code (the site's language by default)
+languageOf :: SiteConfig -> Metadata -> String
+languageOf cfg metadata = case runCheck (L.languageOfWith (siteLanguage cfg) metadata) of
     Right lang -> L.languageCode lang
-    Left _ -> "en"
+    Left _ -> L.languageCode (siteLanguage cfg)
 
 -- | The first 'Just' value in a list
 firstJust :: [Maybe a] -> Maybe a

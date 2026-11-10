@@ -28,7 +28,7 @@ globalContext cfg =
     siteContext cfg
         <> socialMediaContext cfg
         <> dataContext cfg
-        <> languageContext
+        <> languageContext cfg
         <> translationsContext cfg
         <> feedsContext cfg
         <> authorContext cfg

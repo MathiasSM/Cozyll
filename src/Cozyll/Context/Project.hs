@@ -28,7 +28,7 @@ projectContext cfg =
         , optionalField "endDate" (fmap show . projectEnd)
         , projectField "shortDescription" projectShortDescription
         , projectField "longDescription" projectLongDescription
-        , languageContext
+        , languageContext cfg
         , translationsContext cfg
         , field "slug" (return . takeBaseName . toFilePath . itemIdentifier)
         ]

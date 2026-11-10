@@ -4,6 +4,7 @@ module Cozyll.AuthorSpec (tests) where
 import Cozyll.Config (Env (Dev), SiteConfig (..))
 import Cozyll.Context.Author (authoredBy, copyrightYears, profileImageUrl, resolveAuthors)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, decodeAuthorsUtf8, defaultAuthor, parseAuthorsYaml)
+import Cozyll.Domain.Language (defaultLanguage)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Metadata qualified as Meta
 import Data.Aeson (Value (..), toJSON)
@@ -284,6 +285,7 @@ cfg =
         , siteCopyrightYear = 0
         , siteCurrentYear = 2021
         , siteDomain = "example.com"
+        , siteLanguage = defaultLanguage
         , siteAlternateNames = []
         , siteLogo = Nothing
         , siteBrand = Nothing
