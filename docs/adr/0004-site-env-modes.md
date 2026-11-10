@@ -24,3 +24,6 @@ The generator needs to build real content for production and development, and th
 - The example content serves as both a demo and the golden test fixture.
 - Adding another mode would require changes in the CLI, configuration, and build rules.
 - Later amended in 3.0.0.0 (2026-11-01): `SITE_ENV=example` was added to build the bundled example content.
+- Amended in 3.4.0.0 (2026-11-10): the modes are enforced across builds. A build records its
+  environment in `_cache/cozyll-build.json`; changing it clears `_site` and `_cache` together,
+  and `cozyll check` refuses a tree built under another environment. See ADR 0013.

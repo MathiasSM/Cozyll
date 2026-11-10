@@ -24,3 +24,8 @@ Vendored defaults in `templates/` and `assets/css/` ship in the release kit. A c
 - The theme contract is simply "override by filename".
 - The status is Proposed because the mechanism is a contract, not a deeply considered trade-off.
 - Non-recursive discovery means nested content template directories are not picked up as overrides.
+- Amended in 3.4.0.0 (2026-11-10): overrides take effect on the next build. Every render path
+  records a pattern dependency over the union of vendored and content templates (and template
+  compilation records it too, because `$partial$` paths are rewritten at compile time), so
+  adding or removing an override invalidates pages, feeds, sitemap and redirects without a
+  `clean`. The contract is documented in `docs/theming.md`, which ships in the kit.
