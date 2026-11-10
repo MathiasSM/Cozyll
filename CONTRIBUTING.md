@@ -51,8 +51,8 @@ The contract lives in `Cozyll.Context.Aside`. To add a control:
    wrapping `<input type="checkbox" checked data-toggle-class="no-images" />` and
    `$<name>ToggleLabel$` (mirror `controls--images-toggle.html`).
 4. Add a gated `<li>` to `templates/site-aside.html`, inside
-   `$if(<name>ToggleLabel)$ … $endif$` (mirror the `rubyToggleLabel` /
-   `imagesToggleLabel` blocks). `controlKeys` plus the label field drive both
+   `$if(<name>ToggleLabel)$ … $endif$` (mirror the `imagesToggleLabel` block; the ruby
+   control is special, see its own templates). `controlKeys` plus the label field drive both
    `hasControls` and that gate.
 5. Add the hiding CSS (e.g. `.no-images img, .no-images figure {display: none;}`).
    The shared script in `site-aside.html` needs no change: it wires every
