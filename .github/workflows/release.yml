@@ -81,12 +81,14 @@ jobs:
       - name: Assemble the kit
         run: |
           chmod +x artifact-executable
-          mkdir -p kit
+          mkdir -p kit/docs
           cp artifact-executable kit/cozyll
           cp -r templates kit/
           cp -r assets kit/
           cp -r schema kit/
           cp -r scripts kit/
+          cp README.md kit/
+          cp docs/authoring.md docs/theming.md docs/consumer-ci.md kit/docs/
           tar -czf cozyll-kit.tar.gz -C kit .
           sha256sum cozyll-kit.tar.gz > cozyll-kit.tar.gz.sha256
 

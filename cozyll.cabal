@@ -22,6 +22,9 @@ extra-source-files:
     schema/*.json
     schema/*.yaml
     schema/example.ruby-data.NOTICE
+    docs/authoring.md
+    docs/theming.md
+    docs/consumer-ci.md
 
 license:            BSD-3-Clause
 license-file:       LICENSE.txt

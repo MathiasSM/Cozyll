@@ -24,12 +24,17 @@ Structure
   with dotted keys (`$meta.author.location$`).
 - `writings/` — every page and post. See below for the groups.
 - `projects/` — YAML projects listed on the showcase page.
-- `media/` — the logo (for favicons) and icons inlined into templates and data
-  files.
+- `media/` — every file here is published under `/images/`. The branding logo
+  drives the favicons and the web manifest (generating those icons needs
+  ImageMagick, which the example build runs), icon SVGs are also inlined into
+  templates and data files, and `photos/` holds the example images.
+- `static/` — files copied verbatim to the site root. The example ships
+  `.nojekyll`.
 - `templates/` — content-provided templates: one override of a vendored
   template (`content.html`, which adds a class), and new partials used via
   `$partial(...)$`.
 - `css/` — additional styles. New classes only; nothing vendored is overridden.
+- `README.md` — this file.
 
 Writings
 -------------------------------------------------------------------------------

@@ -24,9 +24,11 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x artifact-executable
-          mkdir -p kit
+          mkdir -p kit/docs
           cp artifact-executable kit/cozyll
           cp -r templates assets schema kit/
+          cp README.md kit/
+          cp docs/authoring.md docs/theming.md docs/consumer-ci.md kit/docs/
           tar -czf cozyll-kit.tar.gz -C kit .
       - uses: ./.github/actions/setup-cozyll
         with:
