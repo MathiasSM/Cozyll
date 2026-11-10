@@ -58,7 +58,7 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates, pageListItems} = do
         pageMeta = pageMetaOf cfg metadata
     ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
     applyTemplates ctx' ([contentTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
-        >>= finish cfg (socialMetaContext cfg kind [] items pageMeta mainImg ogLocale <> navContext cfg pageName <> ctx')
+        >>= finish cfg (socialMetaContext cfg kind [] items pageMeta mainImg ogLocale <> navContext cfg pageName (pageMetaLanguage pageMeta) <> ctx')
 
 -- | The page's structured-data kind: home is a @WebSite@, a group index a @CollectionPage@, anything else from @schemaType:@
 pageKind :: Metadata -> Compiler PageKind

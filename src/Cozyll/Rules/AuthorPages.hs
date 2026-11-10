@@ -55,4 +55,4 @@ processAuthorPage cfg author = create [authorPageIdentifier cfg author] $ do
         ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
         makeItem ""
             >>= applyTemplates ctx [resolveTemplate cfg "author.html"]
-            >>= finish cfg (socialMetaContext cfg ProfilePage [author] items pageMeta mainImage ogLocale <> navContext cfg "authors" <> ctx)
+            >>= finish cfg (socialMetaContext cfg ProfilePage [author] items pageMeta mainImage ogLocale <> navContext cfg "authors" "en" <> ctx)

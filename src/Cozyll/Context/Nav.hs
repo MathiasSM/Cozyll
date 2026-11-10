@@ -1,5 +1,10 @@
 -- | The site menu, built from the pages that declare a nav entry
-module Cozyll.Context.Nav (navContext) where
+module Cozyll.Context.Nav (
+    navContext,
+
+    -- * Pure helpers (also used by the tests)
+    navEntryLang,
+) where
 
 import Control.Monad (filterM)
 import Cozyll.Config (SiteConfig, pagesPattern, siteEnv)
@@ -26,21 +31,24 @@ import System.FilePath.Posix (takeBaseName)
 pages that declare `nav:` and ordered by `navOrder`
 
 @current@ is the name of the page being rendered (its file name without extension, or
-its post group); that menu entry is @active@.
+its post group); that menu entry is @active@. @pageLanguage@ is the language of the
+page being rendered: an entry in another language carries a @lang@ attribute, while
+an entry in the page's own language has none.
 -}
-navContext :: SiteConfig -> String -> Context a
-navContext cfg current = listField "nav" entryContext (navItems cfg)
+navContext :: SiteConfig -> String -> String -> Context a
+navContext cfg current pageLanguage = listField "nav" entryContext (navItems cfg)
   where
     entryContext =
         field "label" (return . navLabel . itemBody)
             <> field "href" (return . navHref . itemBody)
             <> boolField "active" ((== current) . takeBaseName . toFilePath . itemIdentifier)
-            <> field "lang" (inOtherLanguage . navLanguage . itemBody)
+            <> field "lang" (maybe (noResult "same language as the page") return . navEntryLang pageLanguage . itemBody)
 
-    -- The menu sits in an English header, so only other languages need marking
-    inOtherLanguage language
-        | languageCode language == "en" = noResult "English"
-        | otherwise = return $ languageCode language
+-- | The @lang@ of a menu entry when it differs from the page's language
+navEntryLang :: String -> NavEntry -> Maybe String
+navEntryLang pageLanguage entry
+    | languageCode (navLanguage entry) == pageLanguage = Nothing
+    | otherwise = Just $ languageCode (navLanguage entry)
 
 navItems :: SiteConfig -> Compiler [Item NavEntry]
 navItems cfg = do

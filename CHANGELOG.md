@@ -15,6 +15,8 @@ and this project adheres to the [Haskell Package Versioning Policy](https://pvp.
 - Drafts from a `dev` build no longer survive a `prod` build: changing `SITE_ENV` clears `_site` and `_cache` together before rebuilding.
 - `cozyll check` now refuses a missing or foreign-env `_site` instead of silently passing, and warns when content is newer than the last build.
 - Favicon and web-manifest icon links are no longer dead references when there is no `media/branding/logo.svg`: icons, their `<link>`s and the manifest `icons` key are only emitted when a logo exists.
+- Author pages show the author's full name as the heading (no "By:" prefix), and their profile image is a page-relative URL instead of an absolute one.
+- The site header no longer declares `lang="en"` for non-English pages; menu entries carry their own language.
 
 ### Added
 
