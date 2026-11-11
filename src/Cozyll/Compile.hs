@@ -14,6 +14,7 @@ import Cozyll.Html (readonlyCheckboxes)
 import Cozyll.Metadata (Key (JaRubyAllow, JaRubyCheck, JaRubySkip, Language), lookupKey, lookupKeyList)
 import Cozyll.Ruby (checkJaReadings, checkKanjiCoverage)
 import Cozyll.Ruby.Index (RubyData)
+import Cozyll.Theme (themeFingerprint)
 import Data.Maybe (fromMaybe, isJust)
 import Data.Text qualified as T
 import Hakyll (
@@ -98,7 +99,8 @@ applyTemplates ctx templates item = foldM (\i t -> loadAndApplyTemplate t ctx i)
 -- | Factors out the final common default steps for basically all pages
 finish :: SiteConfig -> Context String -> Item String -> Compiler (Item String)
 finish cfg context item =
-    applyTemplates context [siteTemplate cfg] item
+    themeFingerprint cfg
+        >> applyTemplates context [siteTemplate cfg] item
         >>= relativizeUrls
         >>= cleanIndexUrls
         >>= cleanIndexHtmls

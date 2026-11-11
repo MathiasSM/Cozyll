@@ -1,19 +1,24 @@
--- | The Atom feeds: one per post group, described by the group's index page
-module Cozyll.Domain.Feed (Feed (..), feedHref, feeds, absoluteUrl) where
+{- | The Atom feeds: one per post group, described by the group's index page,
+plus the site-wide feed
+-}
+module Cozyll.Domain.Feed (Feed (..), feedHref, feeds, siteFeed, missingIndexPageMessage, absoluteUrl) where
 
 import Cozyll.CleanURL (outputPath)
-import Cozyll.Config (SiteConfig, pagesPattern, projectsGroup, siteTitle)
+import Cozyll.Config (SiteConfig, contentDir, pagesPattern, projectsGroup, siteDescription, siteTitle)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Metadata (Key (Description, Path, Title), lookupKey)
 import Data.Either (lefts, rights)
-import Data.List (isPrefixOf)
+import Data.List (intercalate, isPrefixOf)
 import Data.Maybe (fromMaybe)
 import Hakyll (MonadMetadata (getMatches, getMetadata), toFilePath)
-import System.FilePath.Posix (takeDirectory, (</>))
+import System.FilePath.Posix (takeDirectory, (<.>), (</>))
 
--- | An Atom feed, described by its group's index page
+{- | An Atom feed, described by its group's index page or, for the site feed, by
+@website.yaml@
+-}
 data Feed = Feed
-    { feedGroup :: String
+    { feedGroup :: Maybe String
+    -- ^ The post group, or 'Nothing' for the site-wide feed
     , feedTitle :: String
     , feedDescription :: String
     , feedFile :: FilePath
@@ -24,6 +29,16 @@ data Feed = Feed
 -- | Where the feed is served from
 feedHref :: Feed -> String
 feedHref feed = '/' : feedFile feed
+
+-- | The site-wide feed: every post of every group, at @/atom.xml@
+siteFeed :: SiteConfig -> Feed
+siteFeed cfg =
+    Feed
+        { feedGroup = Nothing
+        , feedTitle = siteTitle cfg
+        , feedDescription = siteDescription cfg
+        , feedFile = "atom.xml"
+        }
 
 {- | The feed of every post group, or every problem found
 
@@ -43,7 +58,7 @@ feedOf :: (MonadMetadata m) => SiteConfig -> String -> m (Either String Feed)
 feedOf cfg group = do
     indexPages <- getMatches (pagesPattern cfg group)
     case indexPages of
-        [] -> pure $ Left $ "no index page for the group " ++ group
+        [] -> pure $ Left $ missingIndexPageMessage (contentDir cfg) group
         page : _ -> do
             metadata <- getMetadata page
             pure $ case lookupKey Path metadata of
@@ -51,11 +66,29 @@ feedOf cfg group = do
                 Just path ->
                     Right
                         Feed
-                            { feedGroup = group
+                            { feedGroup = Just group
                             , feedTitle = fromMaybe group (lookupKey Title metadata) ++ " - " ++ siteTitle cfg
                             , feedDescription = fromMaybe "" (lookupKey Description metadata)
                             , feedFile = takeDirectory (outputPath path) </> "atom.xml"
                             }
+
+{- | Explains a group folder that has no index page, naming the page to create
+
+A group is described by a flat page under @writings/@ marked @index: true@; without
+one there is no title, description or path to hang the group's feed on.
+-}
+missingIndexPageMessage :: FilePath -> String -> String
+missingIndexPageMessage contentDir group =
+    intercalate
+        "\n"
+        [ "no index page for the group " ++ show group ++ ": create " ++ indexPage ++ " with"
+        , "  index: true"
+        , "  group: " ++ group
+        , "  path: /" ++ group
+        , "(see docs/authoring.md, \"Groups\")"
+        ]
+  where
+    indexPage = contentDir </> "writings" </> group <.> "md"
 
 {- | Makes a root-relative URL (`/contact`) absolute, as feed readers have no page to resolve it against.
 

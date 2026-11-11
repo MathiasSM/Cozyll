@@ -33,77 +33,311 @@ The published site reflects the documentation of the **latest release**, not `ma
 the docs for unreleased changes, run the command above locally; the output lands in
 `haddocks/` (gitignored).
 
-## Usage
+## The two things that live here
 
-You may download the [latest release](https://github.com/MathiasSM/Cozyll/releases/latest), which should include an executable for ubuntu (I can tweak the release thing to provide statically-linked executables, or builds for other platforms, but I don't know of anyone needing them as of writing). Keep in mind the main reason for the release is more easy integration with Github actions to publish a "content repo" using this. You may run the executable in a directory with:
+A Cozyll site is a workspace with two separate parts:
 
-- `templates/` vended hakyll templates that define components of each (usually html) pages. There are included files in the release tarball and this repo, but you may change them as you need to.
-- `assets/` vended styles and potentially other files, either too basic or coupled with the vended templates.
-- `content/` where all writing, images and other stuff lives. To build my personal site, I use a separate repo that holds these files. It expects these files:
-  - `website.yaml` (see `schema/example.website.yaml`), a file with metadata about the site, for use during generation. Required.
-  - `socials.yaml` (see `schema/example.socials.yaml`), a file with a list of accounts linked to you/your site, used for templates to build links to those profiles, and for some `.well-known` files. Required.
-  - `authors.yaml` (see `schema/authors.schema.json`), a map keyed by author id: each author's name, links, profile image, and the one flagged `siteDefault: true` (see [Authors](#authors)). Required.
-  - `localization.yaml`, a map of UI string id → `{ locale: translation }` (plus the reserved `_ogLocaleDefaultRegion` key) that backs the templates' `$t("id")$` lookups and `og:locale`. Required, even for a single-language site; the build fails on a missing translation.
-  - `writings/` shall contain any and all markdown/djot/whatever files, each of which will become a specific page in your site. Each file has a frontmatter yaml which adds some metadata to the processed page (see [Frontmatter](#frontmatter)).
-  - `data/` may hold yaml files, which are translated into usable context fields, usable in templates or templated pages (see [Data Files](#data-files)).
-  - `media/` may hold images and other binary files which can be included in the site and linked to.
-  - `projects/` may hold YAML files, each becoming an item on the projects (showcase) page.
-  - Optionally, a `templates/` directory may hold additional templates, or override existing ones (by using the same name).
-  - Optionally, a `css/` directory may hold additional stylesheets, or override existing ones (by using the same name).
+* **The kit** — a release download: the `cozyll` binary, plus the vendored theme
+  (`templates/`, `assets/`), schemas (`schema/`), scripts (`scripts/`) and these docs. It is
+  not installed as a package and not committed to your content repo. Replace it whole when
+  you upgrade.
+* **The content repo** — everything you write and commit: the four YAML files, `writings/`,
+  `media/`, `static/`, optional overrides, and your CI workflow. It is a normal git
+  repository.
 
+A workspace looks like this:
 
-The way to execute this is same as any hakyll site; if you build it from source, you can use `cabal exec cozyll <CMD>` instead.
-
-- `<CMD>` is any of:
-  - `build` (generate site)
-  - `clean` (cleanup and remove cache)
-  - `rebuild` (clean and build again)
-  - `server` (run server on what's built)
-  - `watch` (recompile server)
-  - `check` (validate the already-built HTML in `_site` for broken links; run `build` first)
-    - Only internal links are checked: `cabal.project` sets `constraints: hakyll -checkexternal`, which compiles out Hakyll's external-link check, so external URLs are skipped silently. Upstream's `checkExternal` flag defaults to on; see the comment in `cabal.project` for why it is off here.
-
-You may set environment variables to override some `website.yaml` fields; export them manually, use a `.env` file, or your preferred method. See `.env.example`.
-
-```sh
-# Environment:
-
-# prod: production build of the real content; drafts hidden (default)
-SITE_ENV=prod
-
-# dev: development build of the real content; drafts shown
-# SITE_ENV=dev
-
-# example: build the example content at the site root; drafts hidden
-# SITE_ENV=example
+```text
+site/
+├── cozyll                    # kit (downloaded, not committed)
+├── templates/
+├── assets/
+├── schema/
+├── scripts/
+├── README.md
+├── docs/
+├── content/                  # your content repo (checked out here)
+│   ├── website.yaml
+│   ├── socials.yaml
+│   ├── authors.yaml
+│   ├── localization.yaml
+│   ├── writings/
+│   ├── media/
+│   ├── static/
+│   ├── templates/            # optional overrides
+│   ├── css/                  # optional extra styles
+│   └── .github/workflows/ci.yml
+├── _site/                    # generated
+└── _cache/                   # generated
 ```
 
-### Licensing and attribution
+Generated files are written in the working directory, next to `content/`, and must not be
+committed. A content repo's `.gitignore` should include:
 
-Cozyll is BSD-3-Clause (see `LICENSE.txt`). The released library and CLI ship
-**no dictionary data**: the `ruby-data/index.json` your site builds from is
-generated by `cozyll data fetch` in your content repo, and is owned and committed
-there.
+```gitignore
+_site/
+_cache/
+*.tix
+```
 
-The upstream sources, their licences, and the attribution obligations when you
-commit or display the derived data are documented in
-[`Cozyll.Ruby.Sources`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Ruby-Sources.html)
-(source: `src/Cozyll/Ruby/Sources.hs`); the index format itself is documented in
-[`Cozyll.Ruby.Index`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Ruby-Index.html)
-(source: `src/Cozyll/Ruby/Index.hs`). In short: the index is CC BY-SA 4.0; credit
-KANJIDIC/JMdict/JMnedict (EDRDG), JmdictFurigana/JmnedictFurigana,
-yomitan-jlpt-vocab, Waller, and kanji-data; link their licences and
-[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); state what you
+`*_cache` and `_site/` are also harmless when you run the kit from a scratch directory.
+`*.tix` only appears when you build Cozyll from source with coverage enabled.
+
+The consumer workflow belongs in the content repo at `.github/workflows/ci.yml` (GitHub
+only reads workflows from the repository root). When the reusable workflow checks the
+content repo out under `content/`, that file is at `content/.github/workflows/ci.yml` in the
+workspace.
+
+## Install
+
+Download the latest `cozyll-kit.tar.gz` and its checksum from the
+[releases page](https://github.com/MathiasSM/Cozyll/releases/latest), verify, and extract it
+into the workspace:
+
+```sh
+curl -fsSLO https://github.com/MathiasSM/Cozyll/releases/latest/download/cozyll-kit.tar.gz
+curl -fsSLO https://github.com/MathiasSM/Cozyll/releases/latest/download/cozyll-kit.tar.gz.sha256
+sha256sum -c cozyll-kit.tar.gz.sha256
+tar -xzf cozyll-kit.tar.gz
+```
+
+The kit targets Linux x86_64; the release notes state the platform baseline for each
+release.
+
+A normal build needs no extra tools. ImageMagick (`magick`, or `convert`) is needed only
+when a brand logo has to be converted into favicons. Graphviz (`dot`) is needed only when
+the content includes `.dot` sources.
+
+## Ruby data and licensing
+
+Cozyll is BSD-3-Clause (see `LICENSE.txt`). The released library and CLI ship **no
+dictionary data**: the `ruby-data/index.json` your site builds from is generated by
+`cozyll data fetch` in your content repo and is owned and committed there.
+
+The upstream sources, their licences and the attribution obligations are documented in
+[`Cozyll.Ruby.Sources`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Ruby-Sources.html) and
+[`Cozyll.Ruby.Index`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Ruby-Index.html). In short:
+the index is CC BY-SA 4.0; credit KANJIDIC/JMdict/JMnedict (EDRDG),
+JmdictFurigana/JmnedictFurigana, yomitan-jlpt-vocab, Waller and kanji-data; link their
+licences and [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); state what you
 changed; do not claim copyright over the data; and keep it reasonably current.
 
-If you enable the feature (your content repo has `ruby-data/index.json`), copy
-[`schema/example.ruby-data.NOTICE`](schema/example.ruby-data.NOTICE) to
-`ruby-data/NOTICE` (adjust it if you changed `sources.yaml`). If `ruby-data/` is a
-submodule, commit the index and `NOTICE` there and bump the parent pointer. The
-generated site should still carry the acknowledgement itself (for example, a
-“Sources & licences” page linked from the footer); if the data repo is public,
-you can link the `NOTICE` as well. If you never provide `ruby-data/index.json`,
-no dictionary data is used and none of this attribution applies.
+If you enable the feature, copy `schema/example.ruby-data.NOTICE` to `ruby-data/NOTICE`
+(adjust it if you changed `sources.yaml`) and carry an acknowledgement on the generated
+site. If you never provide `ruby-data/index.json`, no dictionary data is used and none of
+this applies.
+
+## Your first site
+
+Run `cozyll init` to create a working `content/` (the four configs, a home page and a
+`.gitignore`), or write them yourself. The files are:
+
+* [`schema/example.website.yaml`](schema/example.website.yaml) — site identity and output
+  switches.
+* [`schema/example.socials.yaml`](schema/example.socials.yaml) — the accounts linked from
+  the site.
+* [`schema/example.authors.yaml`](schema/example.authors.yaml) — the author map; exactly one
+  author sets `siteDefault: true`.
+* [`schema/example.localization.yaml`](schema/example.localization.yaml) — the UI strings
+  for each language.
+* `content/writings/` — your pages and posts, starting with a home page.
+
+Then build and check:
+
+```sh
+cozyll build
+cozyll check
+cozyll watch
+```
+
+`SITE_ENV` selects the content and the draft policy:
+
+* `prod` (the default) builds `content/` and hides drafts.
+* `dev` builds `content/` and shows drafts.
+* `example` builds the bundled `example-content/` at the site root, with drafts hidden.
+
+```sh
+SITE_ENV=dev cozyll build
+SITE_ENV=example cozyll build
+```
+
+Changing `SITE_ENV` clears `_site/` and `_cache/` before the next build, so a development
+build cannot leak into production.
+
+## Commands
+
+```text
+cozyll [(-v|--verbose)] COMMAND
+```
+
+| Command | What it does |
+|---|---|
+| `build` | Generate the site into `_site/`. `build --dry-run` lists the out-of-date items without writing. |
+| `clean` | Remove `_site/` and `_cache/` (including `_cache/tmp/`). Needs no content. |
+| `rebuild` | `clean` followed by `build`. |
+| `server` | Serve the files already built in `_site/`. |
+| `watch` | Build, serve, and rebuild pieces as content changes. |
+| `check` | Validate links in the built `_site/`. Needs no content. |
+| `data` | `fetch`/`verify`/`fmt`/`sources` maintain the optional derived ruby index; see [Ruby and JLPT levels](#ruby-and-jlpt-levels). |
+| `init` | Create a starter `content/` (four configs, a home page, `.gitignore`). |
+
+`init` creates the required `content/` tree from the kit's `schema/` examples; it refuses a
+non-empty `content/` unless you pass `--force`, and `init --dir DIR` scaffolds elsewhere.
+
+`clean` and `check` work without a content directory or a valid `SITE_ENV`. `check` refuses
+a missing `_site/` and a tree built with another `SITE_ENV`, and warns when content is newer
+than the last build. It checks internal links only; external links are not fetched (see
+`cabal.project`).
+
+`-v`/`--verbose` enables debug output, including the resolved `SITE_ENV`, content directory
+and build-state decision:
+
+```sh
+cozyll -v build
+```
+
+`--help` prints the command list, and `--version` prints the version:
+
+```sh
+cozyll --help
+cozyll --version
+```
+
+## Authoring
+
+Pages are flat files under `content/writings/`; posts sit in a group folder and carry a
+`date:`. A group is an index page (`writings/<group>.md` with `index: true`, `group:` and
+`path:`) plus a `writings/<group>/` folder, and it gets a listing and a feed at
+`/<group>/atom.xml`. The site as a whole has `/atom.xml` (every group's posts, newest
+first, up to `feed.size`). Every item needs an explicit `path:`; drafts use `draft: true`, and
+`aliases:` publishes redirects. Dates stay ISO `YYYY-MM-DD` by design.
+
+The full guide — front matter, groups, media routes, `content/static/`, feeds and the
+errors the build raises — is in [docs/authoring.md](docs/authoring.md).
+
+## Ruby and JLPT levels
+
+`[base](-reading)` renders ruby. When the content repo provides a derived
+`ruby-data/index.json`, each ruby carries `data-jlpt` (`n1`–`n5` or `unknown`) and
+`data-jlpt-source` (`word`, `kanji`, or `unknown`), and readers get a threshold
+`<select>` plus an independent unknown-level checkbox. Their choice is stored in
+`localStorage`; there is no article default, so without JS all ruby is shown.
+
+Generate (and refresh) the data with the CLI, then commit it:
+
+```sh
+cozyll data fetch     # resolve sources, derive ruby-data/index.json
+cozyll data verify    # schema and canonical form
+cozyll data fmt       # rewrite the index canonically
+cozyll data sources   # print the effective sources file
+```
+
+The default source list is `schema/example.ruby-sources.yaml`; copy it to
+`ruby-data/sources.yaml` (or run `cozyll data sources --write`) to pin versions or change
+locations. `ref: latest` resolves via the GitHub API; non-GitHub hosts need a pinned ref.
+Builds are offline and never re-derive: after replacing the index, run `cozyll rebuild`
+(or restart `watch`). The index size limit is `COZYLL_RUBY_INDEX_LIMIT` bytes (default
+8 MiB).
+
+Front matter (per page):
+
+| Key | Meaning |
+|---|---|
+| `rubyToggle: <label>` | **Deprecated** legacy all-or-nothing toggle; use `rubyControl`. Kept until the next major. |
+| `rubyControl: <label>` | enables the threshold `<select>` |
+| `rubyUnknown: <label>` | enables the unknown-level checkbox |
+| `jaRubySkip: [...]` | words that may appear without ruby |
+| `jaRubyAllow: [...]` | surfaces or `surface:reading` pairs accepted without a dictionary match |
+| `jaRubyCheck: off\|warn\|error` | overrides the site's check severity |
+
+`jaRubyCheck` is also read from `website.yaml` (default `error`). These keys only govern the
+**Japanese** checks: coverage and reading verification inspect text whose effective `lang` is
+`ja*`; non-Japanese ruby is controlled but not checked. Content repos add `ruby.all` to
+`localization.yaml` for the “All” option.
+
+## Localisation
+
+`content/localization.yaml` is required even for a single-language site. It maps a UI string
+id to a map of locale → string:
+
+```yaml
+post.updated:
+  en: Updated
+  es: Actualizado
+  ja: 更新済み
+```
+
+The templates call strings with `$t("id")$`; lookup falls back from `xx-YY` to `xx`. The
+reserved `_ogLocaleDefaultRegion` key provides the `og:locale` value. The current ids are
+`aside.controls`, `post.updated`, `project.started`, `project.finished`, `ruby.all` and `author.by`
+(the last one is kept for compatibility and is no longer used by the stock theme). See
+[`schema/example.localization.yaml`](schema/example.localization.yaml).
+
+`site.language` in `website.yaml` is the site's own language (ISO 639-1 with an optional
+region, default `en`):
+
+```yaml
+site:
+  language: en
+```
+
+It is the default for pages without `language:`, is used for author pages and for
+`inLanguage`/`og:locale` fallbacks, and marks the site chrome (title and description) with
+`lang` only on pages written in another language. A page overrides it with `language:` in its
+front matter (`language: es-MX`).
+
+Menu labels are a single string, used on every page:
+
+```yaml
+nav: Guides
+navOrder: 2
+```
+
+or a map of language to label:
+
+```yaml
+nav: {en: Guides, es: Guías, ja: ガイド}
+navOrder: 2
+```
+
+When a page is rendered, its label is looked up for the page's language, then its base
+language (`es-MX` → `es`), then the site's language; if none matches, the build fails naming
+the page and the available languages. A label rendered in a language other than the page's
+carries `lang`.
+
+## Theming
+
+Override a template by putting a file with the same name in `content/templates/`; it
+shadows the vendored one on the next `cozyll build`, no `clean` needed. `content.html` is
+applied by the builder rather than through `$partial$`. Extra styles in `content/css/*.css`
+are concatenated after the vendored CSS; `SITE_ENV=dev` keeps the CSS readable while
+`prod`/`example` minify it.
+
+The template inventory, context fields and CSS custom properties are in
+[docs/theming.md](docs/theming.md).
+
+## Checks
+
+`scripts/check-site.sh` runs the same checks locally as the consumer CI:
+
+```sh
+scripts/check-site.sh content-schema --content-dir content
+scripts/check-site.sh all --content-dir content --site-dir _site
+```
+
+The available checks are `content-schema`, `html`, `a11y`, `links-external`, `xml`,
+`jsonld`, `wellknown` and `spelling`; `all` runs the default CI set (`content-schema`,
+`html`, `a11y`, `xml`, `jsonld`, `wellknown`). `links-external` and `spelling` are optional
+and not part of `all`. Run `scripts/check-site.sh --help` for the tools each check needs.
+
+Accessibility findings are advisory unless you pass `--a11y-fail true`, matching CI. The
+script runs `pa11y-ci` with the **axe** runner; bare `npx pa11y` defaults to
+HTML_CodeSniffer and can report a different set of issues, so use the script for the
+authoritative local run.
+
+`cozyll check` is the link check for the generated site. The content-schema check validates
+`website.yaml`, `authors.yaml`, `socials.yaml` and `localization.yaml` against the schemas in
+`schema/`.
 
 ## Development
 
@@ -111,10 +345,12 @@ no dictionary data is used and none of this attribution applies.
 
 #### Setup
 
-1. Install ImageMagick (e.g. via `sudo apt install imagemagick`).
-2. Install ghcup (e.g. using `mise use -g ghcup`).
-3. Use ghcup to install `ghc`, `cabal` (both required)
-4. Install the repo's `mise.toml` tools:
+1. Install ImageMagick (e.g. via `sudo apt install imagemagick`) — needed for the example
+   build, which generates favicons from `example-content/media/branding/logo.svg`.
+2. Install Graphviz if you build content with `.dot` sources.
+3. Install ghcup (e.g. using `mise use -g ghcup`).
+4. Use ghcup to install `ghc`, `cabal` (both required)
+5. Install the repo's `mise.toml` tools:
 
    ```sh
    mise install
@@ -122,7 +358,7 @@ no dictionary data is used and none of this attribution applies.
 
   - You may install `hls`, `fourmolu`, `hlint`, `apply-refact` with it, or use `cabal install PKG-VERSION` (see [CONTRIBUTING.md](CONTRIBUTING.md); CI reads the fourmolu, GHC, and cabal versions from the `FOURMOLU_VERSION`, `GHC_VERSION`, and `CABAL_VERSION` repository variables)
   - Remember to `ghcup set <TOOL>` (in particular, match CI with `ghcup set cabal <CABAL_VERSION>`)
-5. Enable the git hooks (runs `fourmolu` and `hlint` before each commit) via
+6. Enable the git hooks (runs `fourmolu` and `hlint` before each commit) via
    [pre-commit](https://pre-commit.com/); see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 #### Build
@@ -234,52 +470,6 @@ fields are documented in
 See [`Cozyll.Metadata`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Metadata.html) (source:
 `src/Cozyll/Metadata.hs`) for the full list of supported fields. Other fields become available as
 part of the page/post's context, which you may use in templates or templated markup.
-
-### Ruby and JLPT levels
-
-`[base](-reading)` renders ruby. When the content repo provides a derived
-`ruby-data/index.json`, each ruby carries `data-jlpt` (`n1`–`n5` or `unknown`) and
-`data-jlpt-source` (`word`, `kanji`, or `unknown`), and readers get a threshold
-`<select>` plus an independent unknown-level checkbox. Their choice is stored in
-`localStorage`; there is no article default, so without JS all ruby is shown.
-
-Generate (and refresh) the data with the CLI, then commit it:
-
-```sh
-cozyll data fetch     # resolve sources, derive ruby-data/index.json
-cozyll data verify    # schema and canonical form
-cozyll data fmt       # rewrite the index canonically
-cozyll data sources   # print the effective sources file
-```
-
-The default source list is `schema/example.ruby-sources.yaml` (shipped with Cozyll; its
-schema is `schema/ruby-sources.schema.json`). Copy it to `ruby-data/sources.yaml` (or run
-`cozyll data sources --write`) to pin versions or change locations; the content-repo file
-wins. `ref: latest` resolves via the GitHub API; non-GitHub hosts need a pinned ref, and
-release assets are checked against GitHub's digest when one is available.
-
-Builds are offline and never re-derive. The index is not a Hakyll dependency: after
-replacing it, run `cozyll rebuild` (or restart `watch`). The index size limit is
-`COZYLL_RUBY_INDEX_LIMIT` bytes (default 8 MiB). The derived data is CC BY-SA 4.0
-and carries attribution obligations; see
-[Licensing and attribution](#licensing-and-attribution). Cozyll itself ships no
-data.
-
-Front matter (per page):
-
-| Key | Meaning |
-|---|---|
-| `rubyToggle: <label>` | **Deprecated** legacy all-or-nothing toggle; use `rubyControl`. Kept until the next major. |
-| `rubyControl: <label>` | enables the threshold `<select>` |
-| `rubyUnknown: <label>` | enables the unknown-level checkbox |
-| `jaRubySkip: [...]` | words that may appear without ruby |
-| `jaRubyAllow: [...]` | surfaces or `surface:reading` pairs accepted without a dictionary match |
-| `jaRubyCheck: off\|warn\|error` | overrides the site's check severity |
-
-`jaRubyCheck` is also read from `website.yaml` (default `error`). These keys only govern the
-**Japanese** checks: coverage and reading verification inspect text whose effective `lang` is
-`ja*`; non-Japanese ruby is controlled but not checked. Content repos must add `ruby.all` to
-`localization.yaml` for the “All” option.
 
 ### Social metadata
 

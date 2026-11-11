@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/MathiasSM/Cozyll/master/schema/localization.schema.json
+# Example UI strings. A content repo needs a proper localization.yaml.
+#
+# A map keyed by id, whose value maps a locale key to a string.
+# Every id a page consumes must exist for that page's language, or the build
+# fails; `xx-YY` falls back to `xx` (for example `pt-BR` -> `pt`).
+
+aside.controls:
+  en: Controls
+  es: Controles
+  ja: コントロール
+
+post.updated:
+  en: Updated
+  es: Actualizado
+  ja: 更新済み
+
+ruby.all:
+  en: All
+  es: Todos
+  ja: 全て
+
+project.started:
+  en: Started on
+  es: Iniciado en
+  ja: 開始日
+
+project.finished:
+  en: Finished
+  es: Terminado en
+  ja: 完了日
+
+# No longer used by the stock theme as of 3.2.1.0 (the author page now shows
+# the name). Keeping it is harmless for existing content; it can be removed.
+author.by:
+  en: By
+  es: Por
+  ja: 執筆
+
+# Reserved: the full `xx_YY` locale used for `og:locale`. Required for every
+# language that has pages.
+_ogLocaleDefaultRegion:
+  en: en_US
+  es: es_ES
+  ja: ja_JP

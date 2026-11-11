@@ -1,7 +1,7 @@
 # Consumer-facing composite action: validate generated well-known and metadata files.
-# Requires Python 3; checks robots.txt, manifest, funding.json, sitemap, security.txt and trust.txt.
+# Requires Python 3; checks robots.txt, manifest, sitemap, security.txt and trust.txt, plus funding.json when present.
 name: check-wellknown
-description: Validate generated security.txt, funding.json, manifest, robots, trust and sitemap files.
+description: Validate generated security.txt, manifest, robots, trust and sitemap files, and funding.json when present.
 inputs:
   site-dir:
     description: Directory containing the built site.

@@ -15,10 +15,8 @@
     <title>$if(home)$$site-title$ - $site-description$$else$$title$ - $site-title$$endif$</title>
     $if(description)$<meta name="description" content="$description$" />$endif$
 
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.webmanifest">
+    $for(favicons)$<link rel="$rel$" href="$href$"$if(type)$ type="$type$"$endif$$if(sizes)$ sizes="$sizes$"$endif$>
+    $endfor$<link rel="manifest" href="/manifest.webmanifest">
 
     $if(math)$<script defer src="https://cdn.jsdelivr.net/npm/mathjax@$mathjax-version$/tex-chtml.js"></script>$endif$
 </head>

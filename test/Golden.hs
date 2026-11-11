@@ -13,59 +13,19 @@ module Golden (
 where
 
 import Control.Monad (forM, forM_)
-import Cozyll.Config (Env (Example), SiteConfig (..), siteConfiguration)
-import Cozyll.Domain.Author qualified as Author
-import Cozyll.Domain.Website (loadWebsite)
-import Cozyll.Domain.Website qualified as Web
-import Cozyll.Ruby.Index (RubyData, defaultMaxIndexBytes, loadIndexFile)
-import Cozyll.Rules (rules)
-import Cozyll.Theme (discoverContentTemplateNames)
+import Cozyll.Fixture (buildFixture)
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as BS
 import Data.List (sort)
-import Hakyll.Commands qualified as Commands
-import Hakyll.Core.Logger qualified as Logger
-import Hakyll.Core.Runtime (RunMode (RunModeNormal))
 import System.Directory (
     copyFile,
     createDirectoryIfMissing,
     doesDirectoryExist,
     listDirectory,
-    withCurrentDirectory,
  )
-import System.Exit (ExitCode (..), exitFailure)
 import System.FilePath (takeDirectory, takeExtension, (</>))
-import System.IO.Temp (createTempDirectory, getCanonicalTemporaryDirectory)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsFile, writeBinaryFile)
-
--- | Builds a 'SiteConfig' from a parsed @website.yaml@ (no environment overrides)
-mkSiteConfig :: Web.Website -> [Author.Author] -> [FilePath] -> Maybe RubyData -> SiteConfig
-mkSiteConfig website authors contentTemplateNames rubyData =
-    let site = Web.websiteSite website
-        defaultAuthor' = either (error . unlines) id (Author.defaultAuthor authors)
-     in SiteConfig
-            { siteTitle = Web.siteTitle site
-            , siteDescription = Web.siteDescription site
-            , siteCopyrightYear = Web.siteCopyrightYear site
-            , siteCurrentYear = 2021
-            , siteDomain = Web.siteDomain site
-            , siteAlternateNames = Web.siteAlternateNames site
-            , siteLogo = Web.siteLogo site
-            , siteAuthors = authors
-            , siteDefaultAuthor = defaultAuthor'
-            , mathjaxVersion = Web.mathjaxVersion (Web.websiteMathjax website)
-            , highlightStyle = Web.highlightStyle (Web.websiteHighlight website)
-            , contentDir = "content"
-            , assetsDir = "assets"
-            , templatesDir = "templates"
-            , contentTemplatesDir = "content/templates"
-            , contentCssDir = "content/css"
-            , contentTemplateNames = contentTemplateNames
-            , siteEnv = Example
-            , siteRubyData = rubyData
-            , siteJaRubyCheck = Web.websiteJaRubyCheck website
-            }
 
 {- | Builds the fixture site in a fresh temporary directory and mirrors its
 output into a comparable snapshot. Returns the work directory and the
@@ -74,27 +34,9 @@ work directory afterwards.
 -}
 buildSiteSnapshot :: FilePath -> IO (FilePath, FilePath)
 buildSiteSnapshot root = do
-    work <- getCanonicalTemporaryDirectory >>= \tmp -> createTempDirectory tmp "golden"
-    let buildDir = work </> "build"
-        snapshot = work </> "snapshot"
-    -- The example content's own website.yaml drives the build, so the golden output does not depend on the environment
-    website <- loadWebsite (root </> "example-content")
-    contentTemplateNames <- discoverContentTemplateNames (root </> "example-content" </> "templates")
-    authors <- Author.loadAuthors (root </> "example-content")
-    loaded <- loadIndexFile defaultMaxIndexBytes (root </> "example-content" </> "ruby-data" </> "index.json")
-    rubyData <- either error pure loaded
-    let cfg = mkSiteConfig website authors contentTemplateNames rubyData
-    createDirectoryIfMissing True buildDir
-    copyTree (root </> "templates") (buildDir </> "templates")
-    copyTree (root </> "assets") (buildDir </> "assets")
-    copyTree (root </> "example-content") (buildDir </> "content")
-    withCurrentDirectory buildDir $ do
-        -- An Error-only logger keeps the build silent on success, like the old script
-        logger <- Logger.new Logger.Error
-        Commands.build RunModeNormal siteConfiguration logger (rules cfg website) >>= \case
-            ExitSuccess -> pure ()
-            _ -> exitFailure
-    buildSnapshot (buildDir </> "_site") snapshot
+    (work, site) <- buildFixture root (root </> "example-content")
+    let snapshot = work </> "snapshot"
+    buildSnapshot site snapshot
     pure (work, snapshot)
 
 {- | One golden test per file, comparing the built snapshot against the
@@ -143,17 +85,6 @@ relativeFiles root = go ""
             let child = if null relative then entry else relative </> entry
             isDir <- doesDirectoryExist (root </> child)
             if isDir then go child else pure [child]
-
--- | Copies a directory tree, creating the destination as needed
-copyTree :: FilePath -> FilePath -> IO ()
-copyTree source destination = do
-    createDirectoryIfMissing True destination
-    entries <- listDirectory source
-    forM_ entries $ \entry -> do
-        let from = source </> entry
-            to = destination </> entry
-        isDir <- doesDirectoryExist from
-        if isDir then copyTree from to else copyFile from to
 
 {- | The format and dimensions of a PNG or ICO, read from its header
 

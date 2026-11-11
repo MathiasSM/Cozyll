@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/MathiasSM/Cozyll/master/schema/localization.schema.json",
+  "title": "Localization",
+  "description": "UI strings used by the templates and metadata values consumed by the generator, as a map keyed by id (the string in `$t(\"id\")$`) whose value maps a locale key to a string. Every id a page consumes must exist for that page's language (or its base language: `xx-YY` falls back to `xx`) or the build fails. The reserved `_ogLocaleDefaultRegion` key holds the full `xx_YY` locale used for `og:locale`.",
+  "type": "object",
+  "properties": {
+    "_ogLocaleDefaultRegion": {
+      "type": "object",
+      "description": "The full `xx_YY` locale used for `og:locale`, per language.",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": {
+    "type": "object",
+    "additionalProperties": { "type": "string" }
+  }
+}

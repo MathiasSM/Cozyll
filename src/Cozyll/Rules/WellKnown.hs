@@ -1,7 +1,8 @@
 -- | Generates the site's well-known and metadata files (robots.txt, funding.json, …) from @website.yaml@
-module Cozyll.Rules.WellKnown (processWellKnownFiles) where
+module Cozyll.Rules.WellKnown (processWellKnownFiles, fundingFiles, manifestTxt) where
 
-import Cozyll.Config (SiteConfig, baseUrl, siteDefaultAuthor, siteTitle, socialsFile)
+import Cozyll.Brand (SiteIcon (..), brandIcons, iconHref, manifestIcons)
+import Cozyll.Config (SiteConfig, baseUrl, siteBrand, siteDefaultAuthor, siteTitle, socialsFile)
 import Cozyll.Content (requireSocials)
 import Cozyll.Domain.Author (authorName)
 import Cozyll.Domain.Social (Social (..))
@@ -36,11 +37,11 @@ processWellKnownFiles :: SiteConfig -> Website -> Rules ()
 processWellKnownFiles cfg website = do
     let url = baseUrl cfg
         contact = websiteContact website
+        icons = maybe [] brandIcons (siteBrand cfg)
     createFile "robots.txt" (robotsTxt url (robotsDisallow (websiteRobots website)))
-    createFile "manifest.webmanifest" (manifestTxt (siteTitle cfg) (websiteManifest website))
+    createFile "manifest.webmanifest" (manifestTxt (siteTitle cfg) (websiteManifest website) icons)
     createFile ".well-known/security.txt" (securityTxt url (contactPage contact) (websiteSecurity website))
-    createFile ".well-known/funding-manifest-urls" (fundingManifestUrls url)
-    createFile "funding.json" (fundingJson (authorName (siteDefaultAuthor cfg)) url (websiteFunding website))
+    mapM_ (uncurry createFile) (fundingFiles (authorName (siteDefaultAuthor cfg)) url (websiteFunding website))
     createFileCompiler ".well-known/trust.txt" $ do
         socials <- socialHrefs cfg
         pure (trustTxt url (contactPage contact) socials (websiteTrust website))
@@ -90,6 +91,19 @@ securityTxt url contactPage security =
 fundingManifestUrls :: String -> String
 fundingManifestUrls url = url ++ "/funding.json\n"
 
+{- | The files generated from the optional @funding:@ section, in build order.
+Empty when @website.yaml@ has no @funding:@ section, so such a site publishes
+neither @funding.json@ nor @.well-known/funding-manifest-urls@.
+-}
+fundingFiles :: String -> String -> Maybe Funding -> [(FilePath, String)]
+fundingFiles author url funding =
+    case funding of
+        Nothing -> []
+        Just value ->
+            [ (".well-known/funding-manifest-urls", fundingManifestUrls url)
+            , ("funding.json", fundingJson author url value)
+            ]
+
 trustTxt :: String -> String -> [String] -> Trust -> String
 trustTxt url contactPage socials trust =
     unlines $
@@ -106,23 +120,44 @@ trustTxt url contactPage socials trust =
 
 -- JSON files ----------------------------------------------------------------
 
-manifestTxt :: String -> Manifest -> String
-manifestTxt name manifest =
+{- | The web app manifest. The @icons@ key mirrors the brand's PNG icons (the
+same list the favicon rules generate) and is omitted entirely when there is no
+logo.
+-}
+manifestTxt :: String -> Manifest -> [SiteIcon] -> String
+manifestTxt name manifest icons =
     encodePretty
         ( JObject
-            [ ("name", JString name)
-            , ("background_color", JString (manifestBackgroundColor manifest))
-            , ("theme_color", JString (manifestThemeColor manifest))
-            ,
+            ( [ ("name", JString name)
+              , ("background_color", JString (manifestBackgroundColor manifest))
+              , ("theme_color", JString (manifestThemeColor manifest))
+              ]
+                ++ iconField
+            )
+        )
+        ++ "\n"
+  where
+    iconField
+        | null pngIcons = []
+        | otherwise =
+            [
                 ( "icons"
                 , JArray
-                    [ JObject [("src", JString "/favicon-192.png"), ("type", JString "image/png"), ("sizes", JString "192x192")]
-                    , JObject [("src", JString "/favicon-512.png"), ("type", JString "image/png"), ("sizes", JString "512x512")]
+                    [ JObject
+                        [ ("src", JString (iconHref icon))
+                        , ("type", JString typ)
+                        , ("sizes", JString sizes)
+                        ]
+                    | icon <- pngIcons
+                    , typ <- maybeToList (iconType icon)
+                    , sizes <- maybeToList (iconSizes icon)
                     ]
                 )
             ]
-        )
-        ++ "\n"
+    pngIcons = manifestIcons icons
+
+    maybeToList Nothing = []
+    maybeToList (Just value) = [value]
 
 fundingJson :: String -> String -> Funding -> String
 fundingJson author url funding =

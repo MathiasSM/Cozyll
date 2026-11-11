@@ -70,7 +70,7 @@ processPostGroupItems cfg groupName =
                     ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
                     saveSnapshot (postSnapshot groupName) item'
                         >>= applyTemplates ctx' [contentTemplate cfg, postTemplate cfg]
-                        >>= finish cfg (socialMetaContext cfg Article authors [] pageMeta mainImg ogLocale <> navContext cfg groupName <> ctx')
+                        >>= finish cfg (socialMetaContext cfg Article authors [] pageMeta mainImg ogLocale <> navContext cfg groupName (pageMetaLanguage pageMeta) <> ctx')
 
 -- | Build context for archive page
 getCtx :: SiteConfig -> String -> Compiler (Context String)

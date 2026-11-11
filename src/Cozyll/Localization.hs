@@ -38,7 +38,7 @@ translationsContext cfg = functionField "t" $ \args item -> do
     textId <- case args of
         [x] -> pure x
         _ -> fail "t() expects exactly one id"
-    lang <- languageCode <$> requireLanguage (itemIdentifier item)
+    lang <- languageCode <$> requireLanguage cfg (itemIdentifier item)
     requireTranslation cfg lang textId
 
 -- | Looks up a string for a language, falling back to the base language (@xx-YY@ → @xx@).

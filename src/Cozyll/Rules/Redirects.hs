@@ -6,14 +6,20 @@ import Cozyll.Config (SiteConfig, pagesPattern, postsPattern)
 import Cozyll.Content (aliasesOf, isDraft)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Metadata (Key (Path), lookupKey)
+import Cozyll.Theme (themeFingerprint)
 import Data.Either (fromLeft)
 import Data.List (tails)
 import Hakyll (
+    Redirect (..),
     Rules,
-    createRedirects,
+    compile,
+    create,
     fromFilePath,
     getAllMetadata,
+    idRoute,
+    makeItem,
     preprocess,
+    route,
     toFilePath,
     version,
  )
@@ -41,8 +47,17 @@ processRedirects cfg = do
             [file ++ ": " ++ problem | (file, _, Left found) <- parsed, problem <- found]
                 ++ fromLeft [] planned
     case planned of
-        Right redirects | null problems -> version "redirects" $ createRedirects [(fromFilePath out, target) | (out, target) <- redirects]
+        Right redirects
+            | null problems ->
+                version "redirects" $
+                    mapM_ redirectRule redirects
         _ -> preprocess $ ioError $ userError $ "Invalid aliases:\n" ++ unlines (map ("  " ++) problems)
+  where
+    -- Same rule as Hakyll's `createRedirects`, with the theme fingerprint so
+    -- the page participates in theme invalidation like every other render path.
+    redirectRule (out, target) = create [fromFilePath out] $ do
+        route idRoute
+        compile $ themeFingerprint cfg >> makeItem (Redirect target)
 
 {- | The redirects to build, as (output file, target path), or every problem found:
 an alias that is its own path, the path of another page, or claimed twice

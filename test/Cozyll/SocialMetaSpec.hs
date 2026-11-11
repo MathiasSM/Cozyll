@@ -19,6 +19,7 @@ import Cozyll.Context.SocialMeta (
     titleOf,
  )
 import Cozyll.Domain.Author (Author (..))
+import Cozyll.Domain.Language (defaultLanguage)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.TestUtils (mkAuthor)
@@ -46,8 +47,10 @@ mkConfig =
         , siteCopyrightYear = 0
         , siteCurrentYear = 2021
         , siteDomain = "example.com"
+        , siteLanguage = defaultLanguage
         , siteAlternateNames = []
         , siteLogo = Nothing
+        , siteBrand = Nothing
         , siteAuthors = [mkAuthor ""]
         , siteDefaultAuthor = mkAuthor ""
         , mathjaxVersion = ""

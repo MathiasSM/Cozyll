@@ -2,6 +2,7 @@
 module Cozyll.Domain.Language (
     Language (..),
     languageOf,
+    languageOfWith,
     defaultLanguage,
     baseLanguage,
     normalizeLanguage,
@@ -50,6 +51,10 @@ instance FromJSON Language where
     parseJSON = withText "language" $ \t ->
         either fail pure (normalizeLanguage (T.unpack t))
 
+-- | The language of an item, falling back to the site's own language when none is stated
+languageOfWith :: Language -> Metadata -> Check Language
+languageOfWith fallback o = fromMaybe fallback <$> optional o K.Language
+
 -- | The language of an item (English unless stated)
 languageOf :: Metadata -> Check Language
-languageOf o = fromMaybe defaultLanguage <$> optional o K.Language
+languageOf = languageOfWith defaultLanguage

@@ -2,6 +2,7 @@
 module Cozyll.ThemeSpec (tests) where
 
 import Cozyll.Config (Env (Dev), SiteConfig (..), resolveTemplate)
+import Cozyll.Domain.Language (defaultLanguage)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.TestUtils (mkAuthor)
 import Cozyll.Theme (rewritePartials)
@@ -18,8 +19,10 @@ mkConfig names =
         , siteCopyrightYear = 0
         , siteCurrentYear = 2021
         , siteDomain = "example.com"
+        , siteLanguage = defaultLanguage
         , siteAlternateNames = []
         , siteLogo = Nothing
+        , siteBrand = Nothing
         , siteAuthors = [mkAuthor ""]
         , siteDefaultAuthor = mkAuthor ""
         , mathjaxVersion = ""

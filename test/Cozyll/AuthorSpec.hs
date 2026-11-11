@@ -2,15 +2,19 @@
 module Cozyll.AuthorSpec (tests) where
 
 import Cozyll.Config (Env (Dev), SiteConfig (..))
-import Cozyll.Context.Author (authoredBy, copyrightYears, resolveAuthors)
-import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, defaultAuthor, parseAuthorsYaml)
+import Cozyll.Context.Author (authoredBy, copyrightYears, profileImageUrl, resolveAuthors)
+import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, decodeAuthorsUtf8, defaultAuthor, parseAuthorsYaml)
+import Cozyll.Domain.Language (defaultLanguage)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Metadata qualified as Meta
 import Data.Aeson (Value (..), toJSON)
 import Data.Aeson.Key qualified as AesonKey
 import Data.Aeson.KeyMap qualified as KeyMap
-import Data.List (isInfixOf)
+import Data.ByteString qualified as BS
+import Data.List (isInfixOf, sort)
 import Data.Text (Text)
+import Data.Text qualified as T
+import Data.Text.Encoding (encodeUtf8)
 import Hakyll (Metadata)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
@@ -20,8 +24,10 @@ tests =
     testGroup
         "Author"
         [ parseTests
+        , decodeTests
         , defaultAuthorTests
         , authorUrlPathTests
+        , profileImageUrlTests
         , resolveAuthorsTests
         , lookupKeyListTests
         , copyrightYearsTests
@@ -86,6 +92,34 @@ parseTests =
                 Right _ -> assertFailure "expected parsing to fail"
         ]
 
+decodeTests :: TestTree
+decodeTests =
+    testGroup
+        "decodeAuthorsUtf8"
+        [ testCase "decodes UTF-8 names regardless of the locale" $
+            case decodeAuthorsUtf8 (encodeUtf8 (T.pack nonAsciiAuthors)) of
+                Left problem -> assertFailure problem
+                Right authors -> sort (map authorName authors) @?= sort ["Marta Ibáñez", "山田 太郎"]
+        , testCase "rejects invalid UTF-8 bytes" $
+            case decodeAuthorsUtf8 ("marta:\n  name: " <> BS.singleton 0xff <> "\n  siteDefault: true\n") of
+                Left problem ->
+                    assertBool
+                        ("expected a problem mentioning UTF-8, got " ++ show problem)
+                        ("UTF-8" `isInfixOf` problem)
+                Right _ -> assertFailure "expected invalid UTF-8 to fail"
+        ]
+
+-- | An @authors.yaml@ with non-ASCII names
+nonAsciiAuthors :: String
+nonAsciiAuthors =
+    unlines
+        [ "marta:"
+        , "  name: Marta Ibáñez"
+        , "  siteDefault: true"
+        , "kanji:"
+        , "  name: 山田 太郎"
+        ]
+
 defaultAuthorTests :: TestTree
 defaultAuthorTests =
     testGroup
@@ -108,6 +142,20 @@ authorUrlPathTests =
         [ testCase "is the author page path" $ do
             author <- oneAuthor happyAuthor
             authorUrlPath author @?= "/authors/example"
+        ]
+
+profileImageUrlTests :: TestTree
+profileImageUrlTests =
+    testGroup
+        "profileImageUrl"
+        [ testCase "makes a site-relative path root-relative" $
+            profileImageUrl exampleAuthor{authorProfileImage = Just "images/photos/marta.png"}
+                @?= Just "/images/photos/marta.png"
+        , testCase "does not double the slash of a root-relative path" $
+            profileImageUrl exampleAuthor{authorProfileImage = Just "/images/photos/marta.png"}
+                @?= Just "/images/photos/marta.png"
+        , testCase "stays Nothing without a profile image" $
+            profileImageUrl exampleAuthor @?= Nothing
         ]
 
 -- | Parses a single-author document and returns the author
@@ -237,8 +285,10 @@ cfg =
         , siteCopyrightYear = 0
         , siteCurrentYear = 2021
         , siteDomain = "example.com"
+        , siteLanguage = defaultLanguage
         , siteAlternateNames = []
         , siteLogo = Nothing
+        , siteBrand = Nothing
         , siteAuthors = [exampleAuthor, orgAuthor]
         , siteDefaultAuthor = exampleAuthor
         , mathjaxVersion = ""

@@ -1,4 +1,8 @@
--- | The site configuration read from @website.yaml@ in the content repo
+{- | The site configuration read from @website.yaml@ in the content repo.
+
+The @funding:@ section is optional. A site without one publishes neither
+@funding.json@ nor @.well-known/funding-manifest-urls@.
+-}
 module Cozyll.Domain.Website (
     -- * Main logic
     loadWebsite,
@@ -54,6 +58,7 @@ module Cozyll.Domain.Website (
 ) where
 
 import Control.Monad (unless, when)
+import Cozyll.Domain.Language (Language)
 import Cozyll.Yaml (enumFromJSON)
 import Data.Aeson (FromJSON (parseJSON), withObject, (.!=), (.:), (.:?))
 import Data.Time (getCurrentTime, utctDay)
@@ -71,6 +76,7 @@ data Site = Site
     , siteDescription :: String
     , siteCopyrightYear :: Int
     , siteDomain :: String
+    , siteLanguage :: Maybe Language
     , siteAlternateNames :: [String]
     , siteLogo :: Maybe String
     }
@@ -233,7 +239,7 @@ data Website = Website
     , websiteManifest :: Manifest
     , websiteMathjax :: Mathjax
     , websiteHighlight :: Highlight
-    , websiteFunding :: Funding
+    , websiteFunding :: Maybe Funding
     , websiteSecurity :: Security
     , websiteRobots :: Robots
     , websiteTrust :: Trust
@@ -249,6 +255,7 @@ instance FromJSON Site where
             <*> o .: "description"
             <*> o .: "copyrightYear"
             <*> o .: "domain"
+            <*> o .:? "language"
             <*> o .:? "alternateName" .!= []
             <*> o .:? "logo"
 
@@ -332,7 +339,7 @@ instance FromJSON Website where
             <*> o .: "manifest"
             <*> o .: "mathjax"
             <*> o .: "highlight"
-            <*> o .: "funding"
+            <*> o .:? "funding"
             <*> o .: "security"
             <*> o .: "robots"
             <*> o .: "trust"

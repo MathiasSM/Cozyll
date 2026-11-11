@@ -6,10 +6,11 @@ import Cozyll.CleanURL (cleanIndex)
 import Cozyll.Config (SiteConfig, baseUrl, postSnapshot, postsPattern, resolveTemplate, siteDefaultAuthor)
 import Cozyll.Content (requirePostOf)
 import Cozyll.Domain.Author (authorName)
-import Cozyll.Domain.Feed (Feed (..), absoluteUrl, feeds)
+import Cozyll.Domain.Feed (Feed (..), absoluteUrl, feeds, siteFeed)
 import Cozyll.Domain.Post (Post (..))
 import Cozyll.Domain.Website (Website (websiteFeed), feedSize)
-import Data.Maybe (fromMaybe)
+import Cozyll.Theme (themeFingerprint)
+import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Time (Day, defaultTimeLocale, formatTime)
 import Hakyll (
     Context,
@@ -33,21 +34,31 @@ import Hakyll (
     withUrls,
  )
 
--- | Builds the Atom feed of every post group: its newest posts, in full
+{- | Builds the site-wide Atom feed and the Atom feed of every post group: the
+newest posts of the site or of a group, in full
+-}
 processFeeds :: SiteConfig -> Website -> Rules ()
 processFeeds cfg website = do
     found <- feeds cfg
     let feedSize' = feedSize $ websiteFeed website
     case found of
         Left problems -> preprocess $ ioError $ userError $ "Invalid feeds:\n" ++ unlines (map ("  " ++) problems)
-        Right all' -> forM_ all' $ \feed ->
-            create [fromFilePath $ feedFile feed] $ do
-                route idRoute
-                compile $ do
-                    posts <- recentFirst =<< loadAllSnapshots (postsPattern cfg $ feedGroup feed) (postSnapshot $ feedGroup feed)
-                    feedTemplate <- loadBody (resolveTemplate cfg "atom-feed.xml")
-                    itemTemplate <- loadBody (resolveTemplate cfg "atom-item.xml")
-                    renderAtomWithTemplates feedTemplate itemTemplate (configuration cfg feed) (itemContext cfg) (take feedSize' posts)
+        Right groupFeeds -> do
+            let postGroups = mapMaybe feedGroup groupFeeds
+            forM_ (siteFeed cfg : groupFeeds) $ \feed ->
+                create [fromFilePath $ feedFile feed] $ do
+                    route idRoute
+                    compile $ do
+                        themeFingerprint cfg
+                        posts <- case feedGroup feed of
+                            Just group -> recentFirst =<< loadGroup group
+                            Nothing -> recentFirst . concat =<< mapM loadGroup postGroups
+                        feedTemplate <- loadBody (resolveTemplate cfg "atom-feed.xml")
+                        itemTemplate <- loadBody (resolveTemplate cfg "atom-item.xml")
+                        renderAtomWithTemplates feedTemplate itemTemplate (configuration cfg feed) (itemContext cfg) (take feedSize' posts)
+  where
+    loadGroup group =
+        loadAllSnapshots (postsPattern cfg group) (postSnapshot group)
 
 configuration :: SiteConfig -> Feed -> FeedConfiguration
 configuration cfg feed =

@@ -5,7 +5,7 @@
   "description": "Site configuration, as read from website.yaml.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["site", "contact", "manifest", "mathjax", "highlight", "feed", "robots", "security", "trust", "funding"],
+  "required": ["site", "contact", "manifest", "mathjax", "highlight", "feed", "robots", "security", "trust"],
   "properties": {
     "jaRubyCheck": {
       "type": "string",
@@ -23,6 +23,7 @@
         "description": { "type": "string", "description": "Short site description." },
         "copyrightYear": { "type": "integer", "description": "The copyright year shown in the footer." },
         "domain": { "type": "string", "description": "The site's domain, without scheme." },
+        "language": { "type": "string", "description": "The site's own language: a 2-letter ISO 639-1 code with an optional region (e.g. en, es, pt-BR). Defaults to en; pages override it with their own `language:`." },
         "alternateName": { "type": "array", "description": "Alternate site names.", "items": { "type": "string" } },
         "logo": { "type": "string", "description": "Site-relative path to the raster logo (e.g. images/logo.png)." }
       }
