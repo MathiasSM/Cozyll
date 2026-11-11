@@ -42,10 +42,11 @@ jobs:
             echo "Tag $TAG already exists."
             echo "created=false" >> "$GITHUB_OUTPUT"
           else
-            # Tag the commit that bumped the version, not HEAD.
-            COMMIT="$(git log -1 --format='%H' -G "^version:.*${VERSION}" -- cozyll.cabal)"
-            [ -n "$COMMIT" ] || COMMIT="$GITHUB_SHA"
-            git tag "$TAG" "$COMMIT"
+            # Tag the pushed commit. Tagging the original version-bump commit
+            # would be refused when a later commit touched .github/workflows/:
+            # the Actions token cannot create a tag whose tree differs from the
+            # branch's workflow files.
+            git tag "$TAG" "$GITHUB_SHA"
             git push origin "$TAG"
             echo "created=true" >> "$GITHUB_OUTPUT"
             echo "name=$TAG" >> "$GITHUB_OUTPUT"
