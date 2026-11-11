@@ -94,6 +94,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install GHC and cabal
+        # The debian:12 container has no bash configured as the default shell;
+        # `run:` would otherwise use dash, which does not support `pipefail`.
+        shell: bash
         env:
           GHC_VERSION: ${{ vars.GHC_VERSION }}
           CABAL_VERSION: ${{ vars.CABAL_VERSION }}
@@ -111,6 +114,9 @@ jobs:
           cabal update
 
       - name: Build the release binary
+        # The debian:12 container has no bash configured as the default shell;
+        # `run:` would otherwise use dash, which does not support `pipefail`.
+        shell: bash
         run: |
           set -euo pipefail
           . "$HOME/.ghcup/env"
@@ -120,6 +126,9 @@ jobs:
           chmod 755 artifact-executable
 
       - name: Assert the glibc floor
+        # The debian:12 container has no bash configured as the default shell;
+        # `run:` would otherwise use dash, which does not support `pipefail`.
+        shell: bash
         run: |
           set -euo pipefail
           # readelf comes from binutils (pulled in by build-essential); fall
@@ -192,7 +201,10 @@ jobs:
             echo '```'
             for img in debian:12 debian:13; do
               echo "== $img =="
-              version="$(docker run --rm -v "$PWD/kit/cozyll:/cozyll:ro" "$img" /cozyll --version)"
+              # The base images do not carry the RTS runtime libraries, so install
+              # them before running the binary.
+              version="$(docker run --rm -v "$PWD/kit/cozyll:/cozyll:ro" "$img" sh -c \
+                'apt-get update -qq && apt-get install -y -qq --no-install-recommends libgmp10 libffi8 libnuma1 zlib1g >/dev/null && /cozyll --version')"
               echo "$version"
             done
             echo '```'
