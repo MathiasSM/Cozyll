@@ -2,15 +2,26 @@
 
 ## [3.4.3.1] - 2026-11-11
 
-## [3.4.3.0] - 2026-11-11
+### Fixed
+
+- The release workflow runs its container steps under `bash` (dash rejects `set -o pipefail`), installs the runtime libraries the smoke test needs, creates the tag at the pushed release commit, and installs `file` for the glibc assertion.
+
+### Changed
+
+- The Debian 12 release baseline is pinned by digest; the README and release checklist record the glibc 2.36 floor and the required runtime libraries (`libgmp10`, `libffi8`, `libnuma1`, `zlib1g`).
+- Releases are published directly once the kit smoke test and HTML/JSON-LD/XML checks pass, instead of being left as drafts.
 
 ## [3.4.2.0] - 2026-11-11
+
+### Fixed
+
+- Rule-set errors no longer append a Haskell callstack: `cozyll build` prints the rule message and exits 1.
 
 ## [3.4.1.0] - 2026-11-10
 
 ### Changed
 
-- Release kits are built on a digest-pinned Debian 12 baseline: the binary needs glibc 2.36+ and `libgmp10`, `libffi8`, `libnuma1`, `zlib1g`, and no longer writes `cozyll.tix`.
+- Release kits are built on a Debian 12 baseline (glibc 2.36) with a `readelf` check for newer GLIBC symbols, and no longer write `cozyll.tix`.
 
 ## [3.4.0.0] - 2026-11-10
 
@@ -424,7 +435,6 @@
 
 [Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.3.0.0...master
 [3.4.3.1]: https://github.com/MathiasSM/Cozyll/compare/v3.4.2.0...v3.4.3.1
-[3.4.3.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.2.0...v3.4.3.0
 [3.4.2.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.1.0...v3.4.2.0
 [3.4.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.0.0...v3.4.1.0
 [3.4.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.3.1.0...v3.4.0.0
