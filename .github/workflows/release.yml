@@ -61,96 +61,49 @@ jobs:
       cabal-version: ${{ vars.CABAL_VERSION }}
 
   release-binary:
-    name: Kit binary (glibc 2.36)
+    name: Static kit binary
     needs: autotag
     if: needs.autotag.outputs.created == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
-    # The kit binary is linked dynamically, so the glibc symbol versions it
-    # records come from the build image's libc, not from the runner: building
-    # on ubuntu-latest (24.04 → 26.04, glibc 2.39 → 2.43) produced a binary
-    # that refused to start on Debian 13 (glibc 2.41). Build it inside the
-    # oldest supported baseline instead: Debian 12 = glibc 2.36, which also
-    # runs on Debian 12+/Ubuntu 24.04+ because glibc is backwards compatible.
-    # Keep this job coverage-free (an HPC-instrumented binary writes
-    # `cozyll.tix` into the consumer's working directory).
-    # A fully static musl build would remove the glibc floor entirely; that is
-    # a follow-up, not part of this baseline.
-    # harden-runner cannot monitor jobs that run inside a container, so this
-    # job has no egress-audit step.
-    # Pinned by digest: bump deliberately (and re-run the smoke test) when the
-    # baseline moves. debian:12 is glibc 2.36, supported through mid-2028.
-    container:
-      image: debian:12@sha256:268fb24c39bca92d326dd83ea3abebe4a3f7751c804ffef23bb6d857dd343ff8
+    # The kit binary is a fully static executable: it has no glibc or shared
+    # library requirements and runs on any Linux x86_64 distribution. Cabal's
+    # --enable-executable-static links the GHC RTS and every Haskell/C
+    # dependency into the executable; the job is coverage-free, so it never
+    # writes `cozyll.tix`.
     steps:
-      # The base image has no git, and the runner mounts its own node for the
-      # JavaScript actions, so the toolchain has to come first.
-      - name: Install system dependencies
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends \
-            build-essential curl git ca-certificates xz-utils pkg-config file \
-            libgmp-dev libffi-dev libncurses-dev libtinfo6 libnuma-dev \
-            zlib1g-dev libyaml-dev imagemagick
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install GHC and cabal
-        # The debian:12 container has no bash configured as the default shell;
-        # `run:` would otherwise use dash, which does not support `pipefail`.
-        shell: bash
-        env:
-          GHC_VERSION: ${{ vars.GHC_VERSION }}
-          CABAL_VERSION: ${{ vars.CABAL_VERSION }}
-        run: |
-          set -euo pipefail
-          export BOOTSTRAP_HASKELL_NONINTERACTIVE=1
-          export BOOTSTRAP_HASKELL_MINIMAL=1
-          curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
-          # The bootstrap runs in a non-interactive shell, so put ghcup on the
-          # PATH for this step too (and for every later step).
-          export PATH="$HOME/.ghcup/bin:$PATH"
-          ghcup install ghc "$GHC_VERSION" --set
-          ghcup install cabal "$CABAL_VERSION" --set
-          echo "$HOME/.ghcup/bin" >> "$GITHUB_PATH"
-          cabal update
+      - uses: haskell-actions/setup@0f8e8c99d88aeb3fbfd523f1ef2c6f762d10d64d # v2.12.1
+        with:
+          ghc-version: ${{ vars.GHC_VERSION }}
+          cabal-version: ${{ vars.CABAL_VERSION }}
 
-      - name: Build the release binary
-        # The debian:12 container has no bash configured as the default shell;
-        # `run:` would otherwise use dash, which does not support `pipefail`.
-        shell: bash
+      - name: Build the static binary
         run: |
           set -euo pipefail
-          . "$HOME/.ghcup/env"
-          cabal build exe:cozyll
+          cabal build exe:cozyll --enable-executable-static
           cp "$(cabal list-bin exe:cozyll)" artifact-executable
-          # Steps in a job container run as root; artifact consumers are not.
           chmod 755 artifact-executable
+          strip --strip-all artifact-executable
 
-      - name: Assert the glibc floor
-        # The debian:12 container has no bash configured as the default shell;
-        # `run:` would otherwise use dash, which does not support `pipefail`.
-        shell: bash
+      - name: Assert it is statically linked
         run: |
           set -euo pipefail
-          # readelf comes from binutils (pulled in by build-essential); fall
-          # back to objdump in case the image ever trims it.
-          if command -v readelf >/dev/null 2>&1; then
-            symbols="$(readelf --version-info artifact-executable)"
+          file artifact-executable
+          file artifact-executable | grep -q 'statically linked'
+          if ldd artifact-executable 2>&1 | grep -q 'not a dynamic executable'; then
+            echo "no dynamic dependencies"
           else
-            symbols="$(objdump -T artifact-executable)"
-          fi
-
-          max="$(printf '%s\n' "$symbols" | grep -oE 'GLIBC_[0-9]+\.[0-9]+' | sort -uV | tail -1 || true)"
-          echo "max glibc symbol: ${max:-none}"
-
-          if printf '%s\n' "$symbols" | grep -qE 'GLIBC_2\.(3[7-9]|[4-9][0-9])'; then
-            echo "::error::artifact-executable needs a glibc newer than the Debian 12 baseline (2.36):"
-            printf '%s\n' "$symbols" | grep -oE 'GLIBC_2\.(3[7-9]|[4-9][0-9])' | sort -u
+            echo "::error::artifact-executable is dynamically linked"
+            ldd artifact-executable || true
             exit 1
           fi
-
-          file artifact-executable
-          ldd artifact-executable || true
+          ./artifact-executable --version
 
       - name: Upload executable as artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -190,26 +143,6 @@ jobs:
           cp docs/authoring.md docs/theming.md docs/consumer-ci.md kit/docs/
           tar -czf cozyll-kit.tar.gz -C kit .
           sha256sum cozyll-kit.tar.gz > cozyll-kit.tar.gz.sha256
-
-      - name: Check the binary on the glibc baseline and on Debian 13
-        # --version only touches the runtime, so it exercises the dynamic
-        # loader: a binary built against a newer glibc fails here (Debian 12 is
-        # the floor, Debian 13 is the distro the review ran on).
-        run: |
-          set -euo pipefail
-          {
-            echo "### Kit binary version"
-            echo '```'
-            for img in debian:12 debian:13; do
-              echo "== $img =="
-              # The base images do not carry the RTS runtime libraries, so install
-              # them before running the binary.
-              version="$(docker run --rm -v "$PWD/kit/cozyll:/cozyll:ro" "$img" sh -c \
-                'apt-get update -qq && apt-get install -y -qq --no-install-recommends libgmp10 libffi8 libnuma1 zlib1g >/dev/null && /cozyll --version')"
-              echo "$version"
-            done
-            echo '```'
-          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Smoke-test the kit
         run: |

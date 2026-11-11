@@ -101,8 +101,9 @@ sha256sum -c cozyll-kit.tar.gz.sha256
 tar -xzf cozyll-kit.tar.gz
 ```
 
-The kit targets Linux x86_64; the release notes state the platform baseline for each
-release.
+The kit targets Linux x86_64 and is **statically linked**: it has no glibc version
+requirement and needs no shared runtime libraries. (The only network-using command,
+`cozyll data fetch`, resolves hosts through the system resolver like any other program.)
 
 A normal build needs no extra tools. ImageMagick (`magick`, or `convert`) is needed only
 when a brand logo has to be converted into favicons. Graphviz (`dot`) is needed only when
@@ -413,7 +414,7 @@ process.
 
 Configured via Github Actions within `.github` directory.
 
-This project "deploys" as a release, via the CI workflow. Content repos can pull their preferred release (ideally latest, I suppose) and execute it against their files. The release includes both the executable (not statically linked as of writing), as well as templates and assets.
+This project "deploys" as a release, via the CI workflow. Content repos can pull their preferred release (ideally latest, I suppose) and execute it against their files. The release includes both the executable (statically linked), as well as templates and assets.
 
 #### Consumer CI
 
