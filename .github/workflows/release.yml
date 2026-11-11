@@ -83,6 +83,14 @@ jobs:
           ghc-version: ${{ vars.GHC_VERSION }}
           cabal-version: ${{ vars.CABAL_VERSION }}
 
+      - name: Install static system libraries
+        # The runner image has the shared libraries GHC needs at runtime, but
+        # static linking also needs the .a archives.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgmp-dev libffi-dev zlib1g-dev libnuma-dev libncurses-dev
+
       - name: Build the static binary
         run: |
           set -euo pipefail
