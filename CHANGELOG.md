@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [3.4.3.1] - 2026-11-11
+
 ## [3.4.3.0] - 2026-11-11
 
 ## [3.4.2.0] - 2026-11-11
@@ -421,6 +423,7 @@
 
 
 [Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.3.0.0...master
+[3.4.3.1]: https://github.com/MathiasSM/Cozyll/compare/v3.4.2.0...v3.4.3.1
 [3.4.3.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.2.0...v3.4.3.0
 [3.4.2.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.1.0...v3.4.2.0
 [3.4.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.0.0...v3.4.1.0
