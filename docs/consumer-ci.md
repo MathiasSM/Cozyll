@@ -103,6 +103,8 @@ credentials:
 - `content-token` is the secret used for that checkout, for example
   `secrets: content-token: ${{ secrets.CONTENT_TOKEN }}` from a caller secret. Empty uses the
   workflow's `GITHUB_TOKEN`.
+- The build checkout fetches submodules and LFS (`submodules: recursive`, `lfs: true`); the content
+  token is also used for those fetches.
 
 The remaining jobs are opt-in through the workflow inputs:
 

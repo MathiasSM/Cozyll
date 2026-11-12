@@ -81,14 +81,15 @@ jobs:
         uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
         with:
           egress-policy: audit
+      # Content repos may use submodules and LFS; the build needs both.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.content-repo || github.repository }}
           token: ${{ secrets.content-token || github.token }}
           path: content
           persist-credentials: false
-          submodules: false
-          lfs: false
+          submodules: recursive
+          lfs: true
       - name: Resolve Cozyll version
         id: version
         shell: bash
