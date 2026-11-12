@@ -2,7 +2,7 @@
 module Cozyll.Rules.Assets (processAssets, mediaRoute, mediaTarget, staticRoute, staticTarget) where
 
 import Control.Monad (unless)
-import Cozyll.Config (Env (..), SiteConfig, assetsDir, contentCssPattern, contentDir, dataPattern, dataSchemaPattern, highlightStyle, localizationPattern, mediaDir, siteBrand, siteEnv, socialsPattern, staticDir, staticPattern)
+import Cozyll.Config (Env (..), SiteConfig, assetsDir, contentCssPattern, contentDir, dataPattern, dataSchemaPattern, highlightStyle, localizationPattern, mediaDir, siteBrand, siteEnv, siteInputFingerprint, socialsPattern, staticDir, staticPattern)
 import Cozyll.Domain.Website (toPandocStyle)
 import Cozyll.Rules.Favicon (faviconRules)
 import Data.List (stripPrefix)
@@ -124,6 +124,7 @@ processCss cfg = do
     create ["styles.css"] $ do
         route idRoute
         compile $ do
+            siteInputFingerprint cfg
             vendored <- loadAll $ cssFiles cfg
             content <- loadAll $ contentCssPattern cfg
             let highlightCss = styleToCss (toPandocStyle (highlightStyle cfg))

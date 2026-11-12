@@ -2,7 +2,7 @@
 module Cozyll.Rules.WellKnown (processWellKnownFiles, fundingFiles, manifestTxt) where
 
 import Cozyll.Brand (SiteIcon (..), brandIcons, iconHref, manifestIcons)
-import Cozyll.Config (SiteConfig, baseUrl, siteBrand, siteDefaultAuthor, siteTitle, socialsFile)
+import Cozyll.Config (SiteConfig, baseUrl, siteBrand, siteDefaultAuthor, siteInputFingerprint, siteTitle, socialsFile)
 import Cozyll.Content (requireSocials)
 import Cozyll.Domain.Author (authorName)
 import Cozyll.Domain.Social (Social (..))
@@ -38,19 +38,20 @@ processWellKnownFiles cfg website = do
     let url = baseUrl cfg
         contact = websiteContact website
         icons = maybe [] brandIcons (siteBrand cfg)
-    createFile "robots.txt" (robotsTxt url (robotsDisallow (websiteRobots website)))
-    createFile "manifest.webmanifest" (manifestTxt (siteTitle cfg) (websiteManifest website) icons)
-    createFile ".well-known/security.txt" (securityTxt url (contactPage contact) (websiteSecurity website))
-    mapM_ (uncurry createFile) (fundingFiles (authorName (siteDefaultAuthor cfg)) url (websiteFunding website))
+    createFile cfg "robots.txt" (robotsTxt url (robotsDisallow (websiteRobots website)))
+    createFile cfg "manifest.webmanifest" (manifestTxt (siteTitle cfg) (websiteManifest website) icons)
+    createFile cfg ".well-known/security.txt" (securityTxt url (contactPage contact) (websiteSecurity website))
+    mapM_ (uncurry (createFile cfg)) (fundingFiles (authorName (siteDefaultAuthor cfg)) url (websiteFunding website))
     createFileCompiler ".well-known/trust.txt" $ do
+        siteInputFingerprint cfg
         socials <- socialHrefs cfg
         pure (trustTxt url (contactPage contact) socials (websiteTrust website))
 
 -- | Creates a routed file whose content is already known
-createFile :: FilePath -> String -> Rules ()
-createFile path content = create [fromFilePath path] $ do
+createFile :: SiteConfig -> FilePath -> String -> Rules ()
+createFile cfg path content = create [fromFilePath path] $ do
     route idRoute
-    compile $ makeItem content
+    compile (siteInputFingerprint cfg >> makeItem content)
 
 -- | Creates a routed file whose content is computed in a 'Compiler'
 createFileCompiler :: FilePath -> Compiler String -> Rules ()

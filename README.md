@@ -235,9 +235,9 @@ cozyll data sources   # print the effective sources file
 The default source list is `schema/example.ruby-sources.yaml`; copy it to
 `ruby-data/sources.yaml` (or run `cozyll data sources --write`) to pin versions or change
 locations. `ref: latest` resolves via the GitHub API; non-GitHub hosts need a pinned ref.
-Builds are offline and never re-derive: after replacing the index, run `cozyll rebuild`
-(or restart `watch`). The index size limit is `COZYLL_RUBY_INDEX_LIMIT` bytes (default
-8 MiB).
+Builds are offline and never re-derive: the next `cozyll build` picks up a replaced
+`ruby-data/index.json` (no `clean` needed); restart `watch` after replacing it. The index
+size limit is `COZYLL_RUBY_INDEX_LIMIT` bytes (default 8 MiB).
 
 Front matter (per page):
 
