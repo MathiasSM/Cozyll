@@ -22,3 +22,6 @@ run = "fourmolu --mode check $(git ls-files '*.hs')"
 [tasks.docs]
 description = "Build the Haddock documentation, as CI does"
 run = 'cabal haddock-project --hackage --haddock-options="--show-all" --haddock-options="--quickjump"'
+
+[hooks]
+postinstall = "pre-commit install"
