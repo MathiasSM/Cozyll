@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [3.5.0.0] - 2026-11-12
+
 ### Fixed
 
 - Editing `website.yaml`, `authors.yaml`, `socials.yaml`, `localization.yaml` or the brand logo now takes effect on the next `cozyll build`; no `clean` needed (restart `watch` for config edits).
@@ -447,7 +449,8 @@
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.3.0.0...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.5.0.0...master
+[3.5.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.3.1...v3.5.0.0
 [3.4.3.1]: https://github.com/MathiasSM/Cozyll/compare/v3.4.2.0...v3.4.3.1
 [3.4.2.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.1.0...v3.4.2.0
 [3.4.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.0.0...v3.4.1.0
