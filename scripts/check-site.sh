@@ -2,6 +2,7 @@
 # Run the Cozyll site checks locally. The GitHub composite actions call the same
 # subcommands, so local runs and CI use the same logic.
 set -euo pipefail
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 usage() {
   cat <<'EOF'
@@ -17,7 +18,7 @@ Checks (tools in parentheses):
   wellknown        Validate well-known and metadata files. (python3)
   spelling         Run typos. (typos)
   all              Run the default CI set: content-schema, html, a11y, xml, jsonld,
-                   wellknown. The a11y check is advisory (see --a11y-fail).
+                   wellknown. Exits 2 when the only findings are advisory a11y ones.
 
 Options:
   --content-dir DIR   Content directory (default: content).
@@ -25,18 +26,25 @@ Options:
   --schema-dir DIR    Schema directory (default: schema).
   --port PORT         Port for the local a11y server (default: 8080).
   --standard STD      WCAG standard for pa11y (default: WCAG2AA).
-  --a11y-fail BOOL    Fail on accessibility issues (default: false; findings are advisory).
+  --a11y-fail BOOL    true fails on accessibility issues, false keeps exit 0, unset
+                      leaves them advisory and `all` exits 2.
+  --a11y-report FILE  Keep the raw pa11y-ci JSON report at FILE.
   --config FILE       Tool config file, where supported (lychee, typos).
   --vnu-jar FILE      Path to vnu.jar (default: VNU_JAR, else downloaded to the temp dir).
   --fail BOOL         For links-external: fail on broken links (default: false).
   -h, --help          Show this help.
 
+Exit status for `all`: 0 when everything is clean, 1 when a hard check fails or
+--a11y-fail true finds issues, 2 when the only findings are advisory a11y ones.
+An explicit --a11y-fail false keeps 0. The standalone `a11y` check uses the same
+mapping.
+
 Tools are expected on PATH. A missing tool fails with an install hint. The optional
 checks (links-external, spelling) are not part of `all`.
 
-Accessibility findings are advisory unless --a11y-fail true is passed, matching CI.
 The a11y check runs pa11y-ci with the axe runner (the same configuration as CI);
-bare `npx pa11y` defaults to HTML_CodeSniffer and will disagree.
+bare `npx pa11y` defaults to HTML_CodeSniffer and will disagree. pa11y's axe runner
+drops axe's contrast ratios, so read those with axe DevTools or `npx @axe-core/cli`.
 EOF
 }
 
@@ -52,7 +60,8 @@ standard="WCAG2AA"
 config=""
 vnu_jar="${VNU_JAR:-}"
 fail_links="false"
-a11y_fail="false"
+a11y_fail=""
+a11y_report=""
 check=""
 
 while [ "$#" -gt 0 ]; do
@@ -67,7 +76,16 @@ while [ "$#" -gt 0 ]; do
     --config) config="$2"; shift 2 ;;
     --vnu-jar) vnu_jar="$2"; shift 2 ;;
     --fail) fail_links="$2"; shift 2 ;;
-    --a11y-fail) a11y_fail="$2"; shift 2 ;;
+    --a11y-fail)
+      [ "$#" -ge 2 ] || die "option --a11y-fail requires true or false"
+      case "$2" in
+        true|false) a11y_fail="$2" ;;
+        *) die "--a11y-fail must be true or false" ;;
+      esac
+      shift 2 ;;
+    --a11y-report)
+      [ "$#" -ge 2 ] || die "option --a11y-report requires a file"
+      a11y_report="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) die "unknown argument: $1" ;;
   esac
@@ -115,54 +133,68 @@ run_html() {
 run_a11y() {
   need python3 "Install Python 3."
   need npx "Install Node.js."
-  (
-    cfg="$(mktemp)"
-    python3 -m http.server "$port" --bind 127.0.0.1 --directory "$site_dir" >/dev/null 2>&1 &
-    pid=$!
-    trap 'kill "$pid" 2>/dev/null || true; rm -f "$cfg"' EXIT
-    ready=0
-    for _ in $(seq 1 40); do
-      if curl -fsS -o /dev/null "http://127.0.0.1:$port/"; then
-        ready=1
-        break
-      fi
-      sleep 0.25
-    done
-    if [ "$ready" -ne 1 ]; then
-      echo "server did not start on port $port" >&2
-      exit 1
+
+  local cfg report temp_report pid ready rc summary_rc
+  cfg="$(mktemp)"
+  if [ -n "$a11y_report" ]; then
+    report="$a11y_report"
+    temp_report=""
+  else
+    report="$(mktemp)"
+    temp_report="$report"
+  fi
+
+  python3 -m http.server "$port" --bind 127.0.0.1 --directory "$site_dir" >/dev/null 2>&1 &
+  pid=$!
+  trap 'kill "$pid" 2>/dev/null || true; rm -f "$cfg"; if [ -n "$temp_report" ]; then rm -f "$temp_report"; fi' EXIT
+
+  ready=0
+  for _ in $(seq 1 40); do
+    if curl -fsS -o /dev/null "http://127.0.0.1:$port/"; then
+      ready=1
+      break
     fi
-    python3 - "$site_dir" "$port" "$standard" > "$cfg" <<'PY'
-import json, pathlib, sys
-root = pathlib.Path(sys.argv[1])
-port = sys.argv[2]
-standard = sys.argv[3]
-urls = []
-for page in sorted(root.rglob("*.html")):
-    rel = page.relative_to(root).as_posix()
-    if rel.endswith("index.html"):
-        rel = rel[: -len("index.html")]
-    urls.append(f"http://127.0.0.1:{port}/{rel}")
-json.dump(
-    {
-        "defaults": {
-            "standard": standard,
-            "runners": ["axe"],
-            "chromeLaunchConfig": {"args": ["--no-sandbox"]},
-        },
-        "urls": urls,
-    },
-    sys.stdout,
-)
-PY
-    if npx --yes pa11y-ci --config "$cfg"; then
-      :
-    elif [ "$a11y_fail" = "true" ]; then
+    sleep 0.25
+  done
+  if [ "$ready" -ne 1 ]; then
+    info "server did not start on port $port"
+    exit 1
+  fi
+
+  python3 "$script_dir/a11y_config.py" "$site_dir" "$port" "$standard" > "$cfg"
+
+  set +e
+  npx --yes pa11y-ci --config "$cfg" --json > "$report"
+  rc=$?
+  set -e
+  case "$rc" in
+    0|2) ;;
+    *)
+      info "pa11y-ci failed with exit code $rc"
       exit 1
-    else
-      info "a11y reported issues (advisory; pass --a11y-fail true to gate)"
-    fi
-  )
+      ;;
+  esac
+
+  set +e
+  python3 "$script_dir/a11y_report.py" "$report"
+  summary_rc=$?
+  set -e
+
+  if [ -n "$a11y_report" ]; then
+    info "pa11y-ci report: $report"
+  fi
+
+  if [ "$summary_rc" -eq 1 ]; then
+    exit 1
+  fi
+  if [ "$summary_rc" -eq 2 ]; then
+    case "$a11y_fail" in
+      true) exit 1 ;;
+      false) exit 0 ;;
+      *) exit 2 ;;
+    esac
+  fi
+  exit 0
 }
 
 run_links_external() {
@@ -191,30 +223,7 @@ run_xml() {
 
 run_jsonld() {
   need python3 "Install Python 3."
-  python3 - "$site_dir" <<'PY'
-import json, pathlib, re, sys
-root = pathlib.Path(sys.argv[1])
-pattern = re.compile(r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', re.S | re.I)
-failures = []
-count = 0
-for html in root.rglob("*.html"):
-    text = html.read_text(encoding="utf-8")
-    for i, block in enumerate(pattern.findall(text), start=1):
-        count += 1
-        try:
-            data = json.loads(block)
-        except json.JSONDecodeError as exc:
-            failures.append(f"{html}: block {i}: invalid JSON: {exc}")
-            continue
-        if "@context" not in data:
-            failures.append(f"{html}: block {i}: missing @context")
-        if "@type" not in data and "@graph" not in data:
-            failures.append(f"{html}: block {i}: missing @type or @graph")
-if failures:
-    print("\n".join(failures))
-    sys.exit(1)
-print(f"validated {count} JSON-LD blocks")
-PY
+  python3 "$script_dir/check_jsonld.py" "$site_dir"
 }
 
 run_wellknown() {
@@ -232,35 +241,21 @@ run_wellknown() {
     exit 1
   fi
   grep -qi '^Contact:' "$d/.well-known/security.txt" || die "security.txt missing Contact"
-  local exp
+  local exp when now
   exp="$(grep -i '^Expires:' "$d/.well-known/security.txt" | head -1 | cut -d: -f2- | xargs)"
-  python3 - "$exp" <<'PY'
-import sys
-from datetime import datetime, timezone
-raw = sys.argv[1].strip()
-if not raw:
-    print("security.txt missing Expires")
-    sys.exit(1)
-try:
-    when = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-except ValueError as exc:
-    print(f"security.txt Expires is not ISO 8601: {raw} ({exc})")
-    sys.exit(1)
-if when <= datetime.now(timezone.utc):
-    print(f"security.txt Expires is in the past: {raw}")
-    sys.exit(1)
-PY
-  python3 - "$d/manifest.webmanifest" <<'PY'
-import json, sys
-with open(sys.argv[1], encoding="utf-8") as fh:
-    json.load(fh)
-PY
+  if [ -z "$exp" ]; then
+    die "security.txt missing Expires"
+  fi
+  if ! when="$(date -u -d "$exp" +%s 2>/dev/null)"; then
+    die "security.txt Expires is not ISO 8601: $exp"
+  fi
+  now="$(date -u +%s)"
+  if [ "$when" -le "$now" ]; then
+    die "security.txt Expires is in the past: $exp"
+  fi
+  python3 -m json.tool "$d/manifest.webmanifest" >/dev/null
   if [ -f "$d/funding.json" ]; then
-    python3 - "$d/funding.json" <<'PY'
-import json, sys
-with open(sys.argv[1], encoding="utf-8") as fh:
-    json.load(fh)
-PY
+    python3 -m json.tool "$d/funding.json" >/dev/null
   else
     info "no funding.json (no funding section); skipping"
   fi
@@ -275,6 +270,30 @@ run_spelling() {
   typos "${args[@]}" "$content_dir"
 }
 
+# Runs one check in a subshell and records its status, so `all` can finish the
+# remaining checks and print a summary. Accessibility status 2 is advisory.
+summary=()
+all_hard=0
+all_advisory=0
+
+run_all_check() {
+  local name="$1"
+  shift
+  local status=0
+  ( "$@" ) || status=$?
+  if [ "$status" -eq 0 ]; then
+    summary+=("$name: ok")
+    return 0
+  fi
+  if [ "$name" = "a11y" ] && [ "$status" -eq 2 ]; then
+    summary+=("$name: advisory findings")
+    all_advisory=1
+    return 0
+  fi
+  summary+=("$name: FAILED")
+  all_hard=1
+}
+
 case "$check" in
   content-schema) run_content_schema ;;
   html) run_html ;;
@@ -285,11 +304,24 @@ case "$check" in
   wellknown) run_wellknown ;;
   spelling) run_spelling ;;
   all)
-    run_content_schema
-    run_html
-    run_a11y
-    run_xml
-    run_jsonld
-    run_wellknown
+    run_all_check content-schema run_content_schema
+    run_all_check html run_html
+    run_all_check a11y run_a11y
+    run_all_check xml run_xml
+    run_all_check jsonld run_jsonld
+    run_all_check wellknown run_wellknown
+
+    printf '\nSummary:\n'
+    for line in "${summary[@]}"; do
+      printf '  %s\n' "$line"
+    done
+
+    if [ "$all_hard" -ne 0 ]; then
+      exit 1
+    fi
+    if [ "$all_advisory" -ne 0 ]; then
+      exit 2
+    fi
+    exit 0
     ;;
 esac

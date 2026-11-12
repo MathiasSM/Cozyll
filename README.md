@@ -326,8 +326,12 @@ The template inventory, context fields and CSS custom properties are in
 
 ```sh
 scripts/check-site.sh content-schema --content-dir content
-scripts/check-site.sh all --content-dir content --site-dir _site
+scripts/check-site.sh all --content-dir content --site-dir _site --a11y-fail false
 ```
+
+`all` exits 0 when everything is clean, 1 when a hard check fails or `--a11y-fail true`
+finds issues, and 2 when the only findings are advisory accessibility ones. Pass
+`--a11y-fail false` for a green advisory run.
 
 The available checks are `content-schema`, `html`, `a11y`, `links-external`, `xml`,
 `jsonld`, `wellknown` and `spelling`; `all` runs the default CI set (`content-schema`,
@@ -335,9 +339,11 @@ The available checks are `content-schema`, `html`, `a11y`, `links-external`, `xm
 and not part of `all`. Run `scripts/check-site.sh --help` for the tools each check needs.
 
 Accessibility findings are advisory unless you pass `--a11y-fail true`, matching CI. The
-script runs `pa11y-ci` with the **axe** runner; bare `npx pa11y` defaults to
-HTML_CodeSniffer and can report a different set of issues, so use the script for the
-authoritative local run.
+script groups findings by axe rule and prints the page and node counts; pass
+`--a11y-report FILE` to keep the raw pa11y-ci JSON. Contrast ratios are not in pa11y's
+axe output, so check them with axe DevTools or `npx @axe-core/cli`. The script runs
+`pa11y-ci` with the **axe** runner; bare `npx pa11y` defaults to HTML_CodeSniffer and can
+report a different set of issues, so use the script for the authoritative local run.
 
 `cozyll check` is the link check for the generated site. The content-schema check validates
 `website.yaml`, `authors.yaml`, `socials.yaml` and `localization.yaml` against the schemas in
@@ -447,7 +453,7 @@ site, and runs the enabled checks. See [docs/consumer-ci.md](docs/consumer-ci.md
 setup and migration notes; each composite action documents its own inputs and requirements in its
 `action.yml`. Pin an exact release tag instead of `@master` for stability.
 
-The checks can also be run locally with `scripts/check-site.sh`, which ships in the release kit.
+The checks can also be run locally with `scripts/check-site.sh` and its helper files in `scripts/`, which ship in the release kit.
 Run `scripts/check-site.sh --help` for the available checks and their tool requirements.
 
 ---

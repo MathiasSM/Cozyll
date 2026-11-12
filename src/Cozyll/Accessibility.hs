@@ -6,7 +6,7 @@ import Control.Monad.Except (throwError)
 import Data.Char (isSpace)
 import Data.List (group, sort)
 import Data.Maybe (isNothing, mapMaybe)
-import Hakyll (Compiler, Item (itemBody), getUnderlying, toFilePath)
+import Hakyll (Compiler, Item (itemBody))
 import Text.HTML.TagSoup (
     Tag (..),
     innerText,
@@ -39,11 +39,9 @@ checks =
 -- | Fails the compilation if the page fails any accessibility check
 checkAccessibility :: Item String -> Compiler (Item String)
 checkAccessibility item = do
-    ident <- getUnderlying
     let problems = checkHtml (itemBody item)
-        path = toFilePath ident
     unless (null problems) $
-        throwError (map ((path ++ ": ") ++) problems)
+        throwError problems
     pure item
 
 -- Checks ---------------------------------------------------------------------

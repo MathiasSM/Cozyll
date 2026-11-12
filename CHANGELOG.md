@@ -7,6 +7,8 @@
 - `cozyll --help` lists cozyll's commands (`build`, `clean`, `rebuild`, `server`, `watch`, `check`, `data`, `init`) instead of Hakyll's; `deploy` and `preview` now fail with a pointer instead of running Hakyll's stubs.
 - Ruby coverage and reading errors now name the source file once; `data verify` and `data fmt` include the index path on parse errors.
 - `data fetch`, `data fmt` and `data sources --write` create group- and other-readable files again (0666 & umask).
+- `scripts/check-site.sh all` now prints a final summary and exits 0/1/2 (`2` for advisory accessibility findings); `--a11y-report` keeps the raw pa11y-ci JSON, and the accessibility run groups findings by axe rule with page and node counts.
+- Build-time accessibility errors now name the source file once instead of twice.
 
 ### Changed
 

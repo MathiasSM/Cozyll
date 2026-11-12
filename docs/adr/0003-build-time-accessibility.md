@@ -25,6 +25,9 @@ The checks cover:
 ## Consequences
 
 - Structural accessibility issues are caught automatically and gate the build.
-- Color contrast and focus visibility remain review-only concerns.
+- Color contrast is checked manually with axe for now; focus visibility remains a
+  review-only concern.
+- The pa11y component-level run in `scripts/check-site.sh` is advisory, groups findings by
+  axe rule, and does not replace the build-time gate.
 - Custom templates and styles are checked on a best-effort basis; fixing violations remains the site owner's responsibility.
 - Later amended in 3.1.0.0 (2026-11-06): the inline-SVG accessible-name check was added.
