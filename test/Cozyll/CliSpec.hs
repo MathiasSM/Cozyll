@@ -1,7 +1,7 @@
 -- | Tests for the command-line argument classification
 module Cozyll.CliSpec (tests) where
 
-import Cozyll.Cli (Invocation (..), invocationFor, parseEnvValue, versionString)
+import Cozyll.Cli (Invocation (..), invocationFor, parseEnvValue, unsupportedCommand, usageText, versionString)
 import Cozyll.Config (Env (..))
 import Data.Char (isDigit)
 import Data.List (isInfixOf)
@@ -33,6 +33,34 @@ tests =
                 invocationFor ["build"] @?= RunCommand
             , testCase "does not treat a later init as the init command" $
                 invocationFor ["build", "init"] @?= RunCommand
+            , testCase "recognises the global --help" $
+                invocationFor ["--help"] @?= ShowHelp
+            , testCase "recognises the global -h" $
+                invocationFor ["-h"] @?= ShowHelp
+            , testCase "keeps build --help for Hakyll's per-command help" $
+                invocationFor ["build", "--help"] @?= RunCommand
+            , testCase "keeps data --help for its own parser" $
+                invocationFor ["data", "--help"] @?= RunDataArgs ["--help"]
+            , testCase "rejects preview with a pointer to watch" $
+                invocationFor ["preview"] @?= Reject (unsupportedCommand "preview" "use 'cozyll watch'")
+            ]
+        , testGroup
+            "usageText"
+            [ testCase "lists cozyll's own commands" $ do
+                assertBool "init" ("init" `isInfixOf` usageText)
+                assertBool "data" ("data" `isInfixOf` usageText)
+            , testCase "does not list Hakyll's removed commands" $ do
+                assertBool "no deploy" (not ("deploy" `isInfixOf` usageText))
+                assertBool "no preview" (not ("preview" `isInfixOf` usageText))
+            ]
+        , testGroup
+            "unsupportedCommand"
+            [ testCase "deploy names the replacement" $
+                unsupportedCommand "deploy" "publish _site/ with your own tooling"
+                    @?= "error: cozyll has no deploy command; publish _site/ with your own tooling"
+            , testCase "preview points at watch" $
+                unsupportedCommand "preview" "use 'cozyll watch'"
+                    @?= "error: cozyll has no preview command; use 'cozyll watch'"
             ]
         , testGroup
             "versionString"
