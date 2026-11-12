@@ -184,6 +184,10 @@ cozyll [(-v|--verbose)] COMMAND
 `init` creates the required `content/` tree from the kit's `schema/` examples; it refuses a
 non-empty `content/` unless you pass `--force`, and `init --dir DIR` scaffolds elsewhere.
 
+`cozyll` has no `deploy` or `preview` command: publish `_site/` with your own tooling,
+and use `cozyll watch` to preview locally. `cozyll <command> --help` prints that command's
+help; `cozyll --help` prints the list above.
+
 `clean` and `check` work without a content directory or a valid `SITE_ENV`. `check` refuses
 a missing `_site/` and a tree built with another `SITE_ENV`, and warns when content is newer
 than the last build. It checks internal links only; external links are not fetched (see

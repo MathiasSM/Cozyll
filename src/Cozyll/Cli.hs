@@ -1,7 +1,7 @@
 {-# LANGUAGE Trustworthy #-}
 
 -- | The command-line interface and its subcommands
-module Cozyll.Cli (Invocation (..), cli, invocationFor, parseEnvValue, versionString) where
+module Cozyll.Cli (Invocation (..), cli, invocationFor, parseEnvValue, unsupportedCommand, usageText, versionString) where
 
 import Control.Exception (IOException, SomeException, displayException, fromException, try)
 import Control.Monad (filterM, unless, void, when)
@@ -51,6 +51,7 @@ data Invocation
     | ShowVersion
     | RunDataArgs [String]
     | Init [String]
+    | Reject String
     | RunCommand
     deriving (Eq, Show)
 
@@ -86,12 +87,13 @@ cli :: IO ()
 cli = do
     args <- getArgs
     case invocationFor args of
-        ShowHelp -> void $ OA.handleParseResult $ parseOptions ["--help"]
+        ShowHelp -> putStr usageText
         ShowVersion -> putStrLn versionString
         RunDataArgs rest -> do
             env <- parseEnv =<< lookupEnv "SITE_ENV"
             runDataCommand (contentDirFor env) rest
         Init initArgs -> runInit initArgs
+        Reject message -> rejectCommand message
         RunCommand -> run args
 
 {- | Classifies the raw arguments: empty means help, a lone @--version@/@-V@
@@ -99,11 +101,42 @@ means version; @data@ (pre-Hakyll) and @init@ are our own subcommands.
 -}
 invocationFor :: [String] -> Invocation
 invocationFor [] = ShowHelp
+invocationFor ["--help"] = ShowHelp
+invocationFor ["-h"] = ShowHelp
 invocationFor ["--version"] = ShowVersion
 invocationFor ["-V"] = ShowVersion
 invocationFor ("data" : rest) = RunDataArgs rest
 invocationFor ("init" : initArgs) = Init initArgs
+invocationFor ("preview" : _) = Reject (unsupportedCommand "preview" "use 'cozyll watch'")
 invocationFor _ = RunCommand
+
+-- | The @cozyll --help@ text: cozyll's commands, not Hakyll's
+usageText :: String
+usageText =
+    unlines
+        [ "Usage: cozyll [(-v|--verbose)] COMMAND"
+        , ""
+        , "  build    Generate the site into _site/ (--dry-run lists out-of-date items)"
+        , "  clean    Remove _site/ and _cache/"
+        , "  rebuild  clean followed by build"
+        , "  server   Serve the files already built in _site/"
+        , "  watch    Build, serve and rebuild as content changes"
+        , "  check    Validate links in the built _site/"
+        , "  data     Maintain ruby-data/index.json"
+        , "  init     Scaffold a working content/"
+        , ""
+        , "  -v, --verbose  Verbose output (resolved SITE_ENV, content dir, build state)"
+        , "  --version      Print the version"
+        , "  -h, --help     Show this help"
+        ]
+
+-- | The message for a Hakyll command cozyll does not support
+unsupportedCommand :: String -> String -> String
+unsupportedCommand name reason = "error: cozyll has no " ++ name ++ " command; " ++ reason
+
+-- | Prints a rejection and exits with status 1
+rejectCommand :: String -> IO a
+rejectCommand message = hPutStrLn stderr message >> exitFailure
 
 -- | The @--version@ output, e.g. @cozyll 3.3.0.0@
 versionString :: String
@@ -201,6 +234,7 @@ dispatch options = case optCommand options of
     Check _ -> do
         guardCheck
         hakyllWithArgs siteConfiguration options (pure ())
+    Deploy -> rejectCommand (unsupportedCommand "deploy" "publish _site/ with your own tooling")
     command -> do
         env <- parseEnv =<< lookupEnv "SITE_ENV"
         let contentDir = contentDirFor env
