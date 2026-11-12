@@ -8,18 +8,23 @@ import Cozyll.Ruby.Index (
     SegmentRow (..),
     WordRow (..),
     decodeIndex,
+    defaultMaxIndexBytes,
     encodeIndex,
     isHan,
     isKana,
     levelRank,
     levelText,
+    loadIndexFile,
     normalizeKey,
     parseLevel,
+    readIndexFile,
  )
 import Data.Text (Text)
 import Data.Text qualified as T
+import System.IO (hClose, hPutStr)
+import System.IO.Temp (withSystemTempFile)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase, (@?=))
+import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
 
 tests :: TestTree
 tests =
@@ -74,6 +79,25 @@ tests =
                 case decodeIndex (T.replace "\"schemaVersion\": 1" "\"schemaVersion\": 2" (encodeIndex (Index [] [] []))) of
                     Left message -> assertBool message ("schemaVersion" `T.isInfixOf` T.pack message)
                     Right _ -> assertBool "expected a failure" False
+            ]
+        , testGroup
+            "file diagnostics"
+            [ testCase "names the root object as index" $
+                decodeIndex "[]" @?= (Left "index must be an object" :: Either String Index)
+            , testCase "readIndexFile prefixes the path" $
+                withSystemTempFile "index.json" $ \path handle -> do
+                    hPutStr handle "[]"
+                    hClose handle
+                    result <- readIndexFile path
+                    result @?= (Left (path ++ ": index must be an object") :: Either String Index)
+            , testCase "loadIndexFile names the path once" $
+                withSystemTempFile "index.json" $ \path handle -> do
+                    hPutStr handle "[]"
+                    hClose handle
+                    loaded <- loadIndexFile defaultMaxIndexBytes path
+                    case loaded of
+                        Left message -> message @?= path ++ ": index must be an object"
+                        Right _ -> assertFailure "expected a decode failure"
             ]
         ]
 

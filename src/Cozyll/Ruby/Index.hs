@@ -219,7 +219,7 @@ jsonText = TL.toStrict . encodeToLazyText . String
 decodeIndex :: Text -> Either String Index
 decodeIndex text = do
     value <- eitherDecodeStrict' (encodeUtf8 text)
-    obj <- asObject "index.json" value
+    obj <- asObject "index" value
     schema <- required "schemaVersion" obj >>= asInt "schemaVersion"
     unless (schema == 1) $ Left ("unsupported schemaVersion " ++ show schema ++ " (this cozyll supports 1)")
     derivation <- required "derivationVersion" obj >>= asInt "derivationVersion"
@@ -414,8 +414,8 @@ readIndexFile :: FilePath -> IO (Either String Index)
 readIndexFile path = do
     bytes <- BS.readFile path
     pure $ do
-        text <- first show (decodeUtf8' bytes)
-        decodeIndex text
+        text <- first (((path ++ ": ") ++) . show) (decodeUtf8' bytes)
+        first ((path ++ ": ") ++) (decodeIndex text)
 
 {- | Loads and validates an index, rejecting files larger than @limit@ bytes.
 @Right Nothing@ when the file is absent (the build then behaves exactly as
@@ -441,7 +441,7 @@ loadIndexFile limit path = do
                         pure (Just (toRubyData idx))
   where
     describeUnicode :: UnicodeException -> String
-    describeUnicode = show
+    describeUnicode = ((path ++ ": ") ++) . show
 
 -- | Writes the index atomically (temp file in the same directory + rename)
 writeIndexFile :: FilePath -> Index -> IO ()

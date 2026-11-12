@@ -153,6 +153,7 @@ test-suite spec
                   , Cozyll.CacheSpec
                   , Cozyll.CleanURLSpec
                   , Cozyll.CliSpec
+                  , Cozyll.CompileSpec
                   , Cozyll.ConfigCacheSpec
                   , Cozyll.ContentSpec
                   , Cozyll.CssSpec
