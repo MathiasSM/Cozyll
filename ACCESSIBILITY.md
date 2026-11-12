@@ -24,7 +24,10 @@ Custom templates, styles, and content you provide are processed on a best-effort
 
 The generator runs automated accessibility checks on the final rendered HTML of every page at build time, and fails the build if a page violates them. The checks cover: image alternative text, the page `<title>`, the `<html lang>` attribute, heading structure and order, link accessible names, inline-SVG accessible names, duplicate `id`s, and the presence of a `<main>` landmark. See `src/Cozyll/Accessibility.hs` and `test/Cozyll/AccessibilitySpec.hs`.
 
-These checks catch structural issues, not everything. Color contrast and focus visibility are verified by review rather than automation.
+These checks catch structural issues, not everything. `scripts/check-site.sh a11y` runs
+pa11y-ci with the axe runner and groups findings by rule; it is advisory (an unset
+`--a11y-fail` makes `all` exit 2), and color contrast is checked manually with axe
+DevTools or `npx @axe-core/cli` for now. Focus visibility remains a review concern.
 
 ## Contributing
 

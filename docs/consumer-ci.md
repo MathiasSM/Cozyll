@@ -114,12 +114,13 @@ Build the site, then run the default set:
 
 ```sh
 cozyll build
-scripts/check-site.sh all --content-dir content --site-dir _site --schema-dir schema
+scripts/check-site.sh all --content-dir content --site-dir _site --schema-dir schema --a11y-fail false
 ```
 
-The script is included next to `cozyll` in the release kit. Run `scripts/check-site.sh --help`
-for the available checks and their tool requirements. Accessibility findings are advisory
-unless `--a11y-fail true` is passed.
+The script and its helper files in `scripts/` are included next to `cozyll` in the release kit. Run `scripts/check-site.sh --help`
+for the available checks and their tool requirements. `all` exits 0 when clean, 1 on a hard
+failure, and 2 when the only findings are advisory accessibility ones. Accessibility findings
+are advisory unless `--a11y-fail true` is passed.
 
 ## Migrating from a hand-written workflow
 

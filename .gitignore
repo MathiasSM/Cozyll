@@ -5,5 +5,7 @@
 /.repro
 /haddocks
 /.env
+__pycache__/
+*.pyc
 /junit.xml
 /junit-golden.xml
