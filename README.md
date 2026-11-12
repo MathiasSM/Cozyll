@@ -449,9 +449,12 @@ jobs:
 ```
 
 The workflow checks the content repo out under `content/`, installs the kit release, builds the
-site, and runs the enabled checks. See [docs/consumer-ci.md](docs/consumer-ci.md) for the overall
-setup and migration notes; each composite action documents its own inputs and requirements in its
-`action.yml`. Pin an exact release tag instead of `@master` for stability.
+site, and runs the enabled checks. To run it from a separate CI repository, set
+`content-repo` to `owner/repo` and pass `content-token` under `secrets`; when `cozyll-version` is
+unset the workflow reads `content/.cozyll-version`, and `content/config/lychee.toml` is picked up
+by the external-link check when present. See [docs/consumer-ci.md](docs/consumer-ci.md) for the
+overall setup and migration notes; each composite action documents its own inputs and
+requirements in its `action.yml`. Pin an exact release tag instead of `@master` for stability.
 
 The checks can also be run locally with `scripts/check-site.sh` and its helper files in `scripts/`, which ship in the release kit.
 Run `scripts/check-site.sh --help` for the available checks and their tool requirements.
