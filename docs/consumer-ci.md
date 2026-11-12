@@ -77,11 +77,12 @@ jobs:
     uses: MathiasSM/Cozyll/.github/workflows/site-ci.yml@master
     with:
       content-repo: acme/content
+    secrets:
       content-token: ${{ secrets.CONTENT_TOKEN }}
 ```
 
 `CONTENT_TOKEN` is a PAT or deploy key with `contents: read` on the content repo. GitHub does not
-pass secrets to reusable workflows implicitly, so the caller must forward it as shown.
+pass secrets to reusable workflows implicitly, so declare it under `secrets:` as shown.
 
 ## What the workflow does
 
@@ -95,13 +96,13 @@ The kit version is resolved in this order:
 2. Otherwise `content/.cozyll-version`, when the content repo has that file.
 3. Otherwise `latest`.
 
-`content-repo` and `content-token` control which repository is checked out and with what
+`content-repo` and the `content-token` secret control which repository is checked out and with what
 credentials:
 
 - `content-repo` takes `owner/repo`. Empty (the default) checks out the calling repository.
-- `content-token` is the token for that checkout, for example
-  `content-token: ${{ secrets.CONTENT_TOKEN }}` from a caller secret. Empty uses the workflow's
-  `GITHUB_TOKEN`.
+- `content-token` is the secret used for that checkout, for example
+  `secrets: content-token: ${{ secrets.CONTENT_TOKEN }}` from a caller secret. Empty uses the
+  workflow's `GITHUB_TOKEN`.
 
 The remaining jobs are opt-in through the workflow inputs:
 

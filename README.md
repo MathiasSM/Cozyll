@@ -450,7 +450,7 @@ jobs:
 
 The workflow checks the content repo out under `content/`, installs the kit release, builds the
 site, and runs the enabled checks. To run it from a separate CI repository, set
-`content-repo` to `owner/repo` and pass `content-token` from a secret; when `cozyll-version` is
+`content-repo` to `owner/repo` and pass `content-token` under `secrets`; when `cozyll-version` is
 unset the workflow reads `content/.cozyll-version`, and `content/config/lychee.toml` is picked up
 by the external-link check when present. See [docs/consumer-ci.md](docs/consumer-ci.md) for the
 overall setup and migration notes; each composite action documents its own inputs and
