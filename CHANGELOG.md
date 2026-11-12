@@ -5,6 +5,10 @@
 - Editing `website.yaml`, `authors.yaml`, `socials.yaml`, `localization.yaml` or the brand logo now takes effect on the next `cozyll build`; no `clean` needed (restart `watch` for config edits).
 - Replacing `ruby-data/index.json` now takes effect on the next `cozyll build`; restart `watch` after replacing it.
 
+### Changed
+
+- `site.logo` is the single logo source: it accepts a site path or an absolute URL and drives the header logo, favicon links, manifest icons and JSON-LD. There is no implicit `media/branding/logo.*` discovery; a local path must resolve to a published `content/static` or `content/media` file. A missing source warns and omits the logo (the next major will likely make it an error).
+
 ## [3.4.3.1] - 2026-11-11
 
 ### Fixed

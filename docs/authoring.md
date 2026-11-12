@@ -214,20 +214,27 @@ segments) fail the build.
 
 ### Logo, favicons and the manifest
 
-The brand asset is `content/media/branding/logo.svg` or `content/media/branding/logo.png`;
-SVG wins when both exist. The logo drives:
+`site.logo` in `website.yaml` is the single brand source. It accepts a site path
+(`images/logo.svg`) or an absolute URL (`https://…`, `//…`). It drives:
 
-* the favicon set (`favicon.ico`, `favicon.svg` for an SVG source, `apple-touch-icon.png`,
-  `favicon-192.png` and `favicon-512.png`);
-* the `icons` in `manifest.webmanifest`.
+* the header logo and the favicon `<link>` set;
+* the `icons` in `manifest.webmanifest`;
+* the JSON-LD `logo`.
 
-With no logo there are no icon `<link>`s and no manifest `icons`; nothing points at a file
-that does not exist. A file under `content/static/` at one of those paths replaces the
-generated icon at that path.
+A site path resolves to the file that publishes it: `content/static/<path>` first, then
+`content/media/<rest>` or `content/media/branding/<rest>` for `images/<rest>`. An SVG or
+PNG source generates the icon set (`favicon.ico`, `favicon.svg` for an SVG source,
+`apple-touch-icon.png`, `favicon-192.png` and `favicon-512.png`); any other source is used
+as a single icon. A file under `content/static/` at a generated icon's path replaces that
+icon.
+
+Without `site.logo` there are no icon links, no manifest `icons`, no JSON-LD `logo` and no
+header logo. If a local `site.logo` cannot be published, the build warns and omits the logo;
+a later release will likely make that an error. `data:` URLs are not supported, because the
+logo is repeated in every page.
 
 Generating icons needs ImageMagick (`magick`, or `convert`) when there is a logo to convert;
-copying an SVG favicon does not. `site.logo` in `website.yaml` is the published path used for
-JSON-LD; when it is unset it defaults to the brand logo's published path.
+copying an SVG favicon does not.
 
 ## Feeds
 

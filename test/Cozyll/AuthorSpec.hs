@@ -288,6 +288,7 @@ cfg =
         , siteLanguage = defaultLanguage
         , siteAlternateNames = []
         , siteLogo = Nothing
+        , siteLogoConfigured = Nothing
         , siteBrand = Nothing
         , siteAuthors = [exampleAuthor, orgAuthor]
         , siteDefaultAuthor = exampleAuthor

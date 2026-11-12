@@ -16,7 +16,7 @@ site:
   # Defaults to en; pages override it with their own `language:`.
   # language: en
   alternateName: ["Cozyll Example"]
-  logo: images/logo.png
+  logo: images/logo.svg
 
 # How to reach the site owner.
 contact:

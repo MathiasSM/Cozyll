@@ -55,7 +55,7 @@ module Cozyll.Config (
 )
 where
 
-import Cozyll.Brand (Brand)
+import Cozyll.Brand (Brand, brandCandidates)
 import Cozyll.Domain.Author (Author)
 import Cozyll.Domain.Language (Language)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle)
@@ -92,7 +92,9 @@ data SiteConfig = SiteConfig
     , siteAlternateNames :: [String]
     -- ^ Alternate site names, exposed as @site-alternateNames@ (JSON-LD only for now)
     , siteLogo :: Maybe String
-    -- ^ Site-relative path to the logo (e.g. @images/logo.svg@), for JSON-LD
+    -- ^ Site-relative path or absolute URL to the resolved logo (e.g. @images/logo.svg@), for JSON-LD and the header
+    , siteLogoConfigured :: Maybe String
+    -- ^ The raw @site.logo@ value before resolution; used to fingerprint the candidate sources
     , siteBrand :: Maybe Brand
     -- ^ The logo-derived brand: published logo path and ordered icons
     , siteAuthors :: [Author]
@@ -248,14 +250,16 @@ websitePattern cfg = fromString $ contentDir cfg </> "website.yaml"
 authorsPattern :: SiteConfig -> Pattern
 authorsPattern cfg = fromString $ contentDir cfg </> "authors.yaml"
 
-{- | The candidate sources of the configured brand logo: every file under
-@content\/media\/branding\/@ named @logo.*@.
+{- | The candidate sources of the configured brand logo, in the resolution
+order used by 'Cozyll.Brand.resolveBrand'.
 
-A list rather than one 'Pattern' so a site without a logo contributes no
-candidate instead of an artificial match-nothing pattern.
+A list rather than one 'Pattern' so a site without a logo (or with a remote
+logo) contributes no candidate instead of an artificial match-nothing pattern.
 -}
 brandSourcePatterns :: SiteConfig -> [Pattern]
-brandSourcePatterns cfg = [fromString (mediaDir cfg </> "branding" </> "logo.*")]
+brandSourcePatterns cfg = case siteLogoConfigured cfg of
+    Nothing -> []
+    Just logo -> map fromString (brandCandidates (contentDir cfg) logo)
 
 -- | The derived ruby index, loaded before the rules run
 rubyIndexPattern :: SiteConfig -> Pattern

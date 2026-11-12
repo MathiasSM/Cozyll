@@ -81,6 +81,7 @@ library
                   , Cozyll.JsonLd
                   , Cozyll.Localization
                   , Cozyll.Metadata
+                  , Cozyll.Paths
                   , Cozyll.Rules
                   , Cozyll.Rules.Assets
                   , Cozyll.Rules.AuthorPages

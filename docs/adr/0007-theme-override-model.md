@@ -33,11 +33,11 @@ Vendored defaults in `templates/` and `assets/css/` ship in the release kit. A c
 ### Site inputs
 
 The same invalidation contract covers the files the builder parses before Hakyll's rules
-run: `website.yaml`, `authors.yaml`, `socials.yaml`, `localization.yaml` and the brand
-logo under `media/branding/logo.*`. They are matched as resources, which puts their
-identifiers in Hakyll's universe, and every render path records a pattern dependency over
-them. Editing one therefore invalidates pages, feeds, sitemap, `styles.css` and the
-well-known files on the next build, with no `clean`. `cozyll watch` captures them when it
-starts, so it needs a restart after editing them. Hakyll never deletes routes that leave
-the rule set, so removing the logo leaves generated `favicon.*` files in `_site/` until a
-`cozyll clean`.
+run: `website.yaml`, `authors.yaml`, `socials.yaml`, `localization.yaml`, the ruby index
+and the configured `site.logo` with its candidate sources. They are matched as resources,
+which puts their identifiers in Hakyll's universe, and every render path records a pattern
+dependency over them. Editing one therefore invalidates pages, feeds, sitemap,
+`styles.css` and the well-known files on the next build, with no `clean`. `cozyll watch`
+captures them when it starts, so it needs a restart after editing them. Hakyll never
+deletes routes that leave the rule set, so removing the logo leaves generated `favicon.*`
+files in `_site/` until a `cozyll clean`.
