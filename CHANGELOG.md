@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [3.5.1.0] - 2026-11-13
+
 ### Added
 
 - The `site-ci` reusable workflow accepts a `content-repo` input and a `content-token` secret so a separate CI repository can build a content repo, resolves the kit version from `content/.cozyll-version` when `cozyll-version` is unset, and passes `content/config/lychee.toml` to lychee when present.
@@ -453,7 +455,8 @@
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.5.0.0...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.0...master
+[3.5.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.0.0...v3.5.1.0
 [3.5.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.3.1...v3.5.0.0
 [3.4.3.1]: https://github.com/MathiasSM/Cozyll/compare/v3.4.2.0...v3.4.3.1
 [3.4.2.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.1.0...v3.4.2.0
