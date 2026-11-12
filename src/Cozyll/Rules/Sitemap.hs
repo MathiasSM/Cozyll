@@ -4,7 +4,7 @@ module Cozyll.Rules.Sitemap (processSitemap) where
 import Control.Applicative ((<|>))
 import Control.Monad (filterM, forM)
 import Cozyll.CleanURL (cleanIndexHtmls)
-import Cozyll.Config (SiteConfig, pagesPattern, postsPattern, resolveTemplate)
+import Cozyll.Config (SiteConfig, pagesPattern, postsPattern, resolveTemplate, siteInputFingerprint)
 import Cozyll.Content (isIndex, isSitemapExcluded)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Author (authorPages, authorPosts)
@@ -43,6 +43,7 @@ processSitemap :: SiteConfig -> Rules ()
 processSitemap cfg = create ["sitemap.xml"] $ do
     route idRoute
     compile $ do
+        siteInputFingerprint cfg
         themeFingerprint cfg
         groups <- discoverGroups cfg
         postsByGroup <- forM groups $ \group -> recentFirst =<< loadAll (postsPattern cfg group)

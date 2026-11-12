@@ -5,7 +5,7 @@ import Control.Monad (foldM, forM_, unless)
 import Control.Monad.Except (throwError)
 import Cozyll.Accessibility (checkAccessibility)
 import Cozyll.CleanURL (cleanIndexHtmls, cleanIndexUrls)
-import Cozyll.Config (SiteConfig, siteTemplate)
+import Cozyll.Config (SiteConfig, siteInputFingerprint, siteTemplate)
 import Cozyll.Content (tocLabelOf)
 import Cozyll.Context.SocialMeta (MainImage, mainImageOf)
 import Cozyll.Domain.Website (CheckMode (..), parseCheckMode)
@@ -99,7 +99,8 @@ applyTemplates ctx templates item = foldM (\i t -> loadAndApplyTemplate t ctx i)
 -- | Factors out the final common default steps for basically all pages
 finish :: SiteConfig -> Context String -> Item String -> Compiler (Item String)
 finish cfg context item =
-    themeFingerprint cfg
+    siteInputFingerprint cfg
+        >> themeFingerprint cfg
         >> applyTemplates context [siteTemplate cfg] item
         >>= relativizeUrls
         >>= cleanIndexUrls

@@ -3,7 +3,7 @@ module Cozyll.Rules.Feed (processFeeds) where
 
 import Control.Monad (forM_)
 import Cozyll.CleanURL (cleanIndex)
-import Cozyll.Config (SiteConfig, baseUrl, postSnapshot, postsPattern, resolveTemplate, siteDefaultAuthor)
+import Cozyll.Config (SiteConfig, baseUrl, postSnapshot, postsPattern, resolveTemplate, siteDefaultAuthor, siteInputFingerprint)
 import Cozyll.Content (requirePostOf)
 import Cozyll.Domain.Author (authorName)
 import Cozyll.Domain.Feed (Feed (..), absoluteUrl, feeds, siteFeed)
@@ -49,6 +49,7 @@ processFeeds cfg website = do
                 create [fromFilePath $ feedFile feed] $ do
                     route idRoute
                     compile $ do
+                        siteInputFingerprint cfg
                         themeFingerprint cfg
                         posts <- case feedGroup feed of
                             Just group -> recentFirst =<< loadGroup group

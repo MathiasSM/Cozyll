@@ -28,6 +28,14 @@ module Cozyll.Config (
     contentCssPattern,
     staticPattern,
 
+    -- * Site inputs
+    websitePattern,
+    authorsPattern,
+    brandSourcePatterns,
+    rubyIndexPattern,
+    siteInputPatterns,
+    siteInputFingerprint,
+
     -- * Directories
     dataDir,
 
@@ -51,9 +59,9 @@ import Cozyll.Brand (Brand)
 import Cozyll.Domain.Author (Author)
 import Cozyll.Domain.Language (Language)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle)
-import Cozyll.Ruby.Index (RubyData)
+import Cozyll.Ruby.Index (RubyData, indexPath)
 import Data.String (fromString)
-import Hakyll (Configuration, Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, ignoreFile, (.||.))
+import Hakyll (Compiler, Configuration, Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, getMatches, ignoreFile, (.||.))
 import System.FilePath.Posix (takeFileName, (<.>), (</>))
 
 {- | The build environment: 'Dev' shows drafts for the real content, 'Example'
@@ -229,6 +237,55 @@ contentCssPattern cfg = fromString $ contentCssDir cfg </> "*.css"
 -- | Every file under 'staticDir', copied verbatim to the site root
 staticPattern :: SiteConfig -> Pattern
 staticPattern cfg = fromString $ staticDir cfg </> "**"
+
+-- Site inputs ----------------------------------------------------------------
+
+-- | The site configuration file, parsed once per build
+websitePattern :: SiteConfig -> Pattern
+websitePattern cfg = fromString $ contentDir cfg </> "website.yaml"
+
+-- | The authors file, parsed once per build
+authorsPattern :: SiteConfig -> Pattern
+authorsPattern cfg = fromString $ contentDir cfg </> "authors.yaml"
+
+{- | The candidate sources of the configured brand logo: every file under
+@content\/media\/branding\/@ named @logo.*@.
+
+A list rather than one 'Pattern' so a site without a logo contributes no
+candidate instead of an artificial match-nothing pattern.
+-}
+brandSourcePatterns :: SiteConfig -> [Pattern]
+brandSourcePatterns cfg = [fromString (mediaDir cfg </> "branding" </> "logo.*")]
+
+-- | The derived ruby index, loaded before the rules run
+rubyIndexPattern :: SiteConfig -> Pattern
+rubyIndexPattern cfg = fromString (indexPath (contentDir cfg))
+
+{- | The files the builder reads outside the content rules (the site config, the
+authors, socials, localization, the ruby index and the brand logo). They are
+matched only to put their identifiers in Hakyll's universe; see
+'siteInputFingerprint'.
+-}
+siteInputPatterns :: SiteConfig -> [Pattern]
+siteInputPatterns cfg =
+    [ websitePattern cfg
+    , authorsPattern cfg
+    , socialsPattern cfg
+    , localizationPattern cfg
+    , rubyIndexPattern cfg
+    ]
+        ++ brandSourcePatterns cfg
+
+{- | Records a dependency on every site input, so editing one marks the
+compiler's item out of date on the next run.
+
+Hakyll only propagates out-of-date state from identifiers in its universe, and
+these files are parsed before the rules run, so 'siteInputPatterns' must be
+matched as resources as well. @getMatches@ records a pattern dependency over the
+current universe, and @outOfDate@ re-filters it on every run.
+-}
+siteInputFingerprint :: SiteConfig -> Compiler ()
+siteInputFingerprint cfg = mapM_ getMatches (siteInputPatterns cfg)
 
 -- | The snapshot holding each published post of a single group, as rendered HTML (before templates)
 postSnapshot :: String -> Snapshot

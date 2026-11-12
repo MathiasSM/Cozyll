@@ -25,6 +25,21 @@ Adding or removing an override changes the set of available templates, which inv
 every rendered page, feed, sitemap and redirect. Editing an override rebuilds the pages that
 depend on it, like any other file.
 
+## Incremental builds
+
+A `cozyll build` keeps `_cache/` and rebuilds only what changed. Besides the templates and
+styles above, the build records a dependency on the site inputs: `website.yaml`,
+`authors.yaml`, `socials.yaml`, `localization.yaml` and the brand logo under
+`media/branding/logo.*`. Editing any of them updates the pages, feeds, sitemap,
+`styles.css`, the manifest and the other well-known files on the next build, with no
+`cozyll clean`.
+
+`cozyll watch` reads the configuration when it starts, so restart it after editing those
+files; watching content changes does not reload them.
+
+Hakyll never deletes a route that leaves the rule set: removing the brand logo leaves the
+previously generated `favicon.*` files in `_site/` until a `cozyll clean`.
+
 `content.html` is a special case in how it is found, not in how it is overridden:
 
 ```haskell

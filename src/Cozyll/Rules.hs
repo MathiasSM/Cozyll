@@ -1,7 +1,7 @@
 -- | The site's rules: how every source file is compiled, routed, and combined
 module Cozyll.Rules (rules) where
 
-import Cozyll.Config (SiteConfig, projectsGroup, templatePattern)
+import Cozyll.Config (SiteConfig, authorsPattern, projectsGroup, rubyIndexPattern, templatePattern, websitePattern)
 import Cozyll.Discover (discoverGroups, discoverStandalonePages)
 import Cozyll.Domain.Website (Website)
 import Cozyll.Rules.Assets (processAssets)
@@ -15,11 +15,15 @@ import Cozyll.Rules.Sitemap (processSitemap)
 import Cozyll.Rules.Validate (validateAuthorRefs, validateNavEntries, validatePaths)
 import Cozyll.Rules.WellKnown (processWellKnownFiles)
 import Cozyll.Theme (rewritingTemplateCompiler)
-import Hakyll (Rules, compile, match)
+import Hakyll (Rules, compile, getResourceString, match, (.||.))
 
 -- | Assembles the whole site from the content and configuration
 rules :: SiteConfig -> Website -> Rules ()
 rules cfg website = do
+    -- The site config is parsed before the rules run; matching it here puts its
+    -- identifier in Hakyll's universe so the fingerprint can see edits.
+    match (websitePattern cfg .||. authorsPattern cfg) $ compile getResourceString
+    match (rubyIndexPattern cfg) $ compile getResourceString
     match (templatePattern cfg) $ compile (rewritingTemplateCompiler cfg)
     validateNavEntries cfg
     validateAuthorRefs cfg

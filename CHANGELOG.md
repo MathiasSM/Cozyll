@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+### Fixed
+
+- Editing `website.yaml`, `authors.yaml`, `socials.yaml`, `localization.yaml` or the brand logo now takes effect on the next `cozyll build`; no `clean` needed (restart `watch` for config edits).
+- Replacing `ruby-data/index.json` now takes effect on the next `cozyll build`; restart `watch` after replacing it.
+
 ## [3.4.3.1] - 2026-11-11
 
 ### Fixed
