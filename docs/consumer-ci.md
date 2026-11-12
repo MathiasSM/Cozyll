@@ -61,12 +61,47 @@ out under `content/` in the runner workspace, installs the kit next to it, and b
 Use `@master` for the tip, or pin an exact release tag (the release workflow tags each version, for
 example `v3.1.0.1`) so the workflow does not change under you.
 
+`cozyll-version: latest` still works. A content repo that wants a fixed kit can instead commit a
+`.cozyll-version` file at its root, holding a single line: a release tag such as `v3.4.3.1`, or
+`latest`.
+
+### Running from a separate CI repository
+
+By default the workflow builds the repository that calls it. If the workflows live in a small CI
+repo and the content lives somewhere else, point the workflow at the content repo and give it a
+token to read it:
+
+```yaml
+jobs:
+  site:
+    uses: MathiasSM/Cozyll/.github/workflows/site-ci.yml@master
+    with:
+      content-repo: acme/content
+      content-token: ${{ secrets.CONTENT_TOKEN }}
+```
+
+`CONTENT_TOKEN` is a PAT or deploy key with `contents: read` on the content repo. GitHub does not
+pass secrets to reusable workflows implicitly, so the caller must forward it as shown.
+
 ## What the workflow does
 
-The `site` job checks the content repo out under `content/`, installs the kit release for
-`cozyll-version` (or the latest release when it is `latest`), builds the site, runs
-`cozyll check`, and uploads `_site/` as an artifact. Add your own deploy job after `site` if
-you publish to GitHub Pages or elsewhere.
+The `site` job checks the content repo out under `content/`, installs the kit release, builds the
+site, runs `cozyll check`, and uploads `_site/` as an artifact. Add your own deploy job after
+`site` if you publish to GitHub Pages or elsewhere.
+
+The kit version is resolved in this order:
+
+1. `cozyll-version`, when it is set: it is authoritative.
+2. Otherwise `content/.cozyll-version`, when the content repo has that file.
+3. Otherwise `latest`.
+
+`content-repo` and `content-token` control which repository is checked out and with what
+credentials:
+
+- `content-repo` takes `owner/repo`. Empty (the default) checks out the calling repository.
+- `content-token` is the token for that checkout, for example
+  `content-token: ${{ secrets.CONTENT_TOKEN }}` from a caller secret. Empty uses the workflow's
+  `GITHUB_TOKEN`.
 
 The remaining jobs are opt-in through the workflow inputs:
 
@@ -77,6 +112,8 @@ The remaining jobs are opt-in through the workflow inputs:
   do not fail the workflow. The check uses `pa11y-ci` with the **axe** runner; bare
   `npx pa11y` defaults to HTML_CodeSniffer and can report different findings.
 - `links-external` and `spelling` are opt-in and are not part of the default set.
+  When the content repo has `content/config/lychee.toml`, `links-external` passes it to lychee as
+  its config; otherwise lychee uses its defaults.
 
 `site-domain` is passed as `SITE_DOMAIN`; leave it empty to use `website.yaml`.
 
