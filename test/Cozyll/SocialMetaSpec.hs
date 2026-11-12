@@ -50,6 +50,7 @@ mkConfig =
         , siteLanguage = defaultLanguage
         , siteAlternateNames = []
         , siteLogo = Nothing
+        , siteLogoConfigured = Nothing
         , siteBrand = Nothing
         , siteAuthors = [mkAuthor ""]
         , siteDefaultAuthor = mkAuthor ""

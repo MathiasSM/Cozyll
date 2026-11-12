@@ -13,7 +13,7 @@ module Cozyll.Fixture (
 
 import Control.Concurrent.MVar (MVar, newMVar, withMVar)
 import Control.Monad (forM_, when)
-import Cozyll.Brand (Brand, brandLogo, discoverBrand)
+import Cozyll.Brand (Brand, brandLogo, resolveBrand)
 import Cozyll.Config (Env (..), SiteConfig (..), siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Language (defaultLanguage)
@@ -52,9 +52,7 @@ mkSiteConfigFor :: Env -> Web.Website -> [Author.Author] -> [FilePath] -> Maybe 
 mkSiteConfigFor env website authors contentTemplateNames brand rubyData =
     let site = Web.websiteSite website
         defaultAuthor' = either (error . unlines) id (Author.defaultAuthor authors)
-        logo = case Web.siteLogo site of
-            Just path -> Just path
-            Nothing -> brandLogo <$> brand
+        logo = brandLogo <$> brand
      in SiteConfig
             { siteTitle = Web.siteTitle site
             , siteDescription = Web.siteDescription site
@@ -64,6 +62,7 @@ mkSiteConfigFor env website authors contentTemplateNames brand rubyData =
             , siteLanguage = fromMaybe defaultLanguage (Web.siteLanguage site)
             , siteAlternateNames = Web.siteAlternateNames site
             , siteLogo = logo
+            , siteLogoConfigured = Web.siteLogo site
             , siteBrand = brand
             , siteAuthors = authors
             , siteDefaultAuthor = defaultAuthor'
@@ -94,9 +93,10 @@ loadFixtureConfigFor :: Env -> FilePath -> IO (SiteConfig, Web.Website)
 loadFixtureConfigFor env buildDir = do
     let contentDir = buildDir </> "content"
     website <- loadWebsite contentDir
+    let site = Web.websiteSite website
     contentTemplateNames <- discoverContentTemplateNames (contentDir </> "templates")
     authors <- Author.loadAuthors contentDir
-    brand <- discoverBrand contentDir
+    brand <- withCurrentDirectory buildDir (resolveBrand "content" (Web.siteLogo site))
     loaded <- loadIndexFile defaultMaxIndexBytes (contentDir </> "ruby-data" </> "index.json")
     rubyData <- either error pure loaded
     pure (mkSiteConfigFor env website authors contentTemplateNames brand rubyData, website)

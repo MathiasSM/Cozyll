@@ -8,7 +8,7 @@ site:
   copyrightYear: 2020
   domain: example.com
   alternateName: ["Ex", "example.com"]
-  logo: images/logo.png
+  logo: images/logo.svg
 
 contact:
   email: contact@example.com

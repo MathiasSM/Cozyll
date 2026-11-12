@@ -47,6 +47,7 @@ main { flex:1; }
     padding-top:0
   }
   .site-header > a > svg {width: 40%; height: auto;}
+  .site-header > a > img {width: 40%; height: auto;}
   .site-header > a > div {margin-inline-start: 0;}
   .site-header nav {flex-direction: column;margin:1em 0;}
   .site-header nav a { padding: .5em;}

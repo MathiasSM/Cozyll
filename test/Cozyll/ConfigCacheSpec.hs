@@ -44,7 +44,6 @@ tests =
                 assertContains manifest "\"icons\""
                 assertContains home "rel=\"icon\""
                 removeFile (content dir "media" </> "branding" </> "logo.svg")
-                removeFile (content dir "media" </> "branding" </> "logo.png")
                 rebuild dir
                 assertNotContains manifest "\"icons\""
                 assertNotContains home "rel=\"icon\""

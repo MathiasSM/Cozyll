@@ -139,26 +139,17 @@ manifestTxt name manifest icons =
         ++ "\n"
   where
     iconField
-        | null pngIcons = []
+        | null manifestEntries = []
         | otherwise =
-            [
-                ( "icons"
-                , JArray
-                    [ JObject
-                        [ ("src", JString (iconHref icon))
-                        , ("type", JString typ)
-                        , ("sizes", JString sizes)
-                        ]
-                    | icon <- pngIcons
-                    , typ <- maybeToList (iconType icon)
-                    , sizes <- maybeToList (iconSizes icon)
-                    ]
-                )
-            ]
-    pngIcons = manifestIcons icons
+            [("icons", JArray (map iconJson manifestEntries))]
+    manifestEntries = manifestIcons icons
 
-    maybeToList Nothing = []
-    maybeToList (Just value) = [value]
+    iconJson icon =
+        JObject
+            ( ("src", JString (iconHref icon))
+                : maybe [] (\typ -> [("type", JString typ)]) (iconType icon)
+                ++ maybe [] (\sizes -> [("sizes", JString sizes)]) (iconSizes icon)
+            )
 
 fundingJson :: String -> String -> Funding -> String
 fundingJson author url funding =

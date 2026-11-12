@@ -29,8 +29,8 @@ depend on it, like any other file.
 
 A `cozyll build` keeps `_cache/` and rebuilds only what changed. Besides the templates and
 styles above, the build records a dependency on the site inputs: `website.yaml`,
-`authors.yaml`, `socials.yaml`, `localization.yaml` and the brand logo under
-`media/branding/logo.*`. Editing any of them updates the pages, feeds, sitemap,
+`authors.yaml`, `socials.yaml`, `localization.yaml`, and the configured `site.logo` with
+the files it can resolve to. Editing any of them updates the pages, feeds, sitemap,
 `styles.css`, the manifest and the other well-known files on the next build, with no
 `cozyll clean`.
 
@@ -55,7 +55,7 @@ not show it being used. Override it like any other template when you want to cha
 ## Template inventory
 
 Every template receives the shared context: site fields (`site-title`, `site-description`,
-`site-copyrightYear`, `site-copyrightRange`, `site-baseUrl`, `site-domain`,
+`site-copyrightYear`, `site-copyrightRange`, `site-baseUrl`, `site-domain`, `site-logo`,
 `mathjax-version`), the page's `language`, the `t("id")` translation function, feeds, social
 links, data files, authors and the page's own front matter. The table lists the fields the
 template itself uses; see the module Haddocks for the complete context.
@@ -64,7 +64,7 @@ template itself uses; see the module Haddocks for the complete context.
 |---|---|---|
 | `site.html` | The page shell (`<html>`, `<body>`) | `language`, `body` |
 | `site-head.html` | `<head>`: metadata, feeds, favicons, manifest | `jsonld`, `opengraph`, `feeds` (`title`, `href`), `site-baseUrl`, `path`, `home`, `title`, `description`, `site-title`, `site-description`, `favicons` (`href`, `rel`, `type`, `sizes`), `math`, `mathjax-version` |
-| `site-header.html` | Site title, description and menu | `site-title`, `site-description`; renders `site-menu.html` |
+| `site-header.html` | Site logo, title, description and menu | `site-title`, `site-logo`, `site-description`; renders `site-menu.html` |
 | `site-menu.html` | The `nav:` menu | `nav` (`label`, `href`, `active`, `lang`) |
 | `site-footer.html` | The footer | renders `copyright.html` |
 | `copyright.html` | Copyright line | `site-title`, `site-copyrightRange` |

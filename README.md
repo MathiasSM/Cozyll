@@ -346,7 +346,8 @@ authoritative local run.
 #### Setup
 
 1. Install ImageMagick (e.g. via `sudo apt install imagemagick`) — needed for the example
-   build, which generates favicons from `example-content/media/branding/logo.svg`.
+   build, which resolves `site.logo` to `example-content/media/branding/logo.svg` and
+   generates favicons from it.
 2. Install Graphviz if you build content with `.dot` sources.
 3. Install ghcup (e.g. using `mise use -g ghcup`).
 4. Use ghcup to install `ghc`, `cabal` (both required)

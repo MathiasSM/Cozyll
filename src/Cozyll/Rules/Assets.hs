@@ -4,9 +4,9 @@ module Cozyll.Rules.Assets (processAssets, mediaRoute, mediaTarget, staticRoute,
 import Control.Monad (unless)
 import Cozyll.Config (Env (..), SiteConfig, assetsDir, contentCssPattern, contentDir, dataPattern, dataSchemaPattern, highlightStyle, localizationPattern, mediaDir, siteBrand, siteEnv, siteInputFingerprint, socialsPattern, staticDir, staticPattern)
 import Cozyll.Domain.Website (toPandocStyle)
+import Cozyll.Paths (mediaTarget)
 import Cozyll.Rules.Favicon (faviconRules)
 import Data.List (stripPrefix)
-import Data.Maybe (fromMaybe)
 import Data.String (fromString)
 import Hakyll (
     Item (itemBody),
@@ -151,7 +151,7 @@ processSvgImages cfg = do
 
 -- | Generates the favicons from the brand logo
 processFavicon :: SiteConfig -> Rules ()
-processFavicon cfg = faviconRules (contentDir cfg) (siteBrand cfg)
+processFavicon cfg = faviconRules (siteBrand cfg)
 
 -- | Where the site's own stylesheets live (see 'assetsDir')
 cssFiles :: SiteConfig -> Pattern
@@ -173,24 +173,6 @@ dotPattern cfg = fromString $ mediaDir cfg </> "**.dot"
 -- | Publishes a media identifier (see 'mediaTarget' for the route table).
 mediaRoute :: FilePath -> Routes
 mediaRoute mediaDir' = customRoute $ mediaTarget mediaDir' . toFilePath
-
-{- | The site path a media identifier is published at:
-
-| source | published |
-|---|---|
-| @media\/photos\/x.png@ | @images\/photos\/x.png@ |
-| @media\/icons\/x.svg@ | @images\/icons\/x.svg@ |
-| @media\/branding\/x@ | @images\/x@ |
-| @media\/<any>\/x@ | @images\/<any>\/x@ |
-| @media\/x@ | @images\/x@ |
-
-@branding\/@ is the one flattening special case, so the logo stays at
-@images\/logo.svg@.
--}
-mediaTarget :: FilePath -> FilePath -> FilePath
-mediaTarget mediaDir' path =
-    let rest = fromMaybe path (stripPrefix (addTrailingPathSeparator mediaDir') path)
-     in "images" </> fromMaybe rest (stripPrefix "branding/" rest)
 
 {- | Copies a static identifier to the site root (see 'staticTarget'). The
 identifier has already been checked by 'validateStaticPaths'; the fallback

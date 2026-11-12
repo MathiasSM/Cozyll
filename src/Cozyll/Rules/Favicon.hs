@@ -6,7 +6,6 @@ import Cozyll.Brand (
     Brand (..),
     LogoFormat (..),
     SiteIcon (..),
-    brandSourcePath,
     needsImageMagick,
  )
 import Data.Maybe (fromMaybe, isNothing)
@@ -27,28 +26,31 @@ import Hakyll.Core.Logger qualified as Logger
 import System.Directory (findExecutable)
 import System.Exit (die)
 
-{- | Generates the icons the brand asks for, reading the logo as its source.
+{- | Generates the icons the brand asks for, reading the resolved source.
 
 Icons with a @content\/static@ file at the same path are skipped (the static
-file wins), and a site without a logo gets no icons at all. ImageMagick is only
-required when a generated icon actually needs converting.
+file wins), and a site without a @site.logo@, or with a remote or
+non-convertible one, gets no generated icons.
 -}
-faviconRules :: FilePath -> Maybe Brand -> Rules ()
-faviconRules _ Nothing = message "no media/branding/logo.{svg,png}; skipping favicons"
-faviconRules contentDir (Just brand) = do
-    forM_ overridden $ \icon ->
-        message $ "static/" ++ iconPath icon ++ " wins over the generated icon"
-    converter <-
-        if needsImageMagick (brandFormat brand) generated
-            then preprocess findConverter
-            else pure Nothing
-    when (needsImageMagick (brandFormat brand) generated && isNothing converter)
-        $ preprocess
-        $ die
-        $ "ImageMagick is required to generate favicons from the logo.\n"
-            ++ "Install it (providing 'magick' or 'convert'), or add hand-made icons under content/static/."
-    match (fromString $ brandSourcePath contentDir (brandFormat brand)) $
-        forM_ generated (processFavicon (brandFormat brand) (fromMaybe "convert" converter))
+faviconRules :: Maybe Brand -> Rules ()
+faviconRules Nothing = message "no site.logo; skipping favicons"
+faviconRules (Just brand) =
+    case (brandSource brand, brandFormat brand) of
+        (Just source, Just format) -> do
+            forM_ overridden $ \icon ->
+                message $ "static/" ++ iconPath icon ++ " wins over the generated icon"
+            converter <-
+                if needsImageMagick (Just format) generated
+                    then preprocess findConverter
+                    else pure Nothing
+            when (needsImageMagick (Just format) generated && isNothing converter)
+                $ preprocess
+                $ die
+                $ "ImageMagick is required to generate favicons from the logo.\n"
+                    ++ "Install it (providing 'magick' or 'convert'), or add hand-made icons under content/static/."
+            match (fromString source) $
+                forM_ generated (processFavicon format (fromMaybe "convert" converter))
+        _ -> pure ()
   where
     icons = brandIcons brand
     generated = filter iconGenerated icons

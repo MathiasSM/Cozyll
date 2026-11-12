@@ -5,7 +5,7 @@ module Cozyll.Cli (Invocation (..), cli, invocationFor, parseEnvValue, versionSt
 
 import Control.Exception (IOException, SomeException, displayException, fromException, try)
 import Control.Monad (filterM, unless, void, when)
-import Cozyll.Brand (brandLogo, discoverBrand)
+import Cozyll.Brand (brandLogo, resolveBrand)
 import Cozyll.BuildState (
     BuildStart (..),
     BuildState (..),
@@ -383,13 +383,11 @@ loadSiteConfig env contentDir website = do
     contentTemplates <- discoverContentTemplateNames (contentDir </> "templates")
     authors <- Author.loadAuthors contentDir
     defaultAuthor' <- either (die . unlines) pure (Author.defaultAuthor authors)
-    brand <- discoverBrand contentDir
+    brand <- resolveBrand contentDir (Web.siteLogo site)
     today <- utctDay <$> getCurrentTime
     let (currentYearInteger, _, _) = toGregorian today
         currentYear = fromIntegral currentYearInteger
-        logo = case Web.siteLogo site of
-            Just path -> Just path
-            Nothing -> brandLogo <$> brand
+        logo = brandLogo <$> brand
     pure
         SiteConfig
             { siteTitle = title
@@ -400,6 +398,7 @@ loadSiteConfig env contentDir website = do
             , siteLanguage = fromMaybe defaultLanguage (Web.siteLanguage site)
             , siteAlternateNames = Web.siteAlternateNames site
             , siteLogo = logo
+            , siteLogoConfigured = Web.siteLogo site
             , siteBrand = brand
             , siteAuthors = authors
             , siteDefaultAuthor = defaultAuthor'
