@@ -1,6 +1,7 @@
 -- | Tests for the ruby index schema, normalisation, and canonical encoding
 module Cozyll.RubyIndexSpec (tests) where
 
+import Control.Exception (bracket)
 import Cozyll.Ruby.Index (
     Index (..),
     KanjiRow (..),
@@ -18,11 +19,15 @@ import Cozyll.Ruby.Index (
     normalizeKey,
     parseLevel,
     readIndexFile,
+    writeTextFileAtomic,
  )
+import Data.Bits ((.&.))
 import Data.Text (Text)
 import Data.Text qualified as T
+import System.FilePath ((</>))
 import System.IO (hClose, hPutStr)
-import System.IO.Temp (withSystemTempFile)
+import System.IO.Temp (withSystemTempDirectory, withSystemTempFile)
+import System.Posix.Files (fileMode, getFileStatus, groupReadMode, otherReadMode, setFileCreationMask)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
 
@@ -98,6 +103,18 @@ tests =
                     case loaded of
                         Left message -> message @?= path ++ ": index must be an object"
                         Right _ -> assertFailure "expected a decode failure"
+            ]
+        , testGroup
+            "permissions"
+            [ testCase "writeTextFileAtomic keeps default permissions" $
+                withSystemTempDirectory "cozyll-perms" $ \dir -> do
+                    let path = dir </> "index.json"
+                    bracket (setFileCreationMask 0o022) setFileCreationMask $ \_ -> do
+                        writeTextFileAtomic path "x"
+                        status <- getFileStatus path
+                        let mode = fileMode status
+                        assertBool "group-readable" (mode .&. groupReadMode /= 0)
+                        assertBool "other-readable" (mode .&. otherReadMode /= 0)
             ]
         ]
 

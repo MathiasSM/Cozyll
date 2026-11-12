@@ -73,7 +73,7 @@ import System.Directory (createDirectoryIfMissing, doesFileExist, getFileSize, r
 import System.Environment (lookupEnv)
 import System.Exit (die)
 import System.FilePath.Posix (takeDirectory, (</>))
-import System.IO (hClose, openBinaryTempFile)
+import System.IO (hClose, openBinaryTempFileWithDefaultPermissions)
 import Text.Read (readMaybe)
 
 -- Levels ----------------------------------------------------------------------
@@ -452,7 +452,10 @@ writeTextFileAtomic :: FilePath -> Text -> IO ()
 writeTextFileAtomic path text = do
     let dir = takeDirectory path
     createDirectoryIfMissing True dir
-    (tmp, handle) <- openBinaryTempFile dir ".tmp"
+    -- The temp-file helper defaults to 0600, which the rename preserves. The
+    -- index is a committed file, so use the default permissions (0666 & umask)
+    -- to keep it readable by the group and others.
+    (tmp, handle) <- openBinaryTempFileWithDefaultPermissions dir ".tmp"
     BS.hPut handle (encodeUtf8 text)
     hClose handle
     renameFile tmp path
