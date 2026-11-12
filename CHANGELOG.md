@@ -5,6 +5,7 @@
 - Editing `website.yaml`, `authors.yaml`, `socials.yaml`, `localization.yaml` or the brand logo now takes effect on the next `cozyll build`; no `clean` needed (restart `watch` for config edits).
 - Replacing `ruby-data/index.json` now takes effect on the next `cozyll build`; restart `watch` after replacing it.
 - `cozyll --help` lists cozyll's commands (`build`, `clean`, `rebuild`, `server`, `watch`, `check`, `data`, `init`) instead of Hakyll's; `deploy` and `preview` now fail with a pointer instead of running Hakyll's stubs.
+- Ruby coverage and reading errors now name the source file once; `data verify` and `data fmt` include the index path on parse errors.
 
 ### Changed
 

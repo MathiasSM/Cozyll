@@ -1,5 +1,5 @@
 -- | Pandoc compilation and the post-processing shared by every page
-module Cozyll.Compile (runPandoc, runPandocWith, applyTemplates, finish) where
+module Cozyll.Compile (runPandoc, runPandocWith, applyTemplates, finish, withSourcePath) where
 
 import Control.Monad (foldM, forM_, unless)
 import Control.Monad.Except (throwError)
@@ -72,13 +72,11 @@ runPandocWith rubyData checkMode item = do
             skipWords = maybe [] (map T.pack) (lookupKeyList JaRubySkip metadata)
             allowReadings = maybe [] (map T.pack) (lookupKeyList JaRubyAllow metadata)
             problems =
-                map
-                    ((path ++ ": ") ++)
-                    (checkKanjiCoverage pageLang skipWords rubyData' body <> checkJaReadings pageLang allowReadings rubyData' body)
+                checkKanjiCoverage pageLang skipWords rubyData' body <> checkJaReadings pageLang allowReadings rubyData' body
             effective = maybe checkMode (fromMaybe checkMode . parseCheckMode) (lookupKey JaRubyCheck metadata)
         case effective of
             CheckOff -> pure ()
-            CheckWarn -> unsafeCompiler (forM_ problems (hPutStrLn stderr))
+            CheckWarn -> unsafeCompiler (forM_ (withSourcePath path problems) (hPutStrLn stderr))
             CheckError -> unless (null problems) (throwError problems)
 
     renderPandoc ident pandoc = itemBody (writePandocWith writerOptions (ident{itemBody = pandoc}))
@@ -91,6 +89,13 @@ runPandocWith rubyData checkMode item = do
         defaultHakyllWriterOptions
             { writerMathMethod = MathJax ""
             }
+
+{- | Prefix problems with the source path, for diagnostics printed outside
+Hakyll's runtime (which already prefixes thrown compiler errors with the
+identifier).
+-}
+withSourcePath :: FilePath -> [String] -> [String]
+withSourcePath path = map ((path ++ ": ") ++)
 
 -- | Applies the given templates in order, each wrapping the previous result
 applyTemplates :: Context String -> [Identifier] -> Item String -> Compiler (Item String)
