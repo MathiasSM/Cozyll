@@ -96,6 +96,11 @@ The kit version is resolved in this order:
 2. Otherwise `content/.cozyll-version`, when the content repo has that file.
 3. Otherwise `latest`.
 
+When a caller pins a release tag (`site-ci.yml@v3.5.1.0`) and its content repo ships a
+`.cozyll-version` file, the build fails if the two disagree, so the workflow, its composite
+actions, and the downloaded kit always share one version. Callers on a branch or SHA are not
+checked.
+
 `content-repo` and the `content-token` secret control which repository is checked out and with what
 credentials:
 

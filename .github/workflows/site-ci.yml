@@ -90,6 +90,33 @@ jobs:
           persist-credentials: false
           submodules: recursive
           lfs: true
+      - name: Check the workflow ref matches .cozyll-version
+        shell: bash
+        run: |
+          set -euo pipefail
+          # When a caller pins a release tag (e.g. site-ci.yml@v3.5.1.0), its
+          # content repo must pin the same tag in .cozyll-version, so the
+          # workflow, its composite actions, and the downloaded kit are one
+          # version. Enforce that here; skip for branch/SHA callers.
+          ref="${{ job.workflow_ref }}"
+          ref="${ref##*@}"
+          case "$ref" in
+            refs/tags/*) ref="${ref#refs/tags/}" ;;
+            refs/heads/*) echo "site-ci called on branch '$ref'; skipping version match."; exit 0 ;;
+            "") echo "site-ci workflow ref unknown; skipping version match."; exit 0 ;;
+          esac
+          if ! printf '%s' "$ref" | grep -Eq '^v[0-9]+\.[0-9]+'; then
+            echo "site-ci ref '$ref' is not a version tag; skipping version match."
+            exit 0
+          fi
+          if [ -f content/.cozyll-version ]; then
+            want="$(head -n 1 content/.cozyll-version | tr -d '[:space:]')"
+            if [ "$ref" != "$want" ]; then
+              echo "::error::site-ci is called at '$ref' but content/.cozyll-version is '$want'. Bump both to the same release tag." >&2
+              exit 1
+            fi
+            echo "version match: site-ci '$ref' == content/.cozyll-version."
+          fi
       - name: Resolve Cozyll version
         id: version
         shell: bash
