@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [3.5.1.1] - 2026-11-13
+
+### Added
+
+- The `site-ci` reusable workflow fails the build when it is called at a release tag that differs from the content repo's `.cozyll-version`, so a caller's workflow, composite actions, and downloaded kit stay one version; branch and SHA callers are exempt.
+
 ## [3.5.1.0] - 2026-11-13
 
 ### Added
@@ -455,7 +461,8 @@
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.0...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.1...master
+[3.5.1.1]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.0...v3.5.1.1
 [3.5.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.0.0...v3.5.1.0
 [3.5.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.3.1...v3.5.0.0
 [3.4.3.1]: https://github.com/MathiasSM/Cozyll/compare/v3.4.2.0...v3.4.3.1
