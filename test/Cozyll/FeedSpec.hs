@@ -1,14 +1,14 @@
 -- | Tests for the feed helpers and the site-wide feed
 module Cozyll.FeedSpec (tests) where
 
-import Control.Exception (bracket)
+import Cozyll.Config (Env (Example))
 import Cozyll.Domain.Feed (absoluteUrl, missingIndexPageMessage)
-import Cozyll.Fixture (buildFixture, copyTree)
+import Cozyll.Fixture (copyTree, withBuiltExample, withBuiltFrom)
 import Data.Function (on)
 import Data.List (intercalate, isInfixOf, isPrefixOf, sort, sortBy)
 import Data.Text qualified as T
 import Data.Text.IO qualified as TIO
-import System.Directory (getCurrentDirectory, removePathForcibly)
+import System.Directory (getCurrentDirectory)
 import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Tasty (TestTree, testGroup)
@@ -64,9 +64,8 @@ siteFeedTests :: TestTree
 siteFeedTests =
     testGroup
         "site feed"
-        [ testCase "aggregates every group's posts newest first, without the showcase group" $ do
-            root <- getCurrentDirectory
-            bracket (buildFixture root (root </> "example-content")) (removePathForcibly . fst) $ \(_, site) -> do
+        [ testCase "aggregates every group's posts newest first, without the showcase group" $
+            withBuiltExample $ \_ site -> do
                 siteEntries <- readEntries (site </> "atom.xml")
                 groupEntries <- concat <$> mapM (readEntries . (site </>)) groupFeeds
                 -- The site feed is capped by `feed.size` (20 in the example content)
@@ -86,7 +85,7 @@ siteFeedTests =
             withSystemTempDirectory "cozyll-feed" $ \content -> do
                 copyTree (root </> "example-content") content
                 setFeedSize content "6"
-                bracket (buildFixture root content) (removePathForcibly . fst) $ \(_, site) -> do
+                withBuiltFrom Example content $ \_ site -> do
                     siteEntries <- readEntries (site </> "atom.xml")
                     length siteEntries @?= 6
                     map entryDate siteEntries @?= sortBy (flip compare) (map entryDate siteEntries)
