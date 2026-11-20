@@ -1,10 +1,10 @@
 -- | Rules for the assets: styles, media, static files, and tables
 module Cozyll.Rules.Assets (processAssets, mediaRoute, mediaTarget, staticRoute, staticTarget) where
 
-import Control.Monad (unless)
 import Cozyll.Config (Env (..), SiteConfig, assetsDir, contentCssPattern, contentDir, dataPattern, dataSchemaPattern, highlightStyle, localizationPattern, mediaDir, siteBrand, siteEnv, siteInputFingerprint, socialsPattern, staticDir, staticPattern)
 import Cozyll.Domain.Website (toPandocStyle)
 import Cozyll.Paths (mediaTarget)
+import Cozyll.Rules.Common (failIfAny)
 import Cozyll.Rules.Favicon (faviconRules)
 import Data.List (stripPrefix)
 import Data.String (fromString)
@@ -27,7 +27,6 @@ import Hakyll (
     loadAll,
     makeItem,
     match,
-    preprocess,
     route,
     setExtension,
     templateBodyCompiler,
@@ -93,11 +92,7 @@ validateStaticPaths :: SiteConfig -> Rules ()
 validateStaticPaths cfg = do
     identifiers <- getMatches (staticPattern cfg)
     let problems = [toFilePath ident ++ ": " ++ problem | ident <- identifiers, Left problem <- [staticTarget (staticDir cfg) (toFilePath ident)]]
-    unless (null problems)
-        $ preprocess
-        $ ioError
-        $ userError
-        $ "Invalid static files (they must stay inside the site root):\n" ++ unlines (map ("  " ++) problems)
+    failIfAny "Invalid static files (they must stay inside the site root)" problems
 
 -- | Makes the data files (YAML) and their schemas loadable; they are not routed
 processDataFiles :: SiteConfig -> Rules ()

@@ -9,6 +9,7 @@ import Cozyll.Domain.Author (authorName)
 import Cozyll.Domain.Feed (Feed (..), absoluteUrl, feeds, siteFeed)
 import Cozyll.Domain.Post (Post (..))
 import Cozyll.Domain.Website (Website (websiteFeed), feedSize)
+import Cozyll.Rules.Common (failIfAny)
 import Cozyll.Theme (themeFingerprint)
 import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Time (Day, defaultTimeLocale, formatTime)
@@ -26,7 +27,6 @@ import Hakyll (
     loadAllSnapshots,
     loadBody,
     mapContext,
-    preprocess,
     recentFirst,
     renderAtomWithTemplates,
     route,
@@ -42,7 +42,7 @@ processFeeds cfg website = do
     found <- feeds cfg
     let feedSize' = feedSize $ websiteFeed website
     case found of
-        Left problems -> preprocess $ ioError $ userError $ "Invalid feeds:\n" ++ unlines (map ("  " ++) problems)
+        Left problems -> failIfAny "Invalid feeds" problems
         Right groupFeeds -> do
             let postGroups = mapMaybe feedGroup groupFeeds
             forM_ (siteFeed cfg : groupFeeds) $ \feed ->

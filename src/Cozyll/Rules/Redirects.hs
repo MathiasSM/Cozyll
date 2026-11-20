@@ -6,6 +6,7 @@ import Cozyll.Config (SiteConfig, pagesPattern, postsPattern)
 import Cozyll.Content (aliasesOf, isDraft)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Metadata (Key (Path), lookupKey)
+import Cozyll.Rules.Common (failIfAny)
 import Cozyll.Theme (themeFingerprint)
 import Data.Either (fromLeft)
 import Data.List (tails)
@@ -18,7 +19,6 @@ import Hakyll (
     getAllMetadata,
     idRoute,
     makeItem,
-    preprocess,
     route,
     toFilePath,
     version,
@@ -51,7 +51,7 @@ processRedirects cfg = do
             | null problems ->
                 version "redirects" $
                     mapM_ redirectRule redirects
-        _ -> preprocess $ ioError $ userError $ "Invalid aliases:\n" ++ unlines (map ("  " ++) problems)
+        _ -> failIfAny "Invalid aliases" problems
   where
     -- Same rule as Hakyll's `createRedirects`, with the theme fingerprint so
     -- the page participates in theme invalidation like every other render path.
