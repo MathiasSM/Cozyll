@@ -2,8 +2,9 @@
 module Cozyll.Context.Feed (feedsContext) where
 
 import Cozyll.Config (SiteConfig)
+import Cozyll.Context.Common (itemField)
 import Cozyll.Domain.Feed (Feed (..), feedHref, feeds, siteFeed)
-import Hakyll (Context, Item (Item, itemBody), field, fromFilePath, listField)
+import Hakyll (Context, Item (Item), fromFilePath, listField)
 
 {- | The site's Atom feeds as a `feeds` list (@title@, @href@), for the page
 head. The site-wide feed comes first, then one per post group.
@@ -15,5 +16,5 @@ feedsContext cfg = listField "feeds" feedContext $ do
   where
     toItem feed = Item (fromFilePath $ feedFile feed) feed
     feedContext =
-        field "title" (return . feedTitle . itemBody)
-            <> field "href" (return . feedHref . itemBody)
+        itemField "title" feedTitle
+            <> itemField "href" feedHref

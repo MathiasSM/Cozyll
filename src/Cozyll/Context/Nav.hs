@@ -4,6 +4,7 @@ module Cozyll.Context.Nav (navContext) where
 import Control.Monad (filterM)
 import Cozyll.Config (SiteConfig, pagesPattern, siteEnv, siteLanguage)
 import Cozyll.Content (isHidden, requireNav)
+import Cozyll.Context.Common (itemField)
 import Cozyll.Domain.Language (Language (..), languageCode)
 import Cozyll.Domain.Nav (NavEntry (..), resolveNavLabel)
 import Data.List (sortOn)
@@ -35,7 +36,7 @@ navContext cfg current pageLanguage = listField "nav" entryContext (navItems cfg
   where
     entryContext =
         field "label" (fmap fst . resolved)
-            <> field "href" (return . navHref . itemBody)
+            <> itemField "href" navHref
             <> boolField "active" ((== current) . takeBaseName . toFilePath . itemIdentifier)
             <> field "lang" langOf
 

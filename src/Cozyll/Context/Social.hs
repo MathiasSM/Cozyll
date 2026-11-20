@@ -8,6 +8,7 @@ module Cozyll.Context.Social (socialMediaContext) where
 
 import Cozyll.Config (SiteConfig, mediaDir, socialsFile)
 import Cozyll.Content (requireSocials)
+import Cozyll.Context.Common (itemField)
 import Cozyll.Domain.Social (Social (..))
 import Data.List (stripPrefix)
 import Data.Maybe (fromMaybe)
@@ -35,13 +36,13 @@ socialMediaContext cfg = socialsField "socials" socialShow
 socialContext :: FilePath -> Context Social
 socialContext mediaDir' =
     iconContext mediaDir' "images/icons/social/" socialIcon
-        <> field "href" (return . socialHref . itemBody)
-        <> field "username" (return . socialUsername . itemBody)
+        <> itemField "href" socialHref
+        <> itemField "username" socialUsername
 
 -- | The SVG named by each item's icon: @iconHref@ is its URL, @iconRaw@ its markup
 iconContext :: FilePath -> String -> (a -> String) -> Context a
 iconContext mediaDir' prefix getIcon =
-    field "iconHref" (return . hrefOf . itemBody)
+    itemField "iconHref" hrefOf
         <> field "iconRaw" (rawOf . itemBody)
   where
     hrefOf item = prefix ++ getIcon item ++ ".svg"
