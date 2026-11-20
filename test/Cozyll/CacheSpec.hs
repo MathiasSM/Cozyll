@@ -8,12 +8,11 @@ separate @cozyll build@ invocations against the same @_cache@.
 -}
 module Cozyll.CacheSpec (tests) where
 
-import Control.Exception (bracket)
-import Cozyll.Fixture (buildFixture, loadFixtureConfig, runBuild)
+import Cozyll.Fixture (loadFixtureConfig, runBuild, withBuiltExample)
 import Data.ByteString.Char8 qualified as BS
-import System.Directory (createDirectoryIfMissing, getCurrentDirectory, removePathForcibly)
+import System.Directory (createDirectoryIfMissing)
 import System.Exit (ExitCode (..))
-import System.FilePath (takeDirectory, (</>))
+import System.FilePath ((</>))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (Assertion, assertBool, assertFailure, testCase)
 
@@ -25,10 +24,8 @@ tests :: TestTree
 tests =
     testGroup
         "Cache"
-        [ testCase "a template override added after a build applies to the next build" $ do
-            root <- getCurrentDirectory
-            bracket (buildFixture root (root </> "example-content")) (removePathForcibly . fst) $ \(_, site) -> do
-                let dir = takeDirectory site
+        [ testCase "a template override added after a build applies to the next build" $
+            withBuiltExample $ \dir site -> do
                 assertAbsent (siteIndex site)
 
                 -- A new `cozyll build` re-discovers the overrides, but keeps the cache
