@@ -6,6 +6,8 @@ module Cozyll.Config (
     -- * Deployment config
     SiteConfig (..),
     Env (..),
+    envText,
+    envFromText,
     baseUrl,
 
     -- * Files
@@ -70,6 +72,19 @@ build (drafts hidden).
 -}
 data Env = Dev | Example | Prod
     deriving (Eq, Show)
+
+-- | The @SITE_ENV@ spelling used in messages and in the build state file
+envText :: Env -> String
+envText Prod = "prod"
+envText Dev = "dev"
+envText Example = "example"
+
+-- | Parses an @SITE_ENV@ spelling (inverse of 'envText')
+envFromText :: String -> Maybe Env
+envFromText "prod" = Just Prod
+envFromText "dev" = Just Dev
+envFromText "example" = Just Example
+envFromText _ = Nothing
 
 {- | Build-time site configuration, gathered once from the environment by "Cozyll.Cli".
 Every field maps to an environment variable; see @.env.example@

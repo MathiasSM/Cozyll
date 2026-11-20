@@ -76,18 +76,20 @@ loadMathjaxVersion :: FilePath -> IO (Either String String)
 loadMathjaxVersion schemaDir = do
     schemaExists <- doesDirectoryExist schemaDir
     if not schemaExists
-        then pure $ Left $ schemaDir ++ "/ not found.\n\n" ++ kitHint
+        then pure $ Left $ missing (schemaDir ++ "/")
         else do
             let examplePath = schemaDir </> "example.website.yaml"
             exampleExists <- doesFileExist examplePath
             if not exampleExists
-                then pure $ Left $ examplePath ++ " not found.\n\n" ++ kitHint
+                then pure $ Left $ missing examplePath
                 else do
                     result <- decodeFileEither examplePath :: IO (Either ParseException Website)
                     pure $ case result of
                         Left problem ->
                             Left $ "Invalid " ++ examplePath ++ ":\n" ++ prettyPrintParseException problem
                         Right website -> Right $ mathjaxVersion (websiteMathjax website)
+  where
+    missing path = path ++ " not found.\n\n" ++ kitHint
 
 -- | What to tell a user who is not standing in the unpacked kit directory
 kitHint :: String
