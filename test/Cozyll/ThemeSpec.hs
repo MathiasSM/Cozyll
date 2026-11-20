@@ -1,43 +1,16 @@
 -- | Tests for content-theme resolution: template overrides and partial rewriting
 module Cozyll.ThemeSpec (tests) where
 
-import Cozyll.Config (Env (Dev), SiteConfig (..), resolveTemplate)
-import Cozyll.Domain.Language (defaultLanguage)
-import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
-import Cozyll.TestUtils (mkAuthor)
+import Cozyll.Config (SiteConfig (..), resolveTemplate)
+import Cozyll.TestUtils (testConfig)
 import Cozyll.Theme (rewritePartials)
 import Hakyll (toFilePath)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 
--- | A 'SiteConfig' with only the fields theme resolution reads; the rest are dummies
+-- | The shared config with the content template names theme resolution reads
 mkConfig :: [FilePath] -> SiteConfig
-mkConfig names =
-    SiteConfig
-        { siteTitle = "site"
-        , siteDescription = ""
-        , siteCopyrightYear = 0
-        , siteCurrentYear = 2021
-        , siteDomain = "example.com"
-        , siteLanguage = defaultLanguage
-        , siteAlternateNames = []
-        , siteLogo = Nothing
-        , siteLogoConfigured = Nothing
-        , siteBrand = Nothing
-        , siteAuthors = [mkAuthor ""]
-        , siteDefaultAuthor = mkAuthor ""
-        , mathjaxVersion = ""
-        , highlightStyle = Pygments
-        , contentDir = "content"
-        , assetsDir = "assets"
-        , templatesDir = "templates"
-        , contentTemplatesDir = "content/templates"
-        , contentCssDir = "content/css"
-        , contentTemplateNames = names
-        , siteEnv = Dev
-        , siteRubyData = Nothing
-        , siteJaRubyCheck = CheckError
-        }
+mkConfig names = testConfig{contentTemplateNames = names}
 
 tests :: TestTree
 tests =
