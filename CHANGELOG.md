@@ -12,6 +12,7 @@
 ### Fixed
 
 - A chosen ruby threshold hid one level too many (the label said "N3 and harder" but N3 was hidden).
+- The `Outdated dependencies` workflow keeps a single issue: runs are serialised, the issue is selected by title, historical duplicates are closed as duplicates of the oldest issue, and a failed `cabal outdated` fails the job instead of pasting the error into the issue body.
 
 ## [3.5.1.1] - 2026-11-13
 

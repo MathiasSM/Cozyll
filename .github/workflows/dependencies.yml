@@ -12,12 +12,48 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: 'Dependency Review'
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          # Block only high/critical vulnerabilities. Note: this action reviews
+          # the GitHub Actions dependencies, not the Haskell/Cabal ones.
+          fail-on-severity: high
+          # Only comment on the PR when there is something to report.
+          comment-summary-in-pr: on-failure
+          retry-on-snapshot-warnings: true
+          show-patched-versions: true
+
   outdated:
     name: Check for outdated dependencies
+    # PR runs must not touch the issue: a merge would race the pull_request run
+    # of the same commit, and fork PRs only get a read-only token.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    # One run at a time (queued, not cancelled) so the lookup-then-write
+    # sequence cannot interleave and open a second issue. Repository-scoped.
+    concurrency:
+      group: outdated-dependencies
+      cancel-in-progress: false
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
@@ -31,46 +67,7 @@ jobs:
           ghc-version: ${{ vars.GHC_VERSION }}
           cabal-version: ${{ vars.CABAL_VERSION }}
 
-      - name: 'Dependency Review'
-        if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
-        with:
-          # Block only high/critical vulnerabilities. Note: this action reviews
-          # the GitHub Actions dependencies, not the Haskell/Cabal ones.
-          fail-on-severity: high
-          # Only comment on the PR when there is something to report.
-          comment-summary-in-pr: on-failure
-          retry-on-snapshot-warnings: true
-          show-patched-versions: true
-
-      - name: Cabal outdated
+      - name: Reconcile the outdated dependencies issue
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          cabal update
-          set +e
-          cabal outdated --exit-code > outdated.txt 2>&1
-          HAS_OUTDATED=$?
-          set -e
-          cat outdated.txt
-
-          TITLE="Outdated Cabal dependencies"
-          LABEL="automation/outdated"
-
-          gh label create "$LABEL" --color "D93F0B" 2>/dev/null || true
-
-          ISSUE=$(gh issue list --label "$LABEL" --app github-actions \
-            --state all --json number --jq '.[0].number')
-
-          if [ "$HAS_OUTDATED" -ne 0 ]; then
-            if [ -z "$ISSUE" ]; then
-              gh issue create --title "$TITLE" \
-                --label "$LABEL" \
-                --body "$(cat outdated.txt)"
-            else
-              gh issue reopen "$ISSUE" 2>/dev/null || true
-              gh issue edit "$ISSUE" --body "$(cat outdated.txt)"
-            fi
-          elif [ -n "$ISSUE" ]; then
-            gh issue close "$ISSUE"
-          fi
+        run: .github/scripts/outdated-issue.sh
