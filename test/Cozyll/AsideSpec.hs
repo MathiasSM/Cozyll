@@ -2,16 +2,9 @@
 module Cozyll.AsideSpec (tests) where
 
 import Cozyll.Context.Aside (hasAnyControl, hasAside, renderInlineMarkdown)
-import Cozyll.Yaml (decodeYaml)
-import Hakyll (Metadata)
+import Cozyll.TestUtils (metadataFromYaml)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
-
--- | Parses a front-matter YAML fragment into the 'Metadata' the contexts read
-metadata :: String -> Metadata
-metadata yaml = case (decodeYaml yaml :: Either [String] Metadata) of
-    Right m -> m
-    Left problems -> error (unlines problems)
 
 tests :: TestTree
 tests =
@@ -29,25 +22,25 @@ tests =
         , testGroup
             "hasAnyControl"
             [ testCase "detects the legacy ruby toggle" $
-                hasAnyControl (metadata "rubyToggle: ふりがな") @?= True
+                hasAnyControl (metadataFromYaml "rubyToggle: ふりがな") @?= True
             , testCase "detects a ruby level control" $
-                hasAnyControl (metadata "rubyControl: ふりがな") @?= True
+                hasAnyControl (metadataFromYaml "rubyControl: ふりがな") @?= True
             , testCase "ignores the removed unknown-ruby key" $
-                hasAnyControl (metadata "rubyUnknown: unknown") @?= False
+                hasAnyControl (metadataFromYaml "rubyUnknown: unknown") @?= False
             , testCase "detects an images toggle" $
-                hasAnyControl (metadata "imagesToggle: Images") @?= True
+                hasAnyControl (metadataFromYaml "imagesToggle: Images") @?= True
             , testCase "ignores TOC" $
-                hasAnyControl (metadata "TOC: Contents") @?= False
+                hasAnyControl (metadataFromYaml "TOC: Contents") @?= False
             , testCase "is false without toggles" $
-                hasAnyControl (metadata "title: Hello") @?= False
+                hasAnyControl (metadataFromYaml "title: Hello") @?= False
             ]
         , testGroup
             "hasAside"
             [ testCase "true with a toggle" $
-                hasAside (metadata "rubyControl: ふりがな") @?= True
+                hasAside (metadataFromYaml "rubyControl: ふりがな") @?= True
             , testCase "true with a TOC" $
-                hasAside (metadata "TOC: Contents") @?= True
+                hasAside (metadataFromYaml "TOC: Contents") @?= True
             , testCase "false without either" $
-                hasAside (metadata "title: Hello") @?= False
+                hasAside (metadataFromYaml "title: Hello") @?= False
             ]
         ]

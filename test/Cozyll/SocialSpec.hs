@@ -54,4 +54,4 @@ tests =
             assertBool "expected parsing to fail" (isLeft (parseSocialsYaml "icon: ["))
         ]
   where
-    parse = parseSocialsYaml . one
+    parse = parseListFields parseSocialsYaml
