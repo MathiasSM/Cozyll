@@ -1,21 +1,17 @@
 -- | Tests for the authors.yaml parser and author resolution
 module Cozyll.AuthorSpec (tests) where
 
-import Cozyll.Config (Env (Dev), SiteConfig (..))
+import Cozyll.Config (SiteConfig (..))
 import Cozyll.Context.Author (authoredBy, copyrightYears, profileImageUrl, resolveAuthors)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, decodeAuthorsUtf8, defaultAuthor, parseAuthorsYaml)
-import Cozyll.Domain.Language (defaultLanguage)
-import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Metadata qualified as Meta
+import Cozyll.TestUtils (metadataJson, testConfig)
 import Data.Aeson (Value (..), toJSON)
-import Data.Aeson.Key qualified as AesonKey
 import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString qualified as BS
 import Data.List (isInfixOf, sort)
-import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.Encoding (encodeUtf8)
-import Hakyll (Metadata)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
 
@@ -195,19 +191,19 @@ resolveAuthorsTests =
     testGroup
         "resolveAuthors"
         [ testCase "resolves a list of ids in order" $
-            map authorId (resolveAuthors cfg (metadataOf [("author", stringList ["example", "example-org"])]))
+            map authorId (resolveAuthors cfg (metadataJson [("author", stringList ["example", "example-org"])]))
                 @?= ["example", "example-org"]
         , testCase "resolves a scalar id" $
-            map authorId (resolveAuthors cfg (metadataOf [("author", String "example-org")]))
+            map authorId (resolveAuthors cfg (metadataJson [("author", String "example-org")]))
                 @?= ["example-org"]
         , testCase "falls back to the site-default author" $
-            map authorId (resolveAuthors cfg (metadataOf []))
+            map authorId (resolveAuthors cfg (metadataJson []))
                 @?= ["example"]
         , testCase "skips unknown ids" $
-            map authorId (resolveAuthors cfg (metadataOf [("author", stringList ["example", "nobody"])]))
+            map authorId (resolveAuthors cfg (metadataJson [("author", stringList ["example", "nobody"])]))
                 @?= ["example"]
         , testCase "deduplicates repeated ids" $
-            map authorId (resolveAuthors cfg (metadataOf [("author", stringList ["example", "example"])]))
+            map authorId (resolveAuthors cfg (metadataJson [("author", stringList ["example", "example"])]))
                 @?= ["example"]
         ]
 
@@ -216,11 +212,11 @@ lookupKeyListTests =
     testGroup
         "lookupKeyList"
         [ testCase "reads a list" $
-            Meta.lookupKeyList Meta.Author (metadataOf [("author", stringList ["a", "b"])]) @?= Just ["a", "b"]
+            Meta.lookupKeyList Meta.Author (metadataJson [("author", stringList ["a", "b"])]) @?= Just ["a", "b"]
         , testCase "reads a scalar as a single-element list" $
-            Meta.lookupKeyList Meta.Author (metadataOf [("author", String "a")]) @?= Just ["a"]
+            Meta.lookupKeyList Meta.Author (metadataJson [("author", String "a")]) @?= Just ["a"]
         , testCase "is Nothing when absent" $
-            Meta.lookupKeyList Meta.Author (metadataOf []) @?= Nothing
+            Meta.lookupKeyList Meta.Author (metadataJson []) @?= Nothing
         ]
 
 -- | A list of strings as a JSON array
@@ -232,13 +228,13 @@ copyrightYearsTests =
     testGroup
         "copyrightYears"
         [ testCase "is a single year without lastModifiedAt" $
-            copyrightYears (metadataOf [("date", String "2024-02-20")]) @?= "2024"
+            copyrightYears (metadataJson [("date", String "2024-02-20")]) @?= "2024"
         , testCase "is a single year when lastModifiedAt matches" $
-            copyrightYears (metadataOf [("date", String "2024-02-20"), ("lastModifiedAt", String "2024-02-20")]) @?= "2024"
+            copyrightYears (metadataJson [("date", String "2024-02-20"), ("lastModifiedAt", String "2024-02-20")]) @?= "2024"
         , testCase "is a range when lastModifiedAt differs" $
-            copyrightYears (metadataOf [("date", String "2024-02-20"), ("lastModifiedAt", String "2026-03-01")]) @?= "2024–2026"
+            copyrightYears (metadataJson [("date", String "2024-02-20"), ("lastModifiedAt", String "2026-03-01")]) @?= "2024–2026"
         , testCase "is empty without a date" $
-            copyrightYears (metadataOf []) @?= ""
+            copyrightYears (metadataJson []) @?= ""
         ]
 
 postCopyrightTests :: TestTree
@@ -246,10 +242,10 @@ postCopyrightTests =
     testGroup
         "postCopyright"
         [ testCase "names only the opted-in authors" $
-            map authorName (filter authorAddCopyrightNotice (resolveAuthors cfg (metadataOf [("author", stringList ["example", "example-org"])])))
+            map authorName (filter authorAddCopyrightNotice (resolveAuthors cfg (metadataJson [("author", stringList ["example", "example-org"])])))
                 @?= ["Example Author"]
         , testCase "is false when no author opts in" $
-            any authorAddCopyrightNotice (resolveAuthors cfg (metadataOf [("author", String "example-org")]))
+            any authorAddCopyrightNotice (resolveAuthors cfg (metadataJson [("author", String "example-org")]))
                 @?= False
         ]
 
@@ -258,52 +254,23 @@ authoredByTests =
     testGroup
         "authoredBy"
         [ testCase "accepts an explicitly listed author" $
-            authoredBy cfg exampleAuthor (metadataOf [("author", String "example")])
+            authoredBy cfg exampleAuthor (metadataJson [("author", String "example")])
                 @?= True
         , testCase "accepts any author of a multi-author post" $
-            authoredBy cfg orgAuthor (metadataOf [("author", stringList ["example", "example-org"])])
+            authoredBy cfg orgAuthor (metadataJson [("author", stringList ["example", "example-org"])])
                 @?= True
         , testCase "assigns a post without authors to the site default" $
-            authoredBy cfg exampleAuthor (metadataOf []) @?= True
+            authoredBy cfg exampleAuthor (metadataJson []) @?= True
         , testCase "does not assign a post without authors to other authors" $
-            authoredBy cfg orgAuthor (metadataOf []) @?= False
+            authoredBy cfg orgAuthor (metadataJson []) @?= False
         , testCase "rejects an author the post does not list" $
-            authoredBy cfg orgAuthor (metadataOf [("author", String "example")])
+            authoredBy cfg orgAuthor (metadataJson [("author", String "example")])
                 @?= False
         ]
 
--- | Front matter with string values, as Hakyll stores it
-metadataOf :: [(Text, Value)] -> Metadata
-metadataOf = KeyMap.fromList . map (\(key, value) -> (AesonKey.fromText key, value))
-
--- | A 'SiteConfig' with two authors (example is the default)
+-- | The shared config with two authors (example is the default)
 cfg :: SiteConfig
-cfg =
-    SiteConfig
-        { siteTitle = "site"
-        , siteDescription = ""
-        , siteCopyrightYear = 0
-        , siteCurrentYear = 2021
-        , siteDomain = "example.com"
-        , siteLanguage = defaultLanguage
-        , siteAlternateNames = []
-        , siteLogo = Nothing
-        , siteLogoConfigured = Nothing
-        , siteBrand = Nothing
-        , siteAuthors = [exampleAuthor, orgAuthor]
-        , siteDefaultAuthor = exampleAuthor
-        , mathjaxVersion = ""
-        , highlightStyle = Pygments
-        , contentDir = "content"
-        , assetsDir = "assets"
-        , templatesDir = "templates"
-        , contentTemplatesDir = "content/templates"
-        , contentCssDir = "content/css"
-        , contentTemplateNames = []
-        , siteEnv = Dev
-        , siteRubyData = Nothing
-        , siteJaRubyCheck = CheckError
-        }
+cfg = testConfig{siteAuthors = [exampleAuthor, orgAuthor], siteDefaultAuthor = exampleAuthor}
 
 exampleAuthor :: Author
 exampleAuthor = (author' "example" "Example Author" True){authorAddCopyrightNotice = True}
