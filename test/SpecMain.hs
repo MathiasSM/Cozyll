@@ -12,7 +12,6 @@ import Cozyll.CacheSpec qualified as Cache
 import Cozyll.CleanURLSpec qualified as CleanURL
 import Cozyll.CliDataSpec qualified as CliData
 import Cozyll.CliSpec qualified as Cli
-import Cozyll.CompileSpec qualified as Compile
 import Cozyll.ConfigCacheSpec qualified as ConfigCache
 import Cozyll.ContentSpec qualified as Content
 import Cozyll.CssSpec qualified as Css
@@ -63,7 +62,6 @@ main = do
             , CleanURL.tests
             , CliData.tests
             , Cli.tests
-            , Compile.tests
             , ConfigCache.tests
             , Content.tests
             , Css.tests

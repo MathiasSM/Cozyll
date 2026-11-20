@@ -1,6 +1,7 @@
 -- | Tests for the pure formatting helpers
 module Cozyll.FormatSpec (tests) where
 
+import Cozyll.Compile (withSourcePath)
 import Cozyll.Format (postSlug, yearRange)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
@@ -30,5 +31,11 @@ tests =
                 postSlug "/blog/" @?= "blog"
             , testCase "leaves a bare segment unchanged" $
                 postSlug "blog" @?= "blog"
+            ]
+        , testGroup
+            "withSourcePath"
+            [ testCase "prefixes each problem with the source path once" $
+                withSourcePath "content/writings/x.md" ["a", "b"]
+                    @?= ["content/writings/x.md: a", "content/writings/x.md: b"]
             ]
         ]
