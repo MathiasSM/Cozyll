@@ -1,20 +1,23 @@
 -- | Pandoc compilation and the post-processing shared by every page
-module Cozyll.Compile (runPandoc, runPandocWith, applyTemplates, finish, withSourcePath) where
+module Cozyll.Compile (runPandoc, runPandocWith, applyTemplates, finish, finishPage, loadPageBody, withSourcePath) where
 
 import Control.Monad (foldM, forM_, unless)
 import Control.Monad.Except (throwError)
 import Cozyll.Accessibility (checkAccessibility)
 import Cozyll.CleanURL (cleanIndexHtmls, cleanIndexUrls)
-import Cozyll.Config (SiteConfig, siteInputFingerprint, siteTemplate)
-import Cozyll.Content (tocLabelOf)
-import Cozyll.Context.SocialMeta (MainImage, mainImageOf)
+import Cozyll.Config (SiteConfig, siteInputFingerprint, siteJaRubyCheck, siteRubyData, siteTemplate)
+import Cozyll.Content (isTemplated, tocLabelOf)
+import Cozyll.Context.Nav (navContext)
+import Cozyll.Context.SocialMeta (MainImage, PageItem, PageKind, PageMeta (pageMetaLanguage), mainImageOf, socialMetaContext)
+import Cozyll.Domain.Author (Author)
 import Cozyll.Domain.Website (CheckMode (..), parseCheckMode)
 import Cozyll.Filters (processRubyTextWith)
 import Cozyll.Html (readonlyCheckboxes)
+import Cozyll.Localization (ogLocaleFor)
 import Cozyll.Metadata (Key (JaRubyAllow, JaRubyCheck, JaRubySkip, Language), lookupKey, lookupKeyList)
 import Cozyll.Ruby (checkJaReadings, checkKanjiCoverage)
 import Cozyll.Ruby.Index (RubyData)
-import Cozyll.Theme (themeFingerprint)
+import Cozyll.Theme (applyContentAsTemplate, themeFingerprint)
 import Data.Maybe (fromMaybe, isJust)
 import Data.Text qualified as T
 import Hakyll (
@@ -25,6 +28,7 @@ import Hakyll (
     defaultHakyllReaderOptions,
     defaultHakyllWriterOptions,
     getMetadata,
+    getResourceString,
     getUnderlying,
     loadAndApplyTemplate,
     readPandocWith,
@@ -112,3 +116,33 @@ finish cfg context item =
         >>= cleanIndexHtmls
         >>= return . fmap readonlyCheckboxes
         >>= checkAccessibility
+
+-- | Reads the item's body, applies content templating when `templated: true`, then pandoc
+loadPageBody :: SiteConfig -> Context String -> Compiler (Item String, String, Maybe MainImage)
+loadPageBody cfg ctx = do
+    templated <- isTemplated
+    getResourceString
+        >>= (if templated then applyContentAsTemplate cfg ctx else pure)
+        >>= runPandocWith (siteRubyData cfg) (siteJaRubyCheck cfg)
+
+-- | Applies the social metadata, nav and page contexts, then the shared finish steps
+finishPage ::
+    SiteConfig ->
+    PageKind ->
+    [Author] -> -- authors resolved for this item ([] for pages)
+    [PageItem] -> -- items this page lists ([] for posts)
+    PageMeta ->
+    Maybe MainImage ->
+    Context String -> -- the page's own context, already including asideContext
+    String -> -- the nav name: the page/group name
+    Item String ->
+    Compiler (Item String)
+finishPage cfg kind authors items pageMeta mainImg pageCtx name item = do
+    ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
+    finish
+        cfg
+        ( socialMetaContext cfg kind authors items pageMeta mainImg ogLocale
+            <> navContext cfg name (pageMetaLanguage pageMeta)
+            <> pageCtx
+        )
+        item
