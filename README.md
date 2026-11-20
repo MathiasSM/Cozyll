@@ -223,9 +223,11 @@ errors the build raises — is in [docs/authoring.md](docs/authoring.md).
 
 `[base](-reading)` renders ruby. When the content repo provides a derived
 `ruby-data/index.json`, each ruby carries `data-jlpt` (`n1`–`n5` or `unknown`) and
-`data-jlpt-source` (`word`, `kanji`, or `unknown`), and readers get a threshold
-`<select>` plus an independent unknown-level checkbox. Their choice is stored in
-`localStorage`; there is no article default, so without JS all ruby is shown.
+`data-jlpt-source` (`word`, `kanji`, or `unknown`), and readers pick a JLPT threshold from a
+`<select>`; every ruby at an easier level than the threshold is hidden, and the last option
+hides them all. Ruby whose level is not in the index (names, proper nouns) is always shown.
+The choice is stored in `localStorage`; there is no article default, so without JS all ruby is
+shown.
 
 Generate (and refresh) the data with the CLI, then commit it:
 
@@ -248,16 +250,16 @@ Front matter (per page):
 | Key | Meaning |
 |---|---|
 | `rubyToggle: <label>` | **Deprecated** legacy all-or-nothing toggle; use `rubyControl`. Kept until the next major. |
-| `rubyControl: <label>` | enables the threshold `<select>` |
-| `rubyUnknown: <label>` | enables the unknown-level checkbox |
+| `rubyControl: <label>` | enables the JLPT threshold `<select>` |
 | `jaRubySkip: [...]` | words that may appear without ruby |
 | `jaRubyAllow: [...]` | surfaces or `surface:reading` pairs accepted without a dictionary match |
 | `jaRubyCheck: off\|warn\|error` | overrides the site's check severity |
 
 `jaRubyCheck` is also read from `website.yaml` (default `error`). These keys only govern the
 **Japanese** checks: coverage and reading verification inspect text whose effective `lang` is
-`ja*`; non-Japanese ruby is controlled but not checked. Content repos add `ruby.all` to
-`localization.yaml` for the “All” option.
+`ja*`; non-Japanese ruby is controlled but not checked. Content repos using `rubyControl`
+add `ruby.N5-or-harder`, `ruby.N4-or-harder`, `ruby.N3-or-harder`, `ruby.N2-or-harder`,
+`ruby.N1-or-harder` and `ruby.none` to `localization.yaml`; a missing id fails the build.
 
 ## Localisation
 
@@ -273,8 +275,10 @@ post.updated:
 
 The templates call strings with `$t("id")$`; lookup falls back from `xx-YY` to `xx`. The
 reserved `_ogLocaleDefaultRegion` key provides the `og:locale` value. The current ids are
-`aside.controls`, `post.updated`, `project.started`, `project.finished`, `ruby.all` and `author.by`
-(the last one is kept for compatibility and is no longer used by the stock theme). See
+`aside.controls`, `post.updated`, `project.started`, `project.finished`,
+`ruby.N1-or-harder`, `ruby.N2-or-harder`, `ruby.N3-or-harder`, `ruby.N4-or-harder`,
+`ruby.N5-or-harder`, `ruby.none` and `author.by` (the last one is kept for compatibility and is
+no longer used by the stock theme). See
 [`schema/example.localization.yaml`](schema/example.localization.yaml).
 
 `site.language` in `website.yaml` is the site's own language (ISO 639-1 with an optional
@@ -495,6 +499,8 @@ documented in
 
 ### Per-article controls
 
-A control is a checkbox in a page's aside that toggles a class on `<html>`. The contract lives in
+A control is a checkbox in a page's aside that toggles a class on `<html>`. The ruby level
+control is the exception: a `<select>` that stores a JLPT threshold in `localStorage`. The
+contract lives in
 [`Cozyll.Context.Aside`](https://cozyll.mathiassm.dev/cozyll/Cozyll-Context-Aside.html); the
 step-by-step recipe is in [CONTRIBUTING.md](CONTRIBUTING.md#adding-a-control-toggle).

@@ -93,6 +93,7 @@ textarea {
     border: 1px solid var(--color-surface-border);
     padding: .5em 1em;
 }
+select {padding: .1em .5em;}
 textarea {width: 100%; resize: vertical;}
 button {
     font: inherit;

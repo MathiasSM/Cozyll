@@ -6,10 +6,35 @@ aside.controls:
   es: Controles
   ja: コントロール
 
-ruby.all:
-  en: All
-  es: Todo
-  ja: すべて
+ruby.none:
+  en: Hide all JLPT
+  es: Ocultar todo el JLPT
+  ja: JLPTをすべて非表示
+
+ruby.N1-or-harder:
+  en: "N1 and harder"
+  es: "N1 o superior"
+  ja: "N1以上"
+
+ruby.N2-or-harder:
+  en: "N2 and harder"
+  es: "N2 o superior"
+  ja: "N2以上"
+
+ruby.N3-or-harder:
+  en: "N3 and harder"
+  es: "N3 o superior"
+  ja: "N3以上"
+
+ruby.N4-or-harder:
+  en: "N4 and harder"
+  es: "N4 o superior"
+  ja: "N4以上"
+
+ruby.N5-or-harder:
+  en: "N5 and harder"
+  es: "N5 o superior"
+  ja: "N5以上"
 
 post.updated:
   en: Updated

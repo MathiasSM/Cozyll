@@ -32,8 +32,8 @@ tests =
                 hasAnyControl (metadata "rubyToggle: ふりがな") @?= True
             , testCase "detects a ruby level control" $
                 hasAnyControl (metadata "rubyControl: ふりがな") @?= True
-            , testCase "detects an unknown-ruby control" $
-                hasAnyControl (metadata "rubyUnknown: unknown") @?= True
+            , testCase "ignores the removed unknown-ruby key" $
+                hasAnyControl (metadata "rubyUnknown: unknown") @?= False
             , testCase "detects an images toggle" $
                 hasAnyControl (metadata "imagesToggle: Images") @?= True
             , testCase "ignores TOC" $
