@@ -8,6 +8,7 @@ each case reproduces two separate builds against the same @_cache@.
 module Cozyll.ConfigCacheSpec (tests) where
 
 import Cozyll.Fixture (loadFixtureConfig, runBuild, withBuiltExample)
+import Cozyll.TestUtils (assertFileContains, assertFileNotContains)
 import Data.ByteString.Char8 qualified as BS
 import Data.Text qualified as T
 import Data.Text.Encoding (encodeUtf8)
@@ -16,7 +17,7 @@ import System.Directory (getModificationTime, removeFile, setModificationTime)
 import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (Assertion, assertBool, assertFailure, testCase)
+import Test.Tasty.HUnit (assertFailure, testCase)
 
 tests :: TestTree
 tests =
@@ -25,44 +26,44 @@ tests =
         [ testCase "a manifest value edited after a build applies to the next build" $
             withBuiltExample $ \dir site -> do
                 let manifest = site </> "manifest.webmanifest"
-                assertContains manifest oldThemeColor
+                assertFileContains manifest oldThemeColor
                 editFile (content dir "website.yaml") oldThemeColor newThemeColor
                 rebuild dir
-                assertContains manifest newThemeColor
+                assertFileContains manifest newThemeColor
         , testCase "the site title edited after a build applies to the next build" $
             withBuiltExample $ \dir site -> do
                 let home = site </> "index.html"
-                assertNotContains home newTitle
+                assertFileNotContains home newTitle
                 editFile (content dir "website.yaml") "  title: Example\n" ("  title: " ++ newTitle ++ "\n")
                 rebuild dir
-                assertContains home newTitle
+                assertFileContains home newTitle
         , testCase "removing the logo drops the icons from the manifest and the head" $
             withBuiltExample $ \dir site -> do
                 let manifest = site </> "manifest.webmanifest"
                     home = site </> "index.html"
-                assertContains manifest "\"icons\""
-                assertContains home "rel=\"icon\""
+                assertFileContains manifest "\"icons\""
+                assertFileContains home "rel=\"icon\""
                 removeFile (content dir "media" </> "branding" </> "logo.svg")
                 rebuild dir
-                assertNotContains manifest "\"icons\""
-                assertNotContains home "rel=\"icon\""
+                assertFileNotContains manifest "\"icons\""
+                assertFileNotContains home "rel=\"icon\""
         , testCase "an author display name edited after a build applies to the next build" $
             withBuiltExample $ \dir site -> do
                 let tour = site </> "prose" </> "tour" </> "index.html"
-                assertNotContains tour newDisplayName
+                assertFileNotContains tour newDisplayName
                 editFile (content dir "authors.yaml") "  displayName: Example\n" ("  displayName: " ++ newDisplayName ++ "\n")
                 rebuild dir
-                assertContains tour newDisplayName
+                assertFileContains tour newDisplayName
         , testCase "the ruby index edited after a build applies to the next build" $
             withBuiltExample $ \dir site -> do
                 let page = site </> "languages" </> "japanese" </> "index.html"
-                assertContains page "data-jlpt=\"n5\""
+                assertFileContains page "data-jlpt=\"n5\""
                 editFile
                     (content dir ("ruby-data" </> "index.json"))
                     "[\"日本語\", \"にほんご\", \"n5\"]"
                     "[\"日本語\", \"にほんご\", \"n1\"]"
                 rebuild dir
-                assertContains page "data-jlpt=\"n1\""
+                assertFileContains page "data-jlpt=\"n1\""
         ]
 
 -- | The manifest theme colour in the example content, and its replacement
@@ -107,19 +108,3 @@ editFile path needle replacement = do
             BS.writeFile path (before <> replacement' <> BS.drop (BS.length needle') rest)
             modified <- getModificationTime path
             setModificationTime path (addUTCTime 2 modified)
-
--- | Asserts a file contains @needle@
-assertContains :: FilePath -> String -> Assertion
-assertContains path needle = do
-    contents <- BS.readFile path
-    assertBool
-        ("expected " ++ path ++ " to contain \"" ++ needle ++ "\"")
-        (encodeUtf8 (T.pack needle) `BS.isInfixOf` contents)
-
--- | Asserts a file does not contain @needle@
-assertNotContains :: FilePath -> String -> Assertion
-assertNotContains path needle = do
-    contents <- BS.readFile path
-    assertBool
-        ("expected " ++ path ++ " not to contain \"" ++ needle ++ "\"")
-        (not (encodeUtf8 (T.pack needle) `BS.isInfixOf` contents))
