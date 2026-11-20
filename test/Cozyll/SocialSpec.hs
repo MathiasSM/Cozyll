@@ -3,9 +3,8 @@ module Cozyll.SocialSpec (tests) where
 
 import Cozyll.Domain.Social (Social (..), parseSocialsYaml)
 import Cozyll.TestUtils
-import Data.Either (isLeft)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase, (@?=))
+import Test.Tasty.HUnit (testCase, (@?=))
 
 -- | A social account with every field except the optional _show flag
 validSocial :: Fields
@@ -51,7 +50,7 @@ tests =
                     , "social #1: username: missing"
                     ]
         , testCase "rejects text that isn't a YAML list of objects" $
-            assertBool "expected parsing to fail" (isLeft (parseSocialsYaml "icon: ["))
+            assertFails (parseSocialsYaml "icon: [")
         ]
   where
     parse = parseListFields parseSocialsYaml

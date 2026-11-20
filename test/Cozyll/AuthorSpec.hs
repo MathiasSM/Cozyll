@@ -5,7 +5,7 @@ import Cozyll.Config (SiteConfig (..))
 import Cozyll.Context.Author (authoredBy, copyrightYears, profileImageUrl, resolveAuthors)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, decodeAuthorsUtf8, defaultAuthor, parseAuthorsYaml)
 import Cozyll.Metadata qualified as Meta
-import Cozyll.TestUtils (metadataJson, testConfig)
+import Cozyll.TestUtils (assertFailsWith, metadataJson, testConfig)
 import Data.Aeson (Value (..), toJSON)
 import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString qualified as BS
@@ -60,25 +60,25 @@ parseTests =
             author <- oneAuthor "example:\n  name: Example Labs\n  type: organization\n  siteDefault: true\n"
             authorType author @?= Organization
         , testCase "rejects a missing name" $
-            failsWith "name: missing" "example:\n  siteDefault: true\n"
+            assertFailsWith "name: missing" (parseAuthorsYaml "example:\n  siteDefault: true\n")
         , testCase "rejects an empty name" $
-            failsWith "name: empty" "example:\n  name: \"\"\n  siteDefault: true\n"
+            assertFailsWith "name: empty" (parseAuthorsYaml "example:\n  name: \"\"\n  siteDefault: true\n")
         , testCase "rejects an unknown type" $
-            failsWith "type: unknown" "example:\n  name: A\n  type: robot\n  siteDefault: true\n"
+            assertFailsWith "type: unknown" (parseAuthorsYaml "example:\n  name: A\n  type: robot\n  siteDefault: true\n")
         , testCase "rejects an empty profileImage" $
-            failsWith "profileImage: empty" "example:\n  name: A\n  siteDefault: true\n  profileImage: \"\"\n"
+            assertFailsWith "profileImage: empty" (parseAuthorsYaml "example:\n  name: A\n  siteDefault: true\n  profileImage: \"\"\n")
         , testCase "rejects a non-string link" $
-            failsWith "links[0]: expected a non-empty string" "example:\n  name: A\n  siteDefault: true\n  links:\n    - 42\n"
+            assertFailsWith "links[0]: expected a non-empty string" (parseAuthorsYaml "example:\n  name: A\n  siteDefault: true\n  links:\n    - 42\n")
         , testCase "rejects an uppercase id" $
-            failsWith "invalid id" "Foo:\n  name: A\n  siteDefault: true\n"
+            assertFailsWith "invalid id" (parseAuthorsYaml "Foo:\n  name: A\n  siteDefault: true\n")
         , testCase "rejects an id with an underscore" $
-            failsWith "invalid id" "a_b:\n  name: A\n  siteDefault: true\n"
+            assertFailsWith "invalid id" (parseAuthorsYaml "a_b:\n  name: A\n  siteDefault: true\n")
         , testCase "rejects an id starting with a hyphen" $
-            failsWith "invalid id" "-a:\n  name: A\n  siteDefault: true\n"
+            assertFailsWith "invalid id" (parseAuthorsYaml "-a:\n  name: A\n  siteDefault: true\n")
         , testCase "rejects a non-map document" $
-            failsWith "expected a map" "- name: A\n"
+            assertFailsWith "expected a map" (parseAuthorsYaml "- name: A\n")
         , testCase "rejects an empty map" $
-            failsWith "non-empty map" "{}\n"
+            assertFailsWith "non-empty map" (parseAuthorsYaml "{}\n")
         , testCase "reports every problem at once" $
             case parseAuthorsYaml "example:\n  type: robot\n  links:\n    - 42\n" of
                 Left problems -> do
@@ -126,9 +126,9 @@ defaultAuthorTests =
                 Right [] -> assertFailure "Expected non-empty list of authors, but got empty list"
                 Right authors@(author : _) -> defaultAuthor authors @?= Right author
         , testCase "rejects zero defaults" $
-            failsWith "found none" "a:\n  name: A\n"
+            assertFailsWith "found none" (parseAuthorsYaml "a:\n  name: A\n")
         , testCase "rejects two defaults" $
-            failsWith "found 2" "a:\n  name: A\n  siteDefault: true\nb:\n  name: B\n  siteDefault: true\n"
+            assertFailsWith "found 2" (parseAuthorsYaml "a:\n  name: A\n  siteDefault: true\nb:\n  name: B\n  siteDefault: true\n")
         ]
 
 authorUrlPathTests :: TestTree
@@ -160,15 +160,6 @@ oneAuthor yaml = case parseAuthorsYaml yaml of
     Left problems -> assertFailure (unlines problems)
     Right [author] -> pure author
     Right authors -> assertFailure ("expected one author, got " ++ show (length authors))
-
--- | Asserts the parse fails with a problem mentioning the given text
-failsWith :: String -> String -> IO ()
-failsWith text yaml = case parseAuthorsYaml yaml of
-    Left problems ->
-        assertBool
-            ("expected a problem mentioning " ++ show text ++ ", got " ++ show problems)
-            (any (text `isInfixOf`) problems)
-    Right _ -> assertFailure "expected parsing to fail"
 
 happyAuthor :: String
 happyAuthor =
