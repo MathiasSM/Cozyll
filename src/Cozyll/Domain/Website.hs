@@ -158,7 +158,8 @@ toPandocStyle BreezeDark = breezeDark
 toPandocStyle Haddock = haddock
 
 instance FromJSON Highlight where
-    parseJSON = genericParseJSON (typeOptions "highlight")
+    parseJSON value =
+        withObject "highlight" (\_ -> genericParseJSON (typeOptions "highlight") value) value
 
 -- | The @funding:@ section: data behind @funding.json@
 data Funding = Funding
@@ -258,40 +259,52 @@ instance FromJSON Site where
             <*> o .:? "logo"
 
 instance FromJSON Contact where
-    parseJSON = genericParseJSON (typeOptions "contact")
+    parseJSON value =
+        withObject "contact" (\_ -> genericParseJSON (typeOptions "contact") value) value
 
 instance FromJSON Manifest where
-    parseJSON = genericParseJSON (typeOptions "manifest")
+    parseJSON value =
+        withObject "manifest" (\_ -> genericParseJSON (typeOptions "manifest") value) value
 
 instance FromJSON Mathjax where
-    parseJSON = genericParseJSON (typeOptions "mathjax")
+    parseJSON value =
+        withObject "mathjax" (\_ -> genericParseJSON (typeOptions "mathjax") value) value
 
 instance FromJSON Funding where
-    parseJSON = genericParseJSON (typeOptions "funding")
+    parseJSON value =
+        withObject "funding" (\_ -> genericParseJSON (typeOptions "funding") value) value
 
 instance FromJSON FeedConfig where
-    parseJSON = genericParseJSON (typeOptions "feed")
+    parseJSON value =
+        withObject "feed" (\_ -> genericParseJSON (typeOptions "feed") value) value
 
 instance FromJSON FundingEntity where
-    parseJSON = genericParseJSON (typeOptions "fundingEntity")
+    parseJSON value =
+        withObject "funding.entity" (\_ -> genericParseJSON (typeOptions "fundingEntity") value) value
 
 instance FromJSON FundingProject where
-    parseJSON = genericParseJSON (typeOptions "fundingProject")
+    parseJSON value =
+        withObject "funding.project" (\_ -> genericParseJSON (typeOptions "fundingProject") value) value
 
 instance FromJSON FundingChannel where
-    parseJSON = genericParseJSON (typeOptions "fundingChannel")
+    parseJSON value =
+        withObject "funding.channel" (\_ -> genericParseJSON (typeOptions "fundingChannel") value) value
 
 instance FromJSON FundingPlan where
-    parseJSON = genericParseJSON (typeOptions "fundingPlan")
+    parseJSON value =
+        withObject "funding.plan" (\_ -> genericParseJSON (typeOptions "fundingPlan") value) value
 
 instance FromJSON Security where
-    parseJSON = genericParseJSON (typeOptions "security")
+    parseJSON value =
+        withObject "security" (\_ -> genericParseJSON (typeOptions "security") value) value
 
 instance FromJSON Robots where
-    parseJSON = genericParseJSON (typeOptions "robots")
+    parseJSON value =
+        withObject "robots" (\_ -> genericParseJSON (typeOptions "robots") value) value
 
 instance FromJSON Trust where
-    parseJSON = genericParseJSON (typeOptions "trust")
+    parseJSON value =
+        withObject "trust" (\_ -> genericParseJSON (typeOptions "trust") value) value
 
 instance FromJSON Website where
     parseJSON = withObject "website" $ \o ->
