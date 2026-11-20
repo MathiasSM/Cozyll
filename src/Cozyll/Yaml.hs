@@ -2,23 +2,33 @@
 module Cozyll.Yaml (
     decodeYaml,
     parseYamlList,
+    readYamlFile,
     Check (..),
     required,
     optional,
     enumFromJSON,
+    lookupEnum,
+    typeOptions,
+    scalarString,
 ) where
 
+import Control.Monad (unless)
 import Cozyll.Metadata (Key, keyName)
-import Data.Aeson (FromJSON (parseJSON), Object, Value (Null), withText)
+import Data.Aeson (FromJSON (parseJSON), Object, Options (fieldLabelModifier), Value (..), defaultOptions, withText)
 import Data.Aeson.Key (fromString)
 import Data.Aeson.KeyMap (lookup)
 import Data.Aeson.Types (Parser, parseEither)
 import Data.Bifunctor (first)
+import Data.Char (toLower)
 import Data.List (intercalate, stripPrefix)
+import Data.List qualified as List
 import Data.Maybe (fromMaybe)
+import Data.Scientific (Scientific, floatingOrInteger)
 import Data.Text qualified as T
 import Data.Text.Encoding qualified as T
-import Data.Yaml (decodeEither', prettyPrintParseException)
+import Data.Yaml (decodeEither', decodeFileEither, prettyPrintParseException)
+import System.Directory (doesFileExist)
+import System.Exit (die)
 import Prelude hiding (lookup)
 
 -- | Decodes a YAML document, reporting the parse problems found
@@ -36,12 +46,20 @@ parseYamlList what parseOne text = do
   where
     prefix index problem = what ++ " #" ++ show index ++ ": " ++ problem
 
+-- | Reads and decodes a YAML file, dying with a clear message
+readYamlFile :: (FromJSON a) => FilePath -> IO a
+readYamlFile path = do
+    exists <- doesFileExist path
+    unless exists $ die $ path ++ " not found"
+    result <- decodeFileEither path
+    either (\e -> die $ "Invalid " ++ path ++ ":\n" ++ prettyPrintParseException e) pure result
+
 -- | Accepts exactly the spellings @render@ produces
 enumFromJSON :: (Enum a, Bounded a) => String -> (a -> String) -> Value -> Parser a
 enumFromJSON what render = withText what $ \t ->
-    case [x | x <- [minBound .. maxBound], render x == T.unpack t] of
-        x : _ -> pure x
-        [] ->
+    case lookupEnum render (T.unpack t) of
+        Just x -> pure x
+        Nothing ->
             fail $
                 "unknown "
                     ++ what
@@ -50,6 +68,34 @@ enumFromJSON what render = withText what $ \t ->
                     ++ "\" (expected "
                     ++ intercalate ", " (map render [minBound .. maxBound])
                     ++ ")"
+
+-- | Resolves a value from its rendered spelling
+lookupEnum :: (Enum a, Bounded a) => (a -> String) -> String -> Maybe a
+lookupEnum render name = List.lookup name [(render x, x) | x <- [minBound .. maxBound]]
+
+-- | Options for records whose selectors are prefixed by their type name
+typeOptions :: String -> Options
+typeOptions prefix =
+    defaultOptions
+        { fieldLabelModifier = \field -> case drop (length prefix) field of
+            (c : cs) -> toLower c : cs
+            [] -> []
+        }
+
+-- | The text of a scalar value, if it is one
+scalarString :: Value -> Maybe String
+scalarString = \case
+    String text -> Just $ T.unpack text
+    Number n -> Just $ renderNumber n
+    Bool b -> Just $ if b then "true" else "false"
+    Null -> Just ""
+    _ -> Nothing
+
+-- | A JSON number rendered without scientific notation
+renderNumber :: Scientific -> String
+renderNumber n = case floatingOrInteger n of
+    Right integer -> show (integer :: Integer)
+    Left double -> show (double :: Double)
 
 -- | Like 'Either', but combining failures instead of stopping at the first
 newtype Check a = Check {runCheck :: Either [String] a}
