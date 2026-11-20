@@ -19,7 +19,7 @@ import Cozyll.Context.SocialMeta (
  )
 import Cozyll.Domain.Author (Author (..))
 import Cozyll.Domain.Website qualified as Web
-import Cozyll.TestUtils (assertContains, assertNotContains, metadata, mkAuthor, testConfig)
+import Cozyll.TestUtils (assertContains, assertNotContains, metadata, mkAuthor, siteYaml, testConfig)
 import Cozyll.Yaml (decodeYaml)
 import Data.Text (Text)
 import Hakyll (defaultHakyllReaderOptions)
@@ -209,22 +209,8 @@ siteParsingTests =
                     Web.siteLogo site @?= Nothing
         ]
   where
-    siteWithExtras =
-        unlines
-            [ "title: Example"
-            , "description: An example site"
-            , "copyrightYear: 2020"
-            , "domain: example.com"
-            , "alternateName: [Ex, example.com]"
-            , "logo: images/logo.png"
-            ]
-    siteMinimal =
-        unlines
-            [ "title: Example"
-            , "description: An example site"
-            , "copyrightYear: 2020"
-            , "domain: example.com"
-            ]
+    siteWithExtras = siteYaml ["alternateName: [Ex, example.com]", "logo: images/logo.png"]
+    siteMinimal = siteYaml []
 
 pageKindOfTests :: TestTree
 pageKindOfTests =

@@ -50,4 +50,4 @@ tests =
                     ]
         ]
   where
-    parse = parsePostYaml . render
+    parse = parseFields parsePostYaml
