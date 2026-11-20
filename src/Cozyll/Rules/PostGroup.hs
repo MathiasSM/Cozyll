@@ -2,17 +2,14 @@
 module Cozyll.Rules.PostGroup (processPostGroup) where
 
 import Cozyll.CleanURL (pathRoute)
-import Cozyll.Compile (applyTemplates, finish, runPandocWith)
-import Cozyll.Config (SiteConfig, contentTemplate, postSnapshot, postTemplate, postsPattern, resolveTemplate, siteEnv, siteJaRubyCheck, siteRubyData)
-import Cozyll.Content (isHidden, isTemplated, requirePost)
+import Cozyll.Compile (applyTemplates, finishPage, loadPageBody)
+import Cozyll.Config (SiteConfig, contentTemplate, postSnapshot, postTemplate, postsPattern, resolveTemplate, siteEnv)
+import Cozyll.Content (isHidden, requirePost)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.Author (resolveAuthors)
-import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (PageItem, PageKind (Article), PageMeta (pageMetaLanguage), pageItemOf, pageMetaOf, socialMetaContext)
-import Cozyll.Localization (ogLocaleFor)
+import Cozyll.Context.SocialMeta (PageItem, PageKind (Article), pageItemOf, pageMetaOf)
 import Cozyll.Rules.SinglePages (Page (..), page, processPage)
-import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
     Compiler,
     Context,
@@ -20,7 +17,6 @@ import Hakyll (
     boolField,
     compile,
     getMetadata,
-    getResourceString,
     getUnderlying,
     listField,
     loadAllSnapshots,
@@ -58,19 +54,14 @@ processPostGroupItems cfg groupName =
         route $ metadataRoute pathRoute
         compile $ do
             _ <- requirePost
-            templated <- isTemplated
-            getResourceString
-                >>= (if templated then applyContentAsTemplate cfg (globalContext cfg) else return)
-                >>= runPandocWith (siteRubyData cfg) (siteJaRubyCheck cfg)
-                >>= \(item', tocHtml, mainImg) -> do
-                    metadata <- getUnderlying >>= getMetadata
-                    let pageMeta = pageMetaOf cfg metadata
-                        authors = resolveAuthors cfg metadata
-                        ctx' = asideContext tocHtml <> globalContext cfg <> boolField "linkAuthors" (const True)
-                    ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
-                    saveSnapshot (postSnapshot groupName) item'
-                        >>= applyTemplates ctx' [contentTemplate cfg, postTemplate cfg]
-                        >>= finish cfg (socialMetaContext cfg Article authors [] pageMeta mainImg ogLocale <> navContext cfg groupName (pageMetaLanguage pageMeta) <> ctx')
+            (item', tocHtml, mainImg) <- loadPageBody cfg (globalContext cfg)
+            metadata <- getUnderlying >>= getMetadata
+            let pageMeta = pageMetaOf cfg metadata
+                authors = resolveAuthors cfg metadata
+                ctx' = asideContext tocHtml <> globalContext cfg <> boolField "linkAuthors" (const True)
+            saveSnapshot (postSnapshot groupName) item'
+                >>= applyTemplates ctx' [contentTemplate cfg, postTemplate cfg]
+                >>= finishPage cfg Article authors [] pageMeta mainImg ctx' groupName
 
 -- | Build context for archive page
 getCtx :: SiteConfig -> String -> Compiler (Context String)
