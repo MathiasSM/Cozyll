@@ -13,10 +13,11 @@ import Cozyll.Context.Data (
     renderScalar,
     scalarString,
  )
+import Cozyll.TestUtils (assertFails)
 import Cozyll.Yaml (decodeYaml)
-import Data.Either (fromRight, isLeft)
+import Data.Either (fromRight)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase, (@?=))
+import Test.Tasty.HUnit (testCase, (@?=))
 
 -- | The data helpers tests
 tests :: TestTree
@@ -100,7 +101,7 @@ tests =
             "checkAgainstSchema"
             [ testCase "accepts valid data" $ checkAgainstSchema schema valid @?= Right ()
             , testCase "rejects data missing a required field" $
-                assertBool "expected validation to fail" (isLeft (checkAgainstSchema schema invalid))
+                assertFails (checkAgainstSchema schema invalid)
             ]
         ]
   where
