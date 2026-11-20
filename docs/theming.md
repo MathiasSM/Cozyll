@@ -64,23 +64,24 @@ template itself uses; see the module Haddocks for the complete context.
 |---|---|---|
 | `site.html` | The page shell (`<html>`, `<body>`) | `language`, `body` |
 | `site-head.html` | `<head>`: metadata, feeds, favicons, manifest | `jsonld`, `opengraph`, `feeds` (`title`, `href`), `site-baseUrl`, `path`, `home`, `title`, `description`, `site-title`, `site-description`, `favicons` (`href`, `rel`, `type`, `sizes`), `math`, `mathjax-version` |
-| `site-header.html` | Site logo, title, description and menu | `site-title`, `site-logo`, `site-description`; renders `site-menu.html` |
+| `site-header.html` | Site logo, title, description and menu | `site-title`, `site-logo`, `site-description`, `siteChromeLang`; renders `site-menu.html` |
 | `site-menu.html` | The `nav:` menu | `nav` (`label`, `href`, `active`, `lang`) |
 | `site-footer.html` | The footer | renders `copyright.html` |
 | `copyright.html` | Copyright line | `site-title`, `site-copyrightRange` |
 | `content.html` | Wrapper between the body and the page template (applied by the builder) | `body` |
 | `as-page.html` | Standalone page | `title`, `body`; renders `site-aside.html` |
 | `as-post.html` | Post page | `title`, `body`, `postCopyright`; renders `post-date.html`, `site-aside.html`, `post-copyright.html` |
-| `post-date.html` | Byline, date and update date | `language`, `author` (`path`, `displayName`), `date`, `lastModifiedAt`, `t("post.updated")` |
+| `post-date.html` | Byline, date and update date | `language`, `author` (`path`, `displayName`), `linkAuthors`, `date`, `lastModifiedAt`, `t("post.updated")` |
 | `post-copyright.html` | Per-post copyright notice | `postCopyrightHolders` (`name`), `postCopyrightYears` |
-| `post-list.html` | A list of posts | `posts` (`url`, `slug`, `language`, `title`, `date`, `description`); renders `post-date.html` |
+| `post-list.html` | A list of posts | `posts` (`url`, `slug`, `language`, `title`, `description`); renders `post-date.html` |
 | `project-list.html` | A list of showcase projects | `projects` (`href`, `slug`, `status`, `title`, `shortDescription`, `longDescription`); renders `project-date.html` |
 | `project-date.html` | Project dates | `language`, `startDate`, `endDate`, `t("project.started")`, `t("project.finished")` |
 | `with-posts.html` | Group index: body plus post list | `body`; renders `post-list.html` |
 | `with-projects.html` | Showcase index: body plus project list | `body`; renders `project-list.html` |
 | `author.html` | Author profile page | `name`, `profileImage`, `description`, `links` (`url`); renders `post-list.html` |
-| `site-aside.html` | Per-page aside with controls and table of contents | `hasAside`, `hasControls`, `rubyToggleLabel`, `imagesToggleLabel`, `toc`, `tocLabel` |
+| `site-aside.html` | Per-page aside with controls and table of contents | `hasAside`, `hasControls`, `rubyToggleLabel`, `rubyControlLabel`, `imagesToggleLabel`, `toc`, `tocLabel` |
 | `controls--ruby-toggle.html` | The ruby toggle control | `rubyToggleLabel` |
+| `controls--ruby-control.html` | The ruby JLPT threshold control | `rubyControlLabel`, `t("ruby.N5-or-harder")`, `t("ruby.N4-or-harder")`, `t("ruby.N3-or-harder")`, `t("ruby.N2-or-harder")`, `t("ruby.N1-or-harder")`, `t("ruby.none")` |
 | `controls--images-toggle.html` | The image toggle control | `imagesToggleLabel` |
 | `social-links.html` | The social account list | `socials` |
 | `social-link-item.html` | One social link | `href`, `iconRaw`, `username` |
