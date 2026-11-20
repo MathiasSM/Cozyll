@@ -91,7 +91,8 @@ emptyOptions = Options Nothing Nothing Nothing False False False False
 
 {- | One @data@ flag: how it is spelled, its argument, its help text, the
 subcommands that accept it, and how it updates 'Options'. Everything the parser
-and the help text need comes from this table.
+and the help text need comes from this table. 'specLong' is the bare name, as
+@getOpt@ wants it; 'flagName' adds the dashes for the user.
 -}
 data Spec = Spec
     { specShort :: [Char]
@@ -105,33 +106,33 @@ data Spec = Spec
 -- | Every flag, in help order
 specs :: [Spec]
 specs =
-    [ Spec "h" "--help" Nothing "show this help" [] (\_ opts -> opts)
-    , Spec "" "--version" Nothing "show the cozyll version" [] (\_ opts -> opts)
+    [ Spec "h" "help" Nothing "show this help" [] (\_ opts -> opts)
+    , Spec "" "version" Nothing "show the cozyll version" [] (\_ opts -> opts)
     , Spec
         ""
-        "--from"
+        "from"
         (Just "DIR")
         "read upstream files from DIR instead of downloading"
         ["fetch"]
         (\arg opts -> opts{optFrom = arg})
     , Spec
         ""
-        "--data-dir"
+        "data-dir"
         (Just "DIR")
         "ruby-data directory (default: <content>/ruby-data)"
         ["fetch", "verify", "fmt", "sources"]
         (\arg opts -> opts{optDataDir = arg})
     , Spec
         ""
-        "--sources"
+        "sources"
         (Just "FILE")
         "sources file (default: <data-dir>/sources.yaml)"
         ["fetch", "sources"]
         (\arg opts -> opts{optSources = arg})
-    , Spec "" "--check" Nothing "derive and compare without writing" ["fetch"] (\_ opts -> opts{optCheck = True})
-    , Spec "" "--write" Nothing "copy the default sources file into place" ["sources"] (\_ opts -> opts{optWrite = True})
-    , Spec "" "--force" Nothing "overwrite an existing sources file" ["sources"] (\_ opts -> opts{optForce = True})
-    , Spec "" "--resolve" Nothing "resolve latest refs via the GitHub API" ["sources"] (\_ opts -> opts{optResolve = True})
+    , Spec "" "check" Nothing "derive and compare without writing" ["fetch"] (\_ opts -> opts{optCheck = True})
+    , Spec "" "write" Nothing "copy the default sources file into place" ["sources"] (\_ opts -> opts{optWrite = True})
+    , Spec "" "force" Nothing "overwrite an existing sources file" ["sources"] (\_ opts -> opts{optForce = True})
+    , Spec "" "resolve" Nothing "resolve latest refs via the GitHub API" ["sources"] (\_ opts -> opts{optResolve = True})
     ]
 
 -- | Every flag, as @getOpt@ options
@@ -144,9 +145,9 @@ options = map toOption specs
         Nothing -> NoArg (spec, Nothing)
         Just metavar -> ReqArg (\arg -> (spec, Just arg)) metavar
 
--- | The long name of a flag, for error messages
+-- | The long name of a flag as the user writes it, for error messages
 flagName :: Spec -> String
-flagName = specLong
+flagName spec = "--" ++ specLong spec
 
 -- | The flags each command accepts, by long name
 allowedFlags :: String -> [String]
