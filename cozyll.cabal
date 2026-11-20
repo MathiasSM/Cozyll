@@ -85,6 +85,7 @@ library
                   , Cozyll.Rules
                   , Cozyll.Rules.Assets
                   , Cozyll.Rules.AuthorPages
+                  , Cozyll.Rules.Common
                   , Cozyll.Rules.Favicon
                   , Cozyll.Rules.Feed
                   , Cozyll.Rules.PostGroup
