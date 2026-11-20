@@ -48,19 +48,15 @@ module Cozyll.Ruby.Index (
 ) where
 
 import Control.Monad (unless, when)
-import Data.Aeson (Value (..), eitherDecodeStrict')
-import Data.Aeson.Key qualified as Key
-import Data.Aeson.KeyMap (KeyMap)
-import Data.Aeson.KeyMap qualified as KeyMap
+import Cozyll.Ruby.Json (asArray, asInt, asMaybeInt, asObject, asText, decodeJson, required)
+import Data.Aeson (Value (..))
 import Data.Aeson.Text (encodeToLazyText)
 import Data.Bifunctor (first)
 import Data.ByteString qualified as BS
 import Data.Char (isSpace, ord)
-import Data.Foldable (toList)
 import Data.List (groupBy, sortOn)
 import Data.Map.Strict (Map)
 import Data.Map.Strict qualified as Map
-import Data.Scientific (toBoundedInteger)
 import Data.Set (Set)
 import Data.Set qualified as Set
 import Data.Text (Text)
@@ -218,7 +214,7 @@ jsonText = TL.toStrict . encodeToLazyText . String
 
 decodeIndex :: Text -> Either String Index
 decodeIndex text = do
-    value <- eitherDecodeStrict' (encodeUtf8 text)
+    value <- decodeJson (encodeUtf8 text)
     obj <- asObject "index" value
     schema <- required "schemaVersion" obj >>= asInt "schemaVersion"
     unless (schema == 1) $ Left ("unsupported schemaVersion " ++ show schema ++ " (this cozyll supports 1)")
@@ -287,29 +283,6 @@ checkNormalized :: String -> Text -> Either String ()
 checkNormalized label value =
     unless (normalizeKey value == value) $
         Left (label ++ " is not normalised (run `cozyll data fmt`)")
-
-asObject :: String -> Value -> Either String (KeyMap Value)
-asObject _ (Object o) = Right o
-asObject label _ = Left (label ++ " must be an object")
-
-asArray :: String -> Value -> Either String [Value]
-asArray _ (Array a) = Right (toList a)
-asArray label _ = Left (label ++ " must be an array")
-
-required :: String -> KeyMap Value -> Either String Value
-required name obj = maybe (Left ("missing field " ++ name)) Right (KeyMap.lookup (Key.fromText (T.pack name)) obj)
-
-asText :: String -> Value -> Either String Text
-asText _ (String t) = Right t
-asText label _ = Left (label ++ " must be a string")
-
-asInt :: String -> Value -> Either String Int
-asInt label (Number n) = maybe (Left (label ++ " must be an integer")) Right (toBoundedInteger n)
-asInt label _ = Left (label ++ " must be an integer")
-
-asMaybeInt :: String -> Value -> Either String (Maybe Int)
-asMaybeInt _ Null = Right Nothing
-asMaybeInt label v = Just <$> asInt label v
 
 asLevel :: String -> Value -> Either String Level
 asLevel label v = do
