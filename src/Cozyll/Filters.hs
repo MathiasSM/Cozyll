@@ -1,7 +1,7 @@
 -- | Custom Pandoc filters, like the ruby-text transform
-module Cozyll.Filters (processRubyText, processRubyTextWith) where
+module Cozyll.Filters (processRubyText, processRubyTextWith, sourceName) where
 
-import Cozyll.Ruby (LevelSource (..), levelOf)
+import Cozyll.Ruby (levelOf, sourceName)
 import Cozyll.Ruby.Index (RubyData, levelText)
 import Data.Text (Text)
 import Data.Text qualified as T
@@ -51,10 +51,6 @@ rubyHtml rubyData base reading =
                     <> "\" data-jlpt-source=\""
                     <> sourceName source
                     <> "\""
-
-    sourceName FromWord = "word"
-    sourceName FromKanji = "kanji"
-    sourceName FromUnknown = "unknown"
 
 escapeHtml :: Text -> Text
 escapeHtml = T.concatMap escape
