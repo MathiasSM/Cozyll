@@ -89,8 +89,6 @@ data Key
       RubyToggle
     | -- | Enables: The ruby-level control; the value is the control's label (markdown).
       RubyControl
-    | -- | Enables: The unknown-level ruby checkbox; the value is its label (markdown).
-      RubyUnknown
     | -- | Words that may appear without furigana (coverage exemption).
       JaRubySkip
     | -- | Japanese ruby surfaces (or @surface:reading@ pairs) accepted without a dictionary match.
@@ -149,7 +147,6 @@ keyName key = case key of
     TOC -> "TOC"
     RubyToggle -> "rubyToggle"
     RubyControl -> "rubyControl"
-    RubyUnknown -> "rubyUnknown"
     JaRubySkip -> "jaRubySkip"
     JaRubyAllow -> "jaRubyAllow"
     JaRubyCheck -> "jaRubyCheck"

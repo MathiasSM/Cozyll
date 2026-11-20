@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+### Removed
+
+- The `rubyUnknown` front-matter key and the unknown-level ruby checkbox; ruby without a JLPT level is now always shown, and a page whose only control was `rubyUnknown` no longer renders the aside.
+
+### Changed
+
+- The ruby `<select>` no longer offers "All" (it was the same as "N5 and harder") and gains "Hide all JLPT"; `ruby.all` is replaced in `localization.yaml` by `ruby.N5-or-harder` … `ruby.N1-or-harder` and `ruby.none`, so content repos using `rubyControl` must add them or the build fails.
+- The aside control strip scrolls and fades as one row, its chips read their label first and no longer highlight on hover, and the desktop sidebar is a fixed `20em` column instead of sizing to its content.
+
+### Fixed
+
+- A chosen ruby threshold hid one level too many (the label said "N3 and harder" but N3 was hidden).
+
 ## [3.5.1.1] - 2026-11-13
 
 ### Added

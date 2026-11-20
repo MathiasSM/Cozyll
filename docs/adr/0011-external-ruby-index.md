@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-11-10
+- Amended: 2026-11-15
 
 ## Context
 
@@ -35,9 +36,9 @@ offline.
   sokuon, rendaku, and `々` are accepted; `jaRubyAllow` exempts names and creative readings.
 - `jaRubyCheck` (`off`, `warn`, `error`) is a site-level key with a per-page override. Both
   checks are gated to `ja*` text; non-Japanese ruby is controlled but not verified.
-- The reader control is a threshold `<select>` plus an independent unknown-level checkbox;
-  the choice lives in `localStorage`, not in front matter. The old all-or-nothing
-  `rubyToggle` remains as a deprecated alias and will be removed in a future major.
+- The reader control is a threshold `<select>`; the choice lives in `localStorage`, not in
+  front matter. The old all-or-nothing `rubyToggle` remains as a deprecated alias and will be
+  removed in a future major.
 - The index size limit is `COZYLL_RUBY_INDEX_LIMIT` (default 8 MiB); there are no
   per-table row caps.
 
@@ -52,6 +53,10 @@ offline.
   `watch`).
 - Verification proves a reading is attested, not that it is intended in context; names and
   creative readings need `jaRubyAllow`.
-- Consumers must add `ruby.all` to `localization.yaml` for the select label.
+- Consumers must add `ruby.N5-or-harder`, `ruby.N4-or-harder`, `ruby.N3-or-harder`,
+  `ruby.N2-or-harder`, `ruby.N1-or-harder` and `ruby.none` to `localization.yaml` for the
+  select labels.
 - `rubyToggle` is deprecated rather than removed, so existing content keeps working through
   the 3.x line.
+- The checkbox for ruby without a JLPT level was removed on 2026-11-15; the select ends with
+  "Hide all JLPT" and ruby without a JLPT level is always shown.
