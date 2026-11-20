@@ -22,7 +22,7 @@ tests =
             ]
         , testGroup
             "title"
-            [ testCase "reports a missing title" $ reports "<div></div>" "no <title>"
+            [ testCase "reports a missing title" $ reports emptyPage "no <title>"
             , testCase "reports an empty title" $ reports "<title></title>" "empty <title>"
             , testCase "reports multiple titles" $
                 reports "<title>a</title><title>b</title>" "multiple <title> elements"
@@ -31,14 +31,14 @@ tests =
             ]
         , testGroup
             "language"
-            [ testCase "reports a missing html element" $ reports "<div></div>" "no <html> element"
+            [ testCase "reports a missing html element" $ reports emptyPage "no <html> element"
             , testCase "reports an empty lang" $ reports "<html lang=\"\"></html>" "missing non-empty `lang` on <html>"
             , testCase "allows a non-empty lang" $
                 notReported "<html lang=\"en\"></html>" "missing non-empty `lang` on <html>"
             ]
         , testGroup
             "h1"
-            [ testCase "reports a missing h1" $ reports "<div></div>" "no <h1>"
+            [ testCase "reports a missing h1" $ reports emptyPage "no <h1>"
             , testCase "reports multiple h1 elements" $
                 reports "<h1>a</h1><h1>b</h1>" "multiple <h1> elements"
             , testCase "allows a single h1" $ notReported "<h1>Title</h1>" "no <h1>"
@@ -102,7 +102,7 @@ tests =
             ]
         , testGroup
             "main"
-            [ testCase "reports a missing main" $ reports "<div></div>" "no <main>"
+            [ testCase "reports a missing main" $ reports emptyPage "no <main>"
             , testCase "reports multiple main elements" $
                 reports "<main></main><main></main>" "multiple <main> elements"
             , testCase "allows a single main" $ notReported "<main></main>" "no <main>"
@@ -110,6 +110,10 @@ tests =
         , testCase "passes a fully valid page" $
             checkHtml "<html lang=\"en\"><head><title>Home</title></head><body><main><h1>Title</h1><p>Hello</p></main></body></html>" @?= []
         ]
+
+-- | A page with no elements the checks look for
+emptyPage :: String
+emptyPage = "<div></div>"
 
 -- | The problem appears among the page's findings
 reports :: String -> String -> Assertion

@@ -59,15 +59,15 @@ tests =
         , testGroup
             "state file"
             [ testCase "round-trips through _cache/cozyll-build.json" $
-                withSystemTempDirectory "cozyll-build-state" $ \root -> do
+                withStateRoot $ \root -> do
                     writeBuildStateIn root (state Dev)
                     readBuildStateIn root >>= (@?= Just (state Dev))
                     created <- doesFileExist (buildStatePathIn root)
                     assertBool "state file was created" created
             , testCase "is Nothing when the state file is missing" $
-                withSystemTempDirectory "cozyll-build-state" (readBuildStateIn >=> (@?= Nothing))
+                withStateRoot (readBuildStateIn >=> (@?= Nothing))
             , testCase "is Nothing when the JSON is corrupt" $
-                withSystemTempDirectory "cozyll-build-state" $ \root -> do
+                withStateRoot $ \root -> do
                     let file = buildStatePathIn root
                     createDirectoryIfMissing True (root </> "_cache")
                     writeFile file "{not json"
@@ -76,7 +76,7 @@ tests =
         , testGroup
             "reset"
             [ testCase "removes _site and _cache when SITE_ENV changes" $
-                withSystemTempDirectory "cozyll-build-state" $ \root -> do
+                withStateRoot $ \root -> do
                     createDirectoryIfMissing True (root </> "_site" </> "prose")
                     writeFile (root </> "_site" </> "prose" </> "draft.html") "draft"
                     writeBuildStateIn root (state Dev)
@@ -86,29 +86,29 @@ tests =
                     assertBool "_site is gone" (not site)
                     assertBool "_cache is gone" (not cache)
             , testCase "removes a site with no build state" $
-                withSystemTempDirectory "cozyll-build-state" $ \root -> do
+                withStateRoot $ \root -> do
                     createDirectoryIfMissing True (root </> "_site")
                     writeFile (root </> "_site" </> "index.html") "old"
                     applyBuildStartIn root (decideBuildStart Nothing Prod True)
                     site <- doesDirectoryExist (root </> "_site")
                     assertBool "_site is gone" (not site)
             , testCase "tolerates missing directories" $
-                withSystemTempDirectory "cozyll-build-state" $ \root ->
+                withStateRoot $ \root ->
                     resetBuildOutputsIn root
             ]
         , testGroup
             "siteOutputExists"
             [ testCase "is false without _site" $
-                withSystemTempDirectory "cozyll-build-state" $ \root -> do
+                withStateRoot $ \root -> do
                     exists <- siteOutputExistsIn root
                     exists @?= False
             , testCase "is false for an empty _site" $
-                withSystemTempDirectory "cozyll-build-state" $ \root -> do
+                withStateRoot $ \root -> do
                     createDirectoryIfMissing True (root </> "_site")
                     exists <- siteOutputExistsIn root
                     exists @?= False
             , testCase "is true for a non-empty _site" $
-                withSystemTempDirectory "cozyll-build-state" $ \root -> do
+                withStateRoot $ \root -> do
                     createDirectoryIfMissing True (root </> "_site")
                     writeFile (root </> "_site" </> "index.html") "site"
                     exists <- siteOutputExistsIn root
@@ -117,7 +117,7 @@ tests =
         , testGroup
             "newestContentChange"
             [ testCase "names the newest file changed after the build" $
-                withSystemTempDirectory "cozyll-build-state" $ \root -> do
+                withStateRoot $ \root -> do
                     let content = root </> "content"
                     createDirectoryIfMissing True (content </> "writings")
                     writeFile (content </> "writings" </> "old.md") "old"
@@ -127,7 +127,7 @@ tests =
                     newestContentChange content builtAt
                         >>= (@?= Just (content </> "writings" </> "new.md"))
             , testCase "is Nothing when nothing changed after the build" $
-                withSystemTempDirectory "cozyll-build-state" $ \root -> do
+                withStateRoot $ \root -> do
                     let content = root </> "content"
                     createDirectoryIfMissing True content
                     writeFile (content </> "page.md") "page"
@@ -135,3 +135,7 @@ tests =
                     newestContentChange content builtAt >>= (@?= Nothing)
             ]
         ]
+
+-- | Runs an action in a fresh build-state root
+withStateRoot :: (FilePath -> IO a) -> IO a
+withStateRoot = withSystemTempDirectory "cozyll-build-state"
