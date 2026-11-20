@@ -19,25 +19,30 @@ tests =
         , testCase "accepts a mixed run" $ checkJaReadings "ja" [] rubyData (ruby "真っ青" "まっさお") @?= []
         , testCase "rejects a mismatched reading" $
             checkJaReadings "ja" [] rubyData (ruby "漢字" "にほんご")
-                @?= ["ruby [漢字](-にほんご): reading “にほんご” not attested for “漢字”"]
+                @?= unattested "漢字" "にほんご"
         , testCase "skips kana-only ruby" $ checkJaReadings "ja" [] rubyData (ruby "カナ" "かな") @?= []
         , testCase "accepts an allowed surface" $ checkJaReadings "ja" ["漢字"] rubyData (ruby "漢字" "にほんご") @?= []
         , testCase "accepts an allowed surface/reading pair" $ checkJaReadings "ja" ["漢字:にほんご"] rubyData (ruby "漢字" "にほんご") @?= []
         , testCase "does not accept a different pair" $
             checkJaReadings "ja" ["漢字:かんじ"] rubyData (ruby "漢字" "にほんご")
-                @?= ["ruby [漢字](-にほんご): reading “にほんご” not attested for “漢字”"]
+                @?= unattested "漢字" "にほんご"
         , testCase "skips ruby in non-Japanese subtrees" $
             checkJaReadings "ja" [] rubyData "<p><span lang=\"zh-Hant\"><ruby>中文<rt>zhōngwén</rt></ruby></span></p>" @?= []
         , testCase "skips ruby on non-Japanese pages" $
             checkJaReadings "en" [] rubyData (ruby "日本語" "にほんご") @?= []
         , testCase "checks a Japanese span on a non-Japanese page" $
             checkJaReadings "en" [] rubyData "<p><span lang=\"ja\"><ruby>漢字<rt>にほんご</rt></ruby></span></p>"
-                @?= ["ruby [漢字](-にほんご): reading “にほんご” not attested for “漢字”"]
+                @?= unattested "漢字" "にほんご"
         ]
 
 ruby :: String -> String -> String
 ruby base reading =
     "<p><ruby>" ++ base ++ "<rp>(</rp><rt>" ++ reading ++ "</rt><rp>)</rp></ruby></p>"
+
+-- | The diagnostic for a reading the index does not attest for its base
+unattested :: String -> String -> [String]
+unattested base reading =
+    ["ruby [" ++ base ++ "](-" ++ reading ++ "): reading “" ++ reading ++ "” not attested for “" ++ base ++ "”"]
 
 rubyData :: RubyData
 rubyData =
