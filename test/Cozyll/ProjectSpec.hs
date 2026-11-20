@@ -84,7 +84,7 @@ projectTests =
             assertBool "expected parsing to fail" (isLeft (parseProjectYaml "title: ["))
         ]
   where
-    parse = parseProjectYaml . render
+    parse = parseFields parseProjectYaml
 
 -- Showcase order -------------------------------------------------------------
 
@@ -104,7 +104,7 @@ showcaseTests =
 
     project :: String -> String -> Maybe String -> Project
     project name start priority =
-        fromRight (error $ "invalid fixture " ++ name) . parseProjectYaml . render
+        fromRight (error $ "invalid fixture " ++ name) . parseFields parseProjectYaml
             $ maybe id (set "priority") priority
             $ set "startDate" start
             $ set "title" name

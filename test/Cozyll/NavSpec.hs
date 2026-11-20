@@ -78,7 +78,7 @@ tests =
             ]
         ]
   where
-    parse = parseNavYaml defaultLanguage . render
+    parse = parseFields (parseNavYaml defaultLanguage)
     problem needle = \case
         Left problems -> any (needle `isInfixOf`) problems
         Right _ -> False
