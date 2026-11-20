@@ -16,9 +16,7 @@ import Cozyll.Config (Env (Example), siteConfiguration)
 import Cozyll.Domain.Website (Manifest (..))
 import Cozyll.Fixture (copyTree, withBuildLock, withBuiltExample, withBuiltFrom)
 import Cozyll.Rules.WellKnown (manifestTxt)
-import Cozyll.TestUtils (assertContains, assertNotContains)
-import Data.ByteString.Char8 qualified as BS8
-import Data.List (isPrefixOf)
+import Cozyll.TestUtils (assertContains, assertNotContains, replaceInFile)
 import Hakyll.Commands qualified as Commands
 import Hakyll.Core.Logger qualified as Logger
 import System.Directory (
@@ -186,7 +184,7 @@ integrationTests =
 
             withSystemTempDirectory "brand-content" $ \content -> do
                 copyTree (root </> "example-content") content
-                replaceInFile "  logo: images/logo.svg\n" "" (content </> "website.yaml")
+                replaceInFile (content </> "website.yaml") "  logo: images/logo.svg\n" ""
                 removeFile (content </> "media" </> "branding" </> "logo.svg")
                 withBuiltFrom Example content $ \_ site -> do
                     html <- readFile (site </> "index.html")
@@ -206,9 +204,9 @@ integrationTests =
             withSystemTempDirectory "brand-remote" $ \content -> do
                 copyTree (root </> "example-content") content
                 replaceInFile
+                    (content </> "website.yaml")
                     "logo: images/logo.svg"
                     "logo: https://cdn.example.com/logo.svg"
-                    (content </> "website.yaml")
                 withBuiltFrom Example content $ \_ site -> do
                     html <- readFile (site </> "index.html")
                     assertContains "<link rel=\"icon\" href=\"https://cdn.example.com/logo.svg\" type=\"image/svg+xml\">" html
@@ -230,21 +228,6 @@ writeFileAt root relative contents = do
     let path = root </> relative
     createDirectoryIfMissing True (takeDirectory path)
     writeFile path contents
-
--- | Replaces the first occurrence of a needle in a file
-replaceInFile :: String -> String -> FilePath -> IO ()
-replaceInFile needle replacement path = do
-    contents <- BS8.readFile path
-    BS8.writeFile path (BS8.pack (replace needle replacement (BS8.unpack contents)))
-
--- | Replaces the first occurrence of a needle
-replace :: String -> String -> String -> String
-replace needle replacement = go
-  where
-    go [] = []
-    go value@(char : rest)
-        | needle `isPrefixOf` value = replacement ++ go (drop (length needle) value)
-        | otherwise = char : go rest
 
 -- | A manifest with only the colours the icon list does not touch
 manifest :: Manifest
