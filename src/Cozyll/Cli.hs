@@ -11,14 +11,13 @@ import Cozyll.BuildState (
     BuildState (..),
     applyBuildStart,
     decideBuildStart,
-    envText,
     newestContentChange,
     readBuildState,
     siteOutputExists,
     writeBuildState,
  )
 import Cozyll.Cli.Data (runDataCommand)
-import Cozyll.Config (Env (..), SiteConfig (..), requiredContent, siteConfiguration)
+import Cozyll.Config (Env (..), SiteConfig (..), envFromText, envText, requiredContent, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
 import Cozyll.Domain.Language (defaultLanguage)
 import Cozyll.Domain.Website qualified as Web
@@ -40,9 +39,9 @@ import Options.Applicative qualified as OA
 import Paths_cozyll (version)
 import System.Directory (doesDirectoryExist, doesFileExist)
 import System.Environment (getArgs, lookupEnv)
-import System.Exit (ExitCode (ExitFailure, ExitSuccess), die, exitFailure, exitWith)
+import System.Exit (ExitCode (ExitFailure, ExitSuccess), die, exitWith)
 import System.FilePath.Posix (takeFileName, (</>))
-import System.IO (hFlush, hPutStr, hPutStrLn, stderr, stdout)
+import System.IO (hFlush, hPutStrLn, stderr, stdout)
 import Text.Read (readMaybe)
 
 -- | What the command line asks for before Hakyll's parser gets to see it
@@ -93,7 +92,7 @@ cli = do
             env <- parseEnv =<< lookupEnv "SITE_ENV"
             runDataCommand (contentDirFor env) rest
         Init initArgs -> runInit initArgs
-        Reject message -> rejectCommand message
+        Reject message -> die message
         RunCommand -> run args
 
 {- | Classifies the raw arguments: empty means help, a lone @--version@/@-V@
@@ -134,10 +133,6 @@ usageText =
 unsupportedCommand :: String -> String -> String
 unsupportedCommand name reason = "error: cozyll has no " ++ name ++ " command; " ++ reason
 
--- | Prints a rejection and exits with status 1
-rejectCommand :: String -> IO a
-rejectCommand message = hPutStrLn stderr message >> exitFailure
-
 -- | The @--version@ output, e.g. @cozyll 3.3.0.0@
 versionString :: String
 versionString = "cozyll " ++ showVersion version
@@ -153,10 +148,8 @@ anything a user added to @content\/@.
 runInit :: [String] -> IO ()
 runInit args =
     case parseInitArgs args of
-        Left problem -> do
-            hPutStrLn stderr $ "error: " ++ problem
-            hPutStr stderr initUsage
-            exitFailure
+        -- 'die' terminates the line, so drop the usage text's own final newline
+        Left problem -> die $ "error: " ++ problem ++ "\n" ++ dropWhileEnd (== '\n') initUsage
         Right InitHelp -> putStr initUsage
         Right (InitRun options) -> do
             result <- initSite options
@@ -234,7 +227,7 @@ dispatch options = case optCommand options of
     Check _ -> do
         guardCheck
         hakyllWithArgs siteConfiguration options (pure ())
-    Deploy -> rejectCommand (unsupportedCommand "deploy" "publish _site/ with your own tooling")
+    Deploy -> die (unsupportedCommand "deploy" "publish _site/ with your own tooling")
     command -> do
         env <- parseEnv =<< lookupEnv "SITE_ENV"
         let contentDir = contentDirFor env
@@ -343,8 +336,6 @@ guardCheck = do
     warnNewer file =
         hPutStrLn stderr $
             "warning: _site was built before " ++ file ++ " changed; run 'cozyll build'"
-
--- | Emits a debug line only when @-v@/@--verbose@ was passed
 
 -- | Emits a debug line only when @-v@/@--verbose@ was passed
 debugLog :: Options -> String -> IO ()
@@ -471,10 +462,11 @@ parseEnv = either die pure . parseEnvValue
 -}
 parseEnvValue :: Maybe String -> Either String Env
 parseEnvValue Nothing = Right Prod
-parseEnvValue (Just "prod") = Right Prod
-parseEnvValue (Just "dev") = Right Dev
-parseEnvValue (Just "example") = Right Example
-parseEnvValue (Just other) = Left $ "unknown SITE_ENV \"" ++ other ++ "\" (expected prod, dev, or example)"
+parseEnvValue (Just value) = maybe (unknownEnv value) Right (envFromText value)
+
+-- | The error for an @SITE_ENV@ that is neither @prod@, @dev@ nor @example@
+unknownEnv :: String -> Either String a
+unknownEnv value = Left $ "unknown SITE_ENV \"" ++ value ++ "\" (expected prod, dev, or example)"
 
 -- | The content directory an environment builds (@example@ builds the example content)
 contentDirFor :: Env -> FilePath
