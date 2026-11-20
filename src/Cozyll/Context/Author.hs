@@ -70,7 +70,6 @@ import Hakyll (
     field,
     fromFilePath,
     getMetadata,
-    listField,
     listFieldWith,
     loadAllSnapshots,
     recentFirst,
@@ -94,14 +93,21 @@ lookupAuthor cfg slug = find ((== slug) . authorId) (siteAuthors cfg)
 authorItemContext :: SiteConfig -> Context Author
 authorItemContext cfg =
     field "id" (return . authorId . itemBody)
-        <> field "name" (return . authorName . itemBody)
-        <> field "displayName" (return . displayNameOf . itemBody)
-        <> field "path" (return . authorUrlPath . itemBody)
-        <> field "url" (return . authorUrl cfg . itemBody)
+        <> authorFields cfg id
         <> field "description" (return . fromMaybe "" . authorDescription . itemBody)
         <> field "profileImage" (return . fromMaybe "" . profileImageUrl . itemBody)
-        <> field "type" (return . authorTypeName . authorType . itemBody)
-        <> listFieldWith "links" linkItemContext (return . map linkItem . authorLinks . itemBody)
+
+{- | The fields a byline and a profile page build the same way, read from the
+item's 'Author' (the profile page supplies its one author)
+-}
+authorFields :: SiteConfig -> (a -> Author) -> Context a
+authorFields cfg authorOf =
+    field "name" (return . authorName . authorOf . itemBody)
+        <> field "displayName" (return . displayNameOf . authorOf . itemBody)
+        <> field "path" (return . authorUrlPath . authorOf . itemBody)
+        <> field "url" (return . authorUrl cfg . authorOf . itemBody)
+        <> field "type" (return . authorTypeName . authorType . authorOf . itemBody)
+        <> listFieldWith "links" linkItemContext (return . map linkItem . authorLinks . authorOf . itemBody)
 
 -- | The per-post author list, resolved from the page's own metadata
 authorContext :: SiteConfig -> Context String
@@ -111,22 +117,20 @@ authorContext cfg =
         <> field "postCopyrightYears" postCopyrightYears
         <> listFieldWith "postCopyrightHolders" holderContext postCopyrightHolders
   where
-    resolveFor item = do
+    resolveFor item = map authorItem . snd <$> postInfo item
+
+    isPostCopyright item = any authorAddCopyrightNotice . snd <$> postInfo item
+
+    postCopyrightYears item = copyrightYears . fst <$> postInfo item
+
+    postCopyrightHolders item = map authorItem . filter authorAddCopyrightNotice . snd <$> postInfo item
+
+    -- \| The post's metadata and its resolved authors, read once per field lookup
+    postInfo item = do
         metadata <- getMetadata (itemIdentifier item)
-        pure (map authorItem (resolveAuthors cfg metadata))
+        pure (metadata, resolveAuthors cfg metadata)
+
     authorItem author = Item (fromFilePath (authorId author)) author
-
-    isPostCopyright item = do
-        metadata <- getMetadata (itemIdentifier item)
-        pure (any authorAddCopyrightNotice (resolveAuthors cfg metadata))
-
-    postCopyrightYears item = do
-        metadata <- getMetadata (itemIdentifier item)
-        pure (copyrightYears metadata)
-
-    postCopyrightHolders item = do
-        metadata <- getMetadata (itemIdentifier item)
-        pure (map authorItem (filter authorAddCopyrightNotice (resolveAuthors cfg metadata)))
 
 -- | The fields of one copyright holder (a bare name)
 holderContext :: Context Author
@@ -165,14 +169,9 @@ authoredBy cfg author metadata = any ((== authorId author) . authorId) (resolveA
 authorPageContext :: SiteConfig -> Author -> Context String
 authorPageContext cfg author =
     constField "title" displayName
-        <> constField "path" (authorUrlPath author)
-        <> constField "name" (authorName author)
-        <> constField "displayName" displayName
-        <> constField "url" (authorUrl cfg author)
-        <> constField "type" (authorTypeName (authorType author))
+        <> authorFields cfg (const author)
         <> maybe mempty (constField "profileImage") (profileImageUrl author)
         <> maybe mempty (constField "description") (authorDescription author)
-        <> listField "links" linkItemContext (return (map linkItem (authorLinks author)))
   where
     displayName = displayNameOf author
 
