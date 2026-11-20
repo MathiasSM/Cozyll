@@ -3,9 +3,9 @@ module Cozyll.ValidateSpec (tests) where
 
 import Cozyll.Config (Env (..))
 import Cozyll.Rules.Validate (missingPaths)
+import Cozyll.TestUtils (metadataJson)
 import Data.Aeson (Value (Bool, String))
-import Data.Aeson.Key (fromString)
-import Data.Aeson.KeyMap qualified as KM
+import Hakyll (Metadata)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (testCase, (@?=))
 
@@ -31,11 +31,11 @@ tests =
             ]
         ]
 
-withoutPath :: KM.KeyMap Value
-withoutPath = KM.singleton (fromString "title") (String "Foo")
+withoutPath :: Metadata
+withoutPath = metadataJson [("title", String "Foo")]
 
-withPath :: KM.KeyMap Value
-withPath = KM.insert (fromString "path") (String "/foo") withoutPath
+withPath :: Metadata
+withPath = metadataJson [("title", String "Foo"), ("path", String "/foo")]
 
-draftWithoutPath :: KM.KeyMap Value
-draftWithoutPath = KM.insert (fromString "draft") (Bool True) withoutPath
+draftWithoutPath :: Metadata
+draftWithoutPath = metadataJson [("title", String "Foo"), ("draft", Bool True)]
