@@ -4,10 +4,8 @@ module Cozyll.NavSpec (tests) where
 import Cozyll.Domain.Language (Language (..), defaultLanguage)
 import Cozyll.Domain.Nav (NavEntry (..), parseNavYaml, resolveNavLabel)
 import Cozyll.TestUtils
-import Data.Either (isLeft)
-import Data.List (isInfixOf)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase, (@?=))
+import Test.Tasty.HUnit (assertFailure, testCase, (@?=))
 
 -- | A page that wants a menu entry
 navPage :: Fields
@@ -42,18 +40,18 @@ tests =
             , testCase "needs a path when there is a label" $
                 parse (without ["path"] navPage) @?= Left ["path: missing"]
             , testCase "rejects an order that isn't a number" $
-                assertBool "expected parsing to fail" (isLeft (parse $ set "navOrder" "first" navPage))
+                assertFails (parse $ set "navOrder" "first" navPage)
             , testCase "rejects an empty language map" $
                 parse (set "nav" "{}" navPage)
                     @?= Left ["nav: expected at least one language label (like nav: {en: Guides})"]
             , testCase "rejects an invalid language key" $
-                assertBool "expected parsing to fail" (problem "invalid language" (parse $ set "nav" "{english: Blog}" navPage))
+                assertFailsWith "invalid language" (parse $ set "nav" "{english: Blog}" navPage)
             , testCase "reports every invalid language key" $
                 case parse $ set "nav" "{english: Blog, spanish: Blog}" navPage of
                     Left problems -> length problems @?= 2
-                    Right _ -> assertBool "expected parsing to fail" False
+                    Right _ -> assertFailure "expected parsing to fail"
             , testCase "rejects a map label that isn't text" $
-                assertBool "expected parsing to fail" (problem "must be text" (parse $ set "nav" "{en: 3}" navPage))
+                assertFailsWith "must be text" (parse $ set "nav" "{en: 3}" navPage)
             ]
         , testGroup
             "resolveNavLabel"
@@ -79,8 +77,5 @@ tests =
         ]
   where
     parse = parseFields (parseNavYaml defaultLanguage)
-    problem needle = \case
-        Left problems -> any (needle `isInfixOf`) problems
-        Right _ -> False
     single = NavEntry (Just "Blog") [] 2 "/blog" (Language "en")
     translated = NavEntry Nothing [(Language "en", "Guides"), (Language "es", "Guías")] 2 "/guides" (Language "en")

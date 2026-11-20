@@ -3,11 +3,10 @@ module Cozyll.ContentSpec (tests) where
 
 import Cozyll.Config (Env (..))
 import Cozyll.Content (isHidden, parseAliasesYaml, tocLabelOf)
-import Cozyll.TestUtils (metadata, metadataJson)
+import Cozyll.TestUtils (assertFails, metadata, metadataJson)
 import Data.Aeson (Value (Bool))
-import Data.Either (isLeft)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase, (@?=))
+import Test.Tasty.HUnit (testCase, (@?=))
 
 tests :: TestTree
 tests =
@@ -54,7 +53,7 @@ aliasTests =
         , testCase "rejects the home page" $
             parseAliasesYaml "aliases: [/]" @?= Left ["aliases: / is the home page, it can't be an alias"]
         , testCase "rejects something that isn't text" $
-            assertBool "expected parsing to fail" (isLeft (parseAliasesYaml "aliases: 3"))
+            assertFails (parseAliasesYaml "aliases: 3")
         ]
 
 -- Table of contents label ----------------------------------------------------

@@ -12,6 +12,7 @@ import Cozyll.Ruby.Sources (
     resolveSources,
     substituteRef,
  )
+import Cozyll.TestUtils (assertFails)
 import Data.ByteString qualified as BS
 import Data.List (isInfixOf)
 import Data.Map.Strict qualified as Map
@@ -47,7 +48,7 @@ tests =
                         "MIT"
                         [SourceFile "kanji.json" "https://gitlab.example/kanji.json" Nothing]
             result <- resolveSources (\_ -> pure (Left "unexpected")) [source]
-            assertBool (show result) (isLeft result)
+            assertFails result
         , testCase "resolves latest refs and release digests" $ do
             result <- resolveSources fakeFetch [repoSource, releaseSource]
             case result of
@@ -58,7 +59,7 @@ tests =
         , testCase "reports a digest mismatch" $ do
             let resolved = ResolvedSource releaseSource (Map.singleton "JmdictFurigana.json.zip" "wrong")
             result <- downloadSources (\_ -> pure (Right "bytes")) [resolved]
-            assertBool (show result) (isLeft result)
+            assertFails result
         ]
 
 repoSource :: Source
@@ -92,8 +93,3 @@ fakeFetch url
                 "{\"tag_name\": \"v1\", \"assets\": [{\"name\": \"JmdictFurigana.json.zip\", \"digest\": \"sha256:abc\"}]}"
             )
     | otherwise = pure (Left ("unexpected URL: " ++ url))
-
-isLeft :: Either a b -> Bool
-isLeft = \case
-    Left _ -> True
-    Right _ -> False

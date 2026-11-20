@@ -4,10 +4,10 @@ module Cozyll.ProjectSpec (tests) where
 import Cozyll.Content (showcaseKey)
 import Cozyll.Domain.Project (Project (..), Status (..), parseProjectYaml, statusName)
 import Cozyll.TestUtils
-import Data.Either (fromRight, isLeft)
+import Data.Either (fromRight)
 import Data.List (sortOn)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase, (@?=))
+import Test.Tasty.HUnit (testCase, (@?=))
 
 tests :: TestTree
 tests =
@@ -81,7 +81,7 @@ projectTests =
             parse (set "endDate" "2018-05-01" sutori)
                 @?= Left ["endDate: 2018-05-01 is before startDate 2018-05-02"]
         , testCase "rejects text that isn't YAML" $
-            assertBool "expected parsing to fail" (isLeft (parseProjectYaml "title: ["))
+            assertFails (parseProjectYaml "title: [")
         ]
   where
     parse = parseFields parseProjectYaml
