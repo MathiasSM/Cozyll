@@ -162,7 +162,6 @@ test-suite spec
                   , Cozyll.CssSpec
                   , Cozyll.DataSpec
                   , Cozyll.FeedSpec
-                  , Cozyll.Fixture
                   , Cozyll.FormatSpec
                   , Cozyll.HtmlSpec
                   , Cozyll.InitSpec
@@ -204,9 +203,6 @@ test-suite spec
                   , text
                   , time
                   , unix
-                  , directory
-                  , filepath
-                  , temporary
                   , yaml
   ghc-options:      -threaded
 
@@ -216,15 +212,20 @@ test-suite golden
   main-is:          GoldenMain.hs
   hs-source-dirs:   test
   other-modules:    Cozyll.Fixture
+                  , Cozyll.TestUtils
                   , Golden
   build-depends:    base
                   , hakyll
                   , cozyll
+                  , aeson
                   , tasty
                   , tasty-ant-xml
                   , tasty-golden
+                  , tasty-hunit
                   , bytestring
                   , directory
                   , filepath
                   , temporary
+                  , text
+                  , time
   ghc-options:      -threaded

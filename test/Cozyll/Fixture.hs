@@ -5,14 +5,18 @@ module Cozyll.Fixture (
     buildFixture,
     buildFixtureFor,
     withBuildLock,
+    withBuiltExample,
+    withBuiltFrom,
     loadFixtureConfig,
     loadFixtureConfigFor,
     runBuild,
     copyTree,
+    walkFiles,
 ) where
 
 import Control.Concurrent.MVar (MVar, newMVar, withMVar)
-import Control.Monad (forM_, when)
+import Control.Exception (bracket)
+import Control.Monad (forM, forM_, when)
 import Cozyll.Brand (Brand, brandLogo, resolveBrand)
 import Cozyll.Config (Env (..), SiteConfig (..), siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
@@ -21,14 +25,23 @@ import Cozyll.Domain.Website (loadWebsite)
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.Ruby.Index (RubyData, defaultMaxIndexBytes, loadIndexFile)
 import Cozyll.Rules (rules)
+import Cozyll.TestUtils (testConfig)
 import Cozyll.Theme (discoverContentTemplateNames)
 import Data.Maybe (fromMaybe)
 import Hakyll.Commands qualified as Commands
 import Hakyll.Core.Logger qualified as Logger
 import Hakyll.Core.Runtime (RunMode (RunModeNormal))
-import System.Directory (copyFile, createDirectoryIfMissing, doesDirectoryExist, listDirectory, withCurrentDirectory)
+import System.Directory (
+    copyFile,
+    createDirectoryIfMissing,
+    doesDirectoryExist,
+    getCurrentDirectory,
+    listDirectory,
+    removePathForcibly,
+    withCurrentDirectory,
+ )
 import System.Exit (ExitCode (..), exitFailure)
-import System.FilePath ((</>))
+import System.FilePath (takeDirectory, (</>))
 import System.IO.Temp (createTempDirectory, getCanonicalTemporaryDirectory)
 import System.IO.Unsafe (unsafePerformIO)
 
@@ -53,11 +66,10 @@ mkSiteConfigFor env website authors contentTemplateNames brand rubyData =
     let site = Web.websiteSite website
         defaultAuthor' = either (error . unlines) id (Author.defaultAuthor authors)
         logo = brandLogo <$> brand
-     in SiteConfig
+     in testConfig
             { siteTitle = Web.siteTitle site
             , siteDescription = Web.siteDescription site
             , siteCopyrightYear = Web.siteCopyrightYear site
-            , siteCurrentYear = 2021
             , siteDomain = Web.siteDomain site
             , siteLanguage = fromMaybe defaultLanguage (Web.siteLanguage site)
             , siteAlternateNames = Web.siteAlternateNames site
@@ -68,11 +80,6 @@ mkSiteConfigFor env website authors contentTemplateNames brand rubyData =
             , siteDefaultAuthor = defaultAuthor'
             , mathjaxVersion = Web.mathjaxVersion (Web.websiteMathjax website)
             , highlightStyle = Web.highlightStyle (Web.websiteHighlight website)
-            , contentDir = "content"
-            , assetsDir = "assets"
-            , templatesDir = "templates"
-            , contentTemplatesDir = "content/templates"
-            , contentCssDir = "content/css"
             , contentTemplateNames = contentTemplateNames
             , siteEnv = env
             , siteRubyData = rubyData
@@ -134,6 +141,26 @@ buildFixtureFor env root contentSource = withBuildLock $ do
     runBuildIn buildDir cfg website >>= \code -> when (code /= ExitSuccess) exitFailure
     pure (work, buildDir </> "_site")
 
+{- | Builds an 'Example' site from the repository's @example-content@ and runs
+the action on its build directory and its @_site@, removing the work directory
+afterwards.
+-}
+withBuiltExample :: (FilePath -> FilePath -> IO a) -> IO a
+withBuiltExample action = do
+    root <- getCurrentDirectory
+    withBuiltFrom Example (root </> "example-content") action
+
+{- | Builds a site for @env@ from @contentSource@ and runs the action on its
+build directory and its @_site@, removing the work directory afterwards.
+-}
+withBuiltFrom :: Env -> FilePath -> (FilePath -> FilePath -> IO a) -> IO a
+withBuiltFrom env contentSource action = do
+    root <- getCurrentDirectory
+    bracket
+        (buildFixtureFor env root contentSource)
+        (removePathForcibly . fst)
+        $ \(_, site) -> action (takeDirectory site) site
+
 -- | Copies a directory tree, creating the destination as needed
 copyTree :: FilePath -> FilePath -> IO ()
 copyTree source destination = do
@@ -144,3 +171,14 @@ copyTree source destination = do
             to = destination </> entry
         isDir <- doesDirectoryExist from
         if isDir then copyTree from to else copyFile from to
+
+-- | Every file below a directory, as paths relative to it
+walkFiles :: FilePath -> IO [FilePath]
+walkFiles root = go ""
+  where
+    go relative = do
+        entries <- listDirectory (root </> relative)
+        fmap concat . forM entries $ \entry -> do
+            let child = if null relative then entry else relative </> entry
+            isDir <- doesDirectoryExist (root </> child)
+            if isDir then go child else pure [child]

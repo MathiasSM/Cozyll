@@ -7,22 +7,16 @@ vary with the ImageMagick version); everything else byte for byte.
 -}
 module Golden (
     buildSiteSnapshot,
-    relativeFiles,
     goldenTests,
 )
 where
 
 import Control.Monad (forM, forM_)
-import Cozyll.Fixture (buildFixture)
+import Cozyll.Fixture (buildFixture, walkFiles)
 import Data.ByteString (ByteString)
 import Data.ByteString qualified as BS
 import Data.List (sort)
-import System.Directory (
-    copyFile,
-    createDirectoryIfMissing,
-    doesDirectoryExist,
-    listDirectory,
- )
+import System.Directory (copyFile, createDirectoryIfMissing)
 import System.FilePath (takeDirectory, takeExtension, (</>))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.Golden (goldenVsFile, writeBinaryFile)
@@ -56,7 +50,7 @@ images, plus @images.txt@ listing each image's format and dimensions
 -}
 buildSnapshot :: FilePath -> FilePath -> IO ()
 buildSnapshot site snapshot = do
-    files <- relativeFiles site
+    files <- walkFiles site
     let images = [file | file <- files, isImage file]
         others = [file | file <- files, not (isImage file)]
     createDirectoryIfMissing True snapshot
@@ -74,17 +68,6 @@ buildSnapshot site snapshot = do
 -- | Image files (compared by signature rather than content)
 isImage :: FilePath -> Bool
 isImage file = takeExtension file `elem` [".png", ".ico"]
-
--- | Every file below the root, as paths relative to it
-relativeFiles :: FilePath -> IO [FilePath]
-relativeFiles root = go ""
-  where
-    go relative = do
-        entries <- listDirectory (root </> relative)
-        fmap concat . forM entries $ \entry -> do
-            let child = if null relative then entry else relative </> entry
-            isDir <- doesDirectoryExist (root </> child)
-            if isDir then go child else pure [child]
 
 {- | The format and dimensions of a PNG or ICO, read from its header
 
