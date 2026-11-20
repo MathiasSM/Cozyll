@@ -1,11 +1,10 @@
 -- | Tests for the stylesheet assembly: development keeps it readable, production minifies it
 module Cozyll.CssSpec (tests) where
 
-import Control.Exception (bracket)
-import Cozyll.Config (Env (..))
-import Cozyll.Fixture (buildFixtureFor, copyTree)
+import Cozyll.Config (Env (Dev, Example))
+import Cozyll.Fixture (copyTree, withBuiltFrom)
 import Data.List (isInfixOf)
-import System.Directory (getCurrentDirectory, removePathForcibly)
+import System.Directory (getCurrentDirectory)
 import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Tasty (TestTree, testGroup)
@@ -21,10 +20,10 @@ tests =
             withSystemTempDirectory "cozyll-css" $ \content -> do
                 copyTree (root </> "example-content") content
                 writeFile (content </> "css" </> "probe.css") $ "/* " ++ marker ++ " */\n"
-                bracket (buildFixtureFor Dev root content) (removePathForcibly . fst) $ \(_, site) -> do
+                withBuiltFrom Dev content $ \_ site -> do
                     styles <- readFile (site </> "styles.css")
                     assertBool "the dev stylesheet keeps the comment" (marker `isInfixOf` styles)
-                bracket (buildFixtureFor Example root content) (removePathForcibly . fst) $ \(_, site) -> do
+                withBuiltFrom Example content $ \_ site -> do
                     styles <- readFile (site </> "styles.css")
                     assertBool "the example stylesheet is minified" (not (marker `isInfixOf` styles))
         ]
