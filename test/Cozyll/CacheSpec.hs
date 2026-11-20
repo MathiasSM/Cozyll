@@ -9,12 +9,12 @@ separate @cozyll build@ invocations against the same @_cache@.
 module Cozyll.CacheSpec (tests) where
 
 import Cozyll.Fixture (loadFixtureConfig, runBuild, withBuiltExample)
-import Data.ByteString.Char8 qualified as BS
+import Cozyll.TestUtils (assertFileContains, assertFileNotContains)
 import System.Directory (createDirectoryIfMissing)
 import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (Assertion, assertBool, assertFailure, testCase)
+import Test.Tasty.HUnit (assertFailure, testCase)
 
 -- | The override marker the test looks for in the group index output
 probe :: String
@@ -26,7 +26,7 @@ tests =
         "Cache"
         [ testCase "a template override added after a build applies to the next build" $
             withBuiltExample $ \dir site -> do
-                assertAbsent (siteIndex site)
+                assertFileNotContains (siteIndex site) probe
 
                 -- A new `cozyll build` re-discovers the overrides, but keeps the cache
                 createDirectoryIfMissing True (dir </> "content" </> "templates")
@@ -37,24 +37,9 @@ tests =
                     ExitSuccess -> pure ()
                     ExitFailure code -> assertFailure ("build failed with exit code " ++ show code)
 
-                assertPresent (siteIndex site)
+                assertFileContains (siteIndex site) probe
         ]
 
 -- | The prose group index in the built site
 siteIndex :: FilePath -> FilePath
 siteIndex site = site </> "prose" </> "index.html"
-
--- | Asserts the override marker is in the prose group index
-assertPresent :: FilePath -> Assertion
-assertPresent = assertMarker "contain" BS.isInfixOf
-
--- | Asserts the override marker is not in the prose group index
-assertAbsent :: FilePath -> Assertion
-assertAbsent = assertMarker "not contain" (\needle haystack -> not (needle `BS.isInfixOf` haystack))
-
-assertMarker :: String -> (BS.ByteString -> BS.ByteString -> Bool) -> FilePath -> Assertion
-assertMarker expectation holds path = do
-    contents <- BS.readFile path
-    assertBool
-        ("expected " ++ path ++ " to " ++ expectation ++ " \"" ++ probe ++ "\"")
-        (holds (BS.pack probe) contents)
