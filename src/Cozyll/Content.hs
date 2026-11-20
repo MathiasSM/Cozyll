@@ -123,29 +123,25 @@ requirePost = do
     metadata <- getUnderlying >>= getMetadata
     either (failWith "invalid front matter") pure (parsePost metadata)
 
+-- | Parses another item's metadata, failing the build (naming it) with the problems found
+requireWith :: Identifier -> String -> (Metadata -> Either [String] a) -> Compiler a
+requireWith ident what parse = do
+    metadata <- getMetadata ident
+    either (failWith $ toFilePath ident ++ ": " ++ what) pure (parse metadata)
+
 -- | Parses the front matter of any item, failing the build (naming it) with the problems found
 requirePostOf :: Identifier -> Compiler Post
-requirePostOf ident = do
-    metadata <- getMetadata ident
-    either (failWith $ toFilePath ident ++ ": invalid front matter") pure (parsePost metadata)
+requirePostOf ident = requireWith ident "invalid front matter" parsePost
 
 -- | The language of an item (the site's language unless stated), failing the build if it's not a known one
 requireLanguage :: SiteConfig -> Identifier -> Compiler Language
-requireLanguage cfg ident = do
-    metadata <- getMetadata ident
-    either
-        (failWith $ toFilePath ident ++ ": invalid language")
-        pure
-        (runCheck $ languageOfWith (siteLanguage cfg) metadata)
+requireLanguage cfg ident =
+    requireWith ident "invalid language" $ runCheck . languageOfWith (siteLanguage cfg)
 
 -- | The menu entry of any page, failing the build (naming the page) if it's invalid
 requireNav :: SiteConfig -> Identifier -> Compiler (Maybe NavEntry)
-requireNav cfg ident = do
-    metadata <- getMetadata ident
-    either
-        (failWith $ toFilePath ident ++ ": invalid menu entry")
-        pure
-        (parseNavEntry (siteLanguage cfg) metadata)
+requireNav cfg ident =
+    requireWith ident "invalid menu entry" $ parseNavEntry (siteLanguage cfg)
 
 -- | Parses a project item (its body is the YAML), failing the build with the problems found
 requireProject :: Item String -> Compiler Project

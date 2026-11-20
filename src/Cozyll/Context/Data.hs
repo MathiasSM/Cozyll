@@ -48,7 +48,7 @@ module Cozyll.Context.Data (
 
 import Control.Monad (when)
 import Cozyll.Config (SiteConfig, dataDir, mediaDir)
-import Cozyll.Yaml (decodeYaml)
+import Cozyll.Yaml (decodeYaml, scalarString)
 import Data.Aeson (Value (..))
 import Data.Aeson.Key qualified as Key
 import Data.Aeson.KeyMap qualified as KM
@@ -56,7 +56,6 @@ import Data.Foldable (toList)
 import Data.JSON.JSONSchema (ValidationError (..), validate)
 import Data.List (intercalate, isInfixOf, stripPrefix)
 import Data.Maybe (fromMaybe)
-import Data.Scientific (Scientific, floatingOrInteger)
 import Data.String (fromString)
 import Data.Text qualified as T
 import Hakyll (
@@ -157,15 +156,6 @@ valueField cfg value key =
 scalarField :: Value -> Compiler ContextField
 scalarField = maybe (noResult "not a scalar value") (return . StringField) . scalarString
 
--- | The text of a scalar value, if it is one
-scalarString :: Value -> Maybe String
-scalarString = \case
-    String text -> Just $ T.unpack text
-    Number n -> Just $ renderNumber n
-    Bool b -> Just $ if b then "true" else "false"
-    Null -> Just ""
-    _ -> Nothing
-
 -- | The URL of an icon (a bare name under @images/icons/@, @.svg@ appended)
 iconHref :: Maybe Value -> Compiler ContextField
 iconHref = maybe (noResult "icon href") (return . StringField . iconPath) . (>>= iconName)
@@ -230,12 +220,6 @@ splitOnDot = go
 -- | 'Data.List.stripSuffix', absent from the 'base' this project targets
 stripSuffix :: (Eq a) => [a] -> [a] -> Maybe [a]
 stripSuffix suffix list = reverse <$> stripPrefix (reverse suffix) (reverse list)
-
--- | A JSON number rendered without scientific notation
-renderNumber :: Scientific -> String
-renderNumber n = case floatingOrInteger n of
-    Right integer -> show (integer :: Integer)
-    Left double -> show (double :: Double)
 
 -- | A scalar as the string templates should see
 renderScalar :: Value -> String
