@@ -10,10 +10,9 @@ module Cozyll.Cli.Data (runDataCommand, parseCommand, Command (..), Options (..)
 
 import Control.Applicative ((<|>))
 import Control.Monad (foldM, forM_, unless, when)
-import Cozyll.Ruby.Derive (Issue (..), Upstream (..), deriveIndex, readUpstreamFrom)
+import Cozyll.Ruby.Derive (Issue (..), Upstream (..), deriveIndex, readUpstreamFrom, upstreamFromFiles)
 import Cozyll.Ruby.Index (
     Index (..),
-    Level (..),
     dataDirName,
     encodeIndex,
     indexFileName,
@@ -38,7 +37,6 @@ import Data.ByteString qualified as BS
 import Data.ByteString.Lazy qualified as BL
 import Data.List (isPrefixOf)
 import Data.Maybe (fromMaybe)
-import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.Encoding (decodeUtf8, decodeUtf8', encodeUtf8)
 import Data.Version (showVersion)
@@ -91,53 +89,68 @@ data Options = Options
 emptyOptions :: Options
 emptyOptions = Options Nothing Nothing Nothing False False False False
 
-data Flag
-    = FlagFrom FilePath
-    | FlagDataDir FilePath
-    | FlagSources FilePath
-    | FlagCheck
-    | FlagWrite
-    | FlagForce
-    | FlagResolve
-    | FlagHelp
-    | FlagVersion
-    deriving (Eq)
+{- | One @data@ flag: how it is spelled, its argument, its help text, the
+subcommands that accept it, and how it updates 'Options'. Everything the parser
+and the help text need comes from this table.
+-}
+data Spec = Spec
+    { specShort :: [Char]
+    , specLong :: String
+    , specArg :: Maybe String
+    , specHelp :: String
+    , specCommands :: [String]
+    , specApply :: Maybe String -> Options -> Options
+    }
 
--- | Every flag; commands accept a subset (see 'allowedFlags')
-options :: [OptDescr Flag]
-options =
-    [ Option ['h'] ["help"] (NoArg FlagHelp) "show this help"
-    , Option [] ["version"] (NoArg FlagVersion) "show the cozyll version"
-    , Option [] ["from"] (ReqArg FlagFrom "DIR") "read upstream files from DIR instead of downloading"
-    , Option [] ["data-dir"] (ReqArg FlagDataDir "DIR") "ruby-data directory (default: <content>/ruby-data)"
-    , Option [] ["sources"] (ReqArg FlagSources "FILE") "sources file (default: <data-dir>/sources.yaml)"
-    , Option [] ["check"] (NoArg FlagCheck) "derive and compare without writing"
-    , Option [] ["write"] (NoArg FlagWrite) "copy the default sources file into place"
-    , Option [] ["force"] (NoArg FlagForce) "overwrite an existing sources file"
-    , Option [] ["resolve"] (NoArg FlagResolve) "resolve latest refs via the GitHub API"
+-- | Every flag, in help order
+specs :: [Spec]
+specs =
+    [ Spec "h" "--help" Nothing "show this help" [] (\_ opts -> opts)
+    , Spec "" "--version" Nothing "show the cozyll version" [] (\_ opts -> opts)
+    , Spec
+        ""
+        "--from"
+        (Just "DIR")
+        "read upstream files from DIR instead of downloading"
+        ["fetch"]
+        (\arg opts -> opts{optFrom = arg})
+    , Spec
+        ""
+        "--data-dir"
+        (Just "DIR")
+        "ruby-data directory (default: <content>/ruby-data)"
+        ["fetch", "verify", "fmt", "sources"]
+        (\arg opts -> opts{optDataDir = arg})
+    , Spec
+        ""
+        "--sources"
+        (Just "FILE")
+        "sources file (default: <data-dir>/sources.yaml)"
+        ["fetch", "sources"]
+        (\arg opts -> opts{optSources = arg})
+    , Spec "" "--check" Nothing "derive and compare without writing" ["fetch"] (\_ opts -> opts{optCheck = True})
+    , Spec "" "--write" Nothing "copy the default sources file into place" ["sources"] (\_ opts -> opts{optWrite = True})
+    , Spec "" "--force" Nothing "overwrite an existing sources file" ["sources"] (\_ opts -> opts{optForce = True})
+    , Spec "" "--resolve" Nothing "resolve latest refs via the GitHub API" ["sources"] (\_ opts -> opts{optResolve = True})
     ]
 
--- | The long name of a flag, for error messages
-flagName :: Flag -> String
-flagName = \case
-    FlagFrom _ -> "--from"
-    FlagDataDir _ -> "--data-dir"
-    FlagSources _ -> "--sources"
-    FlagCheck -> "--check"
-    FlagWrite -> "--write"
-    FlagForce -> "--force"
-    FlagResolve -> "--resolve"
-    FlagHelp -> "--help"
-    FlagVersion -> "--version"
+-- | Every flag, as @getOpt@ options
+options :: [OptDescr (Spec, Maybe String)]
+options = map toOption specs
+  where
+    toOption spec = Option (specShort spec) [specLong spec] (argDescr spec) (specHelp spec)
 
--- | The flags each command accepts
+    argDescr spec = case specArg spec of
+        Nothing -> NoArg (spec, Nothing)
+        Just metavar -> ReqArg (\arg -> (spec, Just arg)) metavar
+
+-- | The long name of a flag, for error messages
+flagName :: Spec -> String
+flagName = specLong
+
+-- | The flags each command accepts, by long name
 allowedFlags :: String -> [String]
-allowedFlags command = case command of
-    "fetch" -> ["--from", "--data-dir", "--sources", "--check"]
-    "verify" -> ["--data-dir"]
-    "fmt" -> ["--data-dir"]
-    "sources" -> ["--data-dir", "--sources", "--write", "--force", "--resolve"]
-    _ -> []
+allowedFlags command = [flagName spec | spec <- specs, command `elem` specCommands spec]
 
 -- | Parses the arguments after @cozyll data@
 parseCommand :: [String] -> Either String Command
@@ -146,19 +159,18 @@ parseCommand (arg : _) | arg `elem` ["-h", "--help"] = Right Help
 parseCommand (arg : _) | arg == "--version" = Right Version
 parseCommand (command : rest) = do
     flags <- parseFlags rest
-    if FlagHelp `elem` flags
-        then Right Help
-        else
-            if FlagVersion `elem` flags
-                then Right Version
-                else do
-                    options' <- foldFlags (allowedFlags command) flags
-                    case command of
-                        "fetch" -> Right (Fetch options')
-                        "verify" -> Right (Verify options')
-                        "fmt" -> Right (Format options')
-                        "sources" -> Right (Sources options')
-                        _ -> Left ("unknown command: " ++ command)
+    let wants name = name `elem` map (flagName . fst) flags
+    case (wants "--help", wants "--version") of
+        (True, _) -> Right Help
+        (_, True) -> Right Version
+        _ -> do
+            options' <- foldFlags (allowedFlags command) flags
+            case command of
+                "fetch" -> Right (Fetch options')
+                "verify" -> Right (Verify options')
+                "fmt" -> Right (Format options')
+                "sources" -> Right (Sources options')
+                _ -> Left ("unknown command: " ++ command)
   where
     parseFlags args = case getOpt Permute options args of
         (parsed, [], []) -> Right parsed
@@ -172,19 +184,10 @@ parseCommand (command : rest) = do
 
     foldFlags allowed = foldM (applyFlag allowed) emptyOptions
 
-    applyFlag allowed opts flag
-        | flagName flag `notElem` allowed =
-            Left (flagName flag ++ " is not valid for this command")
-        | otherwise = case flag of
-            FlagFrom dir -> Right opts{optFrom = Just dir}
-            FlagDataDir dir -> Right opts{optDataDir = Just dir}
-            FlagSources file -> Right opts{optSources = Just file}
-            FlagCheck -> Right opts{optCheck = True}
-            FlagWrite -> Right opts{optWrite = True}
-            FlagForce -> Right opts{optForce = True}
-            FlagResolve -> Right opts{optResolve = True}
-            FlagHelp -> Right opts
-            FlagVersion -> Right opts
+    applyFlag allowed opts (spec, arg)
+        | flagName spec `notElem` allowed =
+            Left (flagName spec ++ " is not valid for this command")
+        | otherwise = Right (specApply spec arg opts)
 
 -- | Runs a parsed @data@ command
 runDataCommand :: FilePath -> [String] -> IO ()
@@ -247,26 +250,17 @@ downloadUpstream contentDir opts = do
     downloaded <- downloadSources fetch resolved >>= either dieProblems pure
     forM_ resolved $ \source ->
         putStrLn (T.unpack (sourceId (resolvedSource source)) ++ ": " ++ T.unpack (sourceRef (resolvedSource source)))
-    either die pure (toUpstream (concatMap downloadedFiles downloaded))
-
--- | Turns the downloaded logical files into the derivation input
-toUpstream :: [(Text, ByteString)] -> Either String Upstream
-toUpstream files = do
-    kanji <- need "kanji.json"
-    n5 <- need "n5.csv"
-    n4 <- need "n4.csv"
-    n3 <- need "n3.csv"
-    n2 <- need "n2.csv"
-    n1 <- need "n1.csv"
-    jmdict <- need "JmdictFurigana.json"
-    let jmnedict = fromMaybe BS.empty (lookup "JmnedictFurigana.json" files)
-    pure (Upstream kanji (zip [N5, N4, N3, N2, N1] [n5, n4, n3, n2, n1]) jmdict jmnedict)
+    either (dieProblems . map missingUpstreamFile) pure (upstreamFromFiles (concatMap downloadedFiles downloaded))
   where
-    need name =
-        maybe
-            (Left ("downloaded sources are missing " ++ T.unpack name))
-            Right
-            (lookup name files)
+    missingUpstreamFile name = "downloaded sources are missing " ++ T.unpack name
+
+-- | Reads the committed index, rejecting files larger than the configured limit
+loadCheckedIndex :: FilePath -> IO Index
+loadCheckedIndex path = do
+    limit <- indexLimitIO
+    size <- getFileSize path
+    when (size > fromIntegral limit) $ die (path ++ ": index is larger than " ++ show limit ++ " bytes")
+    readIndexFile path >>= either die pure
 
 -- | Validates the committed index (canonical form and size)
 runVerify :: FilePath -> Options -> IO ()
@@ -274,10 +268,7 @@ runVerify contentDir opts = do
     let path = dataDir contentDir opts </> indexFileName
     exists <- doesFileExist path
     unless exists $ die (path ++ " does not exist (run `cozyll data fetch`)")
-    limit <- indexLimitIO
-    size <- getFileSize path
-    when (size > fromIntegral limit) $ die (path ++ ": index is larger than " ++ show limit ++ " bytes")
-    idx <- readIndexFile path >>= either die pure
+    idx <- loadCheckedIndex path
     bytes <- BS.readFile path
     text <- either (die . show) pure (decodeUtf8' bytes)
     when (encodeIndex idx /= text) $ die (path ++ ": not canonical (run `cozyll data fmt`)")
@@ -287,10 +278,7 @@ runVerify contentDir opts = do
 runFormat :: FilePath -> Options -> IO ()
 runFormat contentDir opts = do
     let path = dataDir contentDir opts </> indexFileName
-    limit <- indexLimitIO
-    size <- getFileSize path
-    when (size > fromIntegral limit) $ die (path ++ ": index is larger than " ++ show limit ++ " bytes")
-    idx <- readIndexFile path >>= either die pure
+    idx <- loadCheckedIndex path
     writeIndexFile path idx
     putStrLn ("formatted " ++ path)
 
