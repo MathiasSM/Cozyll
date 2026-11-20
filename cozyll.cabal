@@ -99,6 +99,7 @@ library
                   , Cozyll.Ruby
                   , Cozyll.Ruby.Derive
                   , Cozyll.Ruby.Index
+                  , Cozyll.Ruby.Json
                   , Cozyll.Ruby.Sources
                   , Cozyll.Theme
                   , Cozyll.Yaml
