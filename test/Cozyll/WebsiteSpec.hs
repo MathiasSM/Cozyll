@@ -92,8 +92,7 @@ errorTests =
                 @?= Left ["Aeson exception:\nError in $.feed.size: parsing Int failed, expected Number, but encountered String"]
         , testCase "reports a non-object where an object is expected" $
             (decodeYaml (websiteYaml ["funding: 3"]) :: Either [String] Website)
-                @?= Left
-                    ["Aeson exception:\nError in $.funding: parsing Cozyll.Domain.Website.Funding(Funding) failed, expected Object, but encountered Number"]
+                @?= Left ["Aeson exception:\nError in $.funding: parsing funding failed, expected Object, but encountered Number"]
         ]
 
 -- | @websiteYaml []@ without one of its lines
