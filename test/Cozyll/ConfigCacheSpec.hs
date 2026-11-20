@@ -7,15 +7,14 @@ each case reproduces two separate builds against the same @_cache@.
 -}
 module Cozyll.ConfigCacheSpec (tests) where
 
-import Control.Exception (bracket)
-import Cozyll.Fixture (buildFixture, loadFixtureConfig, runBuild)
+import Cozyll.Fixture (loadFixtureConfig, runBuild, withBuiltExample)
 import Data.ByteString.Char8 qualified as BS
 import Data.Text qualified as T
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time (addUTCTime)
-import System.Directory (getCurrentDirectory, getModificationTime, removeFile, removePathForcibly, setModificationTime)
+import System.Directory (getModificationTime, removeFile, setModificationTime)
 import System.Exit (ExitCode (..))
-import System.FilePath (takeDirectory, (</>))
+import System.FilePath ((</>))
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (Assertion, assertBool, assertFailure, testCase)
 
@@ -24,21 +23,21 @@ tests =
     testGroup
         "ConfigCache"
         [ testCase "a manifest value edited after a build applies to the next build" $
-            withFixture $ \dir site -> do
+            withBuiltExample $ \dir site -> do
                 let manifest = site </> "manifest.webmanifest"
                 assertContains manifest oldThemeColor
                 editFile (content dir "website.yaml") oldThemeColor newThemeColor
                 rebuild dir
                 assertContains manifest newThemeColor
         , testCase "the site title edited after a build applies to the next build" $
-            withFixture $ \dir site -> do
+            withBuiltExample $ \dir site -> do
                 let home = site </> "index.html"
                 assertNotContains home newTitle
                 editFile (content dir "website.yaml") "  title: Example\n" ("  title: " ++ newTitle ++ "\n")
                 rebuild dir
                 assertContains home newTitle
         , testCase "removing the logo drops the icons from the manifest and the head" $
-            withFixture $ \dir site -> do
+            withBuiltExample $ \dir site -> do
                 let manifest = site </> "manifest.webmanifest"
                     home = site </> "index.html"
                 assertContains manifest "\"icons\""
@@ -48,14 +47,14 @@ tests =
                 assertNotContains manifest "\"icons\""
                 assertNotContains home "rel=\"icon\""
         , testCase "an author display name edited after a build applies to the next build" $
-            withFixture $ \dir site -> do
+            withBuiltExample $ \dir site -> do
                 let tour = site </> "prose" </> "tour" </> "index.html"
                 assertNotContains tour newDisplayName
                 editFile (content dir "authors.yaml") "  displayName: Example\n" ("  displayName: " ++ newDisplayName ++ "\n")
                 rebuild dir
                 assertContains tour newDisplayName
         , testCase "the ruby index edited after a build applies to the next build" $
-            withFixture $ \dir site -> do
+            withBuiltExample $ \dir site -> do
                 let page = site </> "languages" </> "japanese" </> "index.html"
                 assertContains page "data-jlpt=\"n5\""
                 editFile
@@ -78,15 +77,6 @@ newTitle = "Example Renamed"
 -- | An author display name the example content does not already use
 newDisplayName :: String
 newDisplayName = "Example Renamed Author"
-
--- | Runs an action against a freshly built fixture, then removes its work directory
-withFixture :: (FilePath -> FilePath -> IO ()) -> IO ()
-withFixture action = do
-    root <- getCurrentDirectory
-    bracket
-        (buildFixture root (root </> "example-content"))
-        (removePathForcibly . fst)
-        $ \(_, site) -> action (takeDirectory site) site
 
 -- | The fixture's copied content directory
 content :: FilePath -> FilePath -> FilePath

@@ -1,7 +1,6 @@
 -- | Tests for brand resolution, the generated icon list, and manifest parity
 module Cozyll.BrandSpec (tests) where
 
-import Control.Exception (bracket)
 import Cozyll.Brand (
     Brand (..),
     LogoFormat (..),
@@ -13,9 +12,9 @@ import Cozyll.Brand (
     needsImageMagick,
     resolveBrand,
  )
-import Cozyll.Config (siteConfiguration)
+import Cozyll.Config (Env (Example), siteConfiguration)
 import Cozyll.Domain.Website (Manifest (..))
-import Cozyll.Fixture (buildFixture, copyTree, withBuildLock)
+import Cozyll.Fixture (copyTree, withBuildLock, withBuiltExample, withBuiltFrom)
 import Cozyll.Rules.WellKnown (manifestTxt)
 import Data.ByteString.Char8 qualified as BS8
 import Data.List (isInfixOf, isPrefixOf)
@@ -26,7 +25,6 @@ import System.Directory (
     doesFileExist,
     getCurrentDirectory,
     removeFile,
-    removePathForcibly,
     withCurrentDirectory,
  )
 import System.Exit (ExitCode (..))
@@ -171,7 +169,7 @@ integrationTests =
         "integration"
         [ testCase "the configured logo drives the head, the header, the manifest and JSON-LD" $ do
             root <- getCurrentDirectory
-            bracket (buildFixture root (root </> "example-content")) (removePathForcibly . fst) $ \(_, site) -> do
+            withBuiltExample $ \_ site -> do
                 html <- readFile (site </> "index.html")
                 assertBool "ico link" ("<link rel=\"icon\" href=\"./favicon.ico\" sizes=\"any\">" `isInfixOf` html)
                 assertBool "svg link" ("<link rel=\"icon\" href=\"./favicon.svg\" type=\"image/svg+xml\">" `isInfixOf` html)
@@ -189,7 +187,7 @@ integrationTests =
                 copyTree (root </> "example-content") content
                 replaceInFile "  logo: images/logo.svg\n" "" (content </> "website.yaml")
                 removeFile (content </> "media" </> "branding" </> "logo.svg")
-                bracket (buildFixture root content) (removePathForcibly . fst) $ \(_, site) -> do
+                withBuiltFrom Example content $ \_ site -> do
                     html <- readFile (site </> "index.html")
                     assertBool "no icon links" (not ("rel=\"icon\"" `isInfixOf` html))
                     assertBool "no apple icon" (not ("apple-touch-icon" `isInfixOf` html))
@@ -210,7 +208,7 @@ integrationTests =
                     "logo: images/logo.svg"
                     "logo: https://cdn.example.com/logo.svg"
                     (content </> "website.yaml")
-                bracket (buildFixture root content) (removePathForcibly . fst) $ \(_, site) -> do
+                withBuiltFrom Example content $ \_ site -> do
                     html <- readFile (site </> "index.html")
                     assertBool "head link" ("<link rel=\"icon\" href=\"https://cdn.example.com/logo.svg\" type=\"image/svg+xml\">" `isInfixOf` html)
                     assertBool "header logo" ("<img src=\"https://cdn.example.com/logo.svg\" alt>" `isInfixOf` html)
