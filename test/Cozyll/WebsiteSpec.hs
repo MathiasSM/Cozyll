@@ -1,4 +1,4 @@
--- | Tests for the optional @funding:@ section of @website.yaml@
+-- | Tests for @website.yaml@ decoding: the optional @funding:@ section and its error text
 module Cozyll.WebsiteSpec (tests) where
 
 import Cozyll.Domain.Website (Funding (..), FundingEntity (..), Website (..))
@@ -13,6 +13,7 @@ tests =
     testGroup
         "Website"
         [ parsingTests
+        , errorTests
         , fundingFileTests
         ]
 
@@ -75,6 +76,35 @@ websiteWithFunding =
 
 websiteWithoutFunding :: String
 websiteWithoutFunding = websiteYaml []
+
+{- | The decode errors are user-facing, so pin the three shapes: a missing
+required key, a wrong type, and a non-object where an object is expected
+-}
+errorTests :: TestTree
+errorTests =
+    testGroup
+        "errorMessages"
+        [ testCase "names a missing required key and its section" $
+            withoutLine "  title: Example"
+                @?= Left ["Aeson exception:\nError in $.site: key \"title\" not found"]
+        , testCase "names a wrong-typed value by its path" $
+            withLine "  size: 20" "  size: nope"
+                @?= Left ["Aeson exception:\nError in $.feed.size: parsing Int failed, expected Number, but encountered String"]
+        , testCase "reports a non-object where an object is expected" $
+            (decodeYaml (websiteYaml ["funding: 3"]) :: Either [String] Website)
+                @?= Left
+                    ["Aeson exception:\nError in $.funding: parsing Cozyll.Domain.Website.Funding(Funding) failed, expected Object, but encountered Number"]
+        ]
+
+-- | @websiteYaml []@ without one of its lines
+withoutLine :: String -> Either [String] Website
+withoutLine dropped = decodeYaml . unlines . filter (/= dropped) . lines $ websiteYaml []
+
+-- | @websiteYaml []@ with one of its lines replaced
+withLine :: String -> String -> Either [String] Website
+withLine old new = decodeYaml . unlines . map replace . lines $ websiteYaml []
+  where
+    replace line = if line == old then new else line
 
 websiteYaml :: [String] -> String
 websiteYaml extra =
