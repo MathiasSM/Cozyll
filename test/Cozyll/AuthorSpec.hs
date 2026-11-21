@@ -1,21 +1,17 @@
 -- | Tests for the authors.yaml parser and author resolution
 module Cozyll.AuthorSpec (tests) where
 
-import Cozyll.Config (Env (Dev), SiteConfig (..))
+import Cozyll.Config (SiteConfig (..))
 import Cozyll.Context.Author (authoredBy, copyrightYears, profileImageUrl, resolveAuthors)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorUrlPath, decodeAuthorsUtf8, defaultAuthor, parseAuthorsYaml)
-import Cozyll.Domain.Language (defaultLanguage)
-import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Metadata qualified as Meta
+import Cozyll.TestUtils (assertFailsWith, metadataJson, testConfig)
 import Data.Aeson (Value (..), toJSON)
-import Data.Aeson.Key qualified as AesonKey
 import Data.Aeson.KeyMap qualified as KeyMap
 import Data.ByteString qualified as BS
 import Data.List (isInfixOf, sort)
-import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.Encoding (encodeUtf8)
-import Hakyll (Metadata)
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
 
@@ -64,25 +60,25 @@ parseTests =
             author <- oneAuthor "example:\n  name: Example Labs\n  type: organization\n  siteDefault: true\n"
             authorType author @?= Organization
         , testCase "rejects a missing name" $
-            failsWith "name: missing" "example:\n  siteDefault: true\n"
+            assertFailsWith "name: missing" (parseAuthorsYaml "example:\n  siteDefault: true\n")
         , testCase "rejects an empty name" $
-            failsWith "name: empty" "example:\n  name: \"\"\n  siteDefault: true\n"
+            assertFailsWith "name: empty" (parseAuthorsYaml "example:\n  name: \"\"\n  siteDefault: true\n")
         , testCase "rejects an unknown type" $
-            failsWith "type: unknown" "example:\n  name: A\n  type: robot\n  siteDefault: true\n"
+            assertFailsWith "type: unknown" (parseAuthorsYaml "example:\n  name: A\n  type: robot\n  siteDefault: true\n")
         , testCase "rejects an empty profileImage" $
-            failsWith "profileImage: empty" "example:\n  name: A\n  siteDefault: true\n  profileImage: \"\"\n"
+            assertFailsWith "profileImage: empty" (parseAuthorsYaml "example:\n  name: A\n  siteDefault: true\n  profileImage: \"\"\n")
         , testCase "rejects a non-string link" $
-            failsWith "links[0]: expected a non-empty string" "example:\n  name: A\n  siteDefault: true\n  links:\n    - 42\n"
+            assertFailsWith "links[0]: expected a non-empty string" (parseAuthorsYaml "example:\n  name: A\n  siteDefault: true\n  links:\n    - 42\n")
         , testCase "rejects an uppercase id" $
-            failsWith "invalid id" "Foo:\n  name: A\n  siteDefault: true\n"
+            assertFailsWith "invalid id" (parseAuthorsYaml "Foo:\n  name: A\n  siteDefault: true\n")
         , testCase "rejects an id with an underscore" $
-            failsWith "invalid id" "a_b:\n  name: A\n  siteDefault: true\n"
+            assertFailsWith "invalid id" (parseAuthorsYaml "a_b:\n  name: A\n  siteDefault: true\n")
         , testCase "rejects an id starting with a hyphen" $
-            failsWith "invalid id" "-a:\n  name: A\n  siteDefault: true\n"
+            assertFailsWith "invalid id" (parseAuthorsYaml "-a:\n  name: A\n  siteDefault: true\n")
         , testCase "rejects a non-map document" $
-            failsWith "expected a map" "- name: A\n"
+            assertFailsWith "expected a map" (parseAuthorsYaml "- name: A\n")
         , testCase "rejects an empty map" $
-            failsWith "non-empty map" "{}\n"
+            assertFailsWith "non-empty map" (parseAuthorsYaml "{}\n")
         , testCase "reports every problem at once" $
             case parseAuthorsYaml "example:\n  type: robot\n  links:\n    - 42\n" of
                 Left problems -> do
@@ -130,9 +126,9 @@ defaultAuthorTests =
                 Right [] -> assertFailure "Expected non-empty list of authors, but got empty list"
                 Right authors@(author : _) -> defaultAuthor authors @?= Right author
         , testCase "rejects zero defaults" $
-            failsWith "found none" "a:\n  name: A\n"
+            assertFailsWith "found none" (parseAuthorsYaml "a:\n  name: A\n")
         , testCase "rejects two defaults" $
-            failsWith "found 2" "a:\n  name: A\n  siteDefault: true\nb:\n  name: B\n  siteDefault: true\n"
+            assertFailsWith "found 2" (parseAuthorsYaml "a:\n  name: A\n  siteDefault: true\nb:\n  name: B\n  siteDefault: true\n")
         ]
 
 authorUrlPathTests :: TestTree
@@ -165,15 +161,6 @@ oneAuthor yaml = case parseAuthorsYaml yaml of
     Right [author] -> pure author
     Right authors -> assertFailure ("expected one author, got " ++ show (length authors))
 
--- | Asserts the parse fails with a problem mentioning the given text
-failsWith :: String -> String -> IO ()
-failsWith text yaml = case parseAuthorsYaml yaml of
-    Left problems ->
-        assertBool
-            ("expected a problem mentioning " ++ show text ++ ", got " ++ show problems)
-            (any (text `isInfixOf`) problems)
-    Right _ -> assertFailure "expected parsing to fail"
-
 happyAuthor :: String
 happyAuthor =
     unlines
@@ -195,19 +182,19 @@ resolveAuthorsTests =
     testGroup
         "resolveAuthors"
         [ testCase "resolves a list of ids in order" $
-            map authorId (resolveAuthors cfg (metadataOf [("author", stringList ["example", "example-org"])]))
+            map authorId (resolveAuthors cfg (metadataJson [("author", stringList ["example", "example-org"])]))
                 @?= ["example", "example-org"]
         , testCase "resolves a scalar id" $
-            map authorId (resolveAuthors cfg (metadataOf [("author", String "example-org")]))
+            map authorId (resolveAuthors cfg (metadataJson [("author", String "example-org")]))
                 @?= ["example-org"]
         , testCase "falls back to the site-default author" $
-            map authorId (resolveAuthors cfg (metadataOf []))
+            map authorId (resolveAuthors cfg (metadataJson []))
                 @?= ["example"]
         , testCase "skips unknown ids" $
-            map authorId (resolveAuthors cfg (metadataOf [("author", stringList ["example", "nobody"])]))
+            map authorId (resolveAuthors cfg (metadataJson [("author", stringList ["example", "nobody"])]))
                 @?= ["example"]
         , testCase "deduplicates repeated ids" $
-            map authorId (resolveAuthors cfg (metadataOf [("author", stringList ["example", "example"])]))
+            map authorId (resolveAuthors cfg (metadataJson [("author", stringList ["example", "example"])]))
                 @?= ["example"]
         ]
 
@@ -216,11 +203,11 @@ lookupKeyListTests =
     testGroup
         "lookupKeyList"
         [ testCase "reads a list" $
-            Meta.lookupKeyList Meta.Author (metadataOf [("author", stringList ["a", "b"])]) @?= Just ["a", "b"]
+            Meta.lookupKeyList Meta.Author (metadataJson [("author", stringList ["a", "b"])]) @?= Just ["a", "b"]
         , testCase "reads a scalar as a single-element list" $
-            Meta.lookupKeyList Meta.Author (metadataOf [("author", String "a")]) @?= Just ["a"]
+            Meta.lookupKeyList Meta.Author (metadataJson [("author", String "a")]) @?= Just ["a"]
         , testCase "is Nothing when absent" $
-            Meta.lookupKeyList Meta.Author (metadataOf []) @?= Nothing
+            Meta.lookupKeyList Meta.Author (metadataJson []) @?= Nothing
         ]
 
 -- | A list of strings as a JSON array
@@ -232,13 +219,13 @@ copyrightYearsTests =
     testGroup
         "copyrightYears"
         [ testCase "is a single year without lastModifiedAt" $
-            copyrightYears (metadataOf [("date", String "2024-02-20")]) @?= "2024"
+            copyrightYears (metadataJson [("date", String "2024-02-20")]) @?= "2024"
         , testCase "is a single year when lastModifiedAt matches" $
-            copyrightYears (metadataOf [("date", String "2024-02-20"), ("lastModifiedAt", String "2024-02-20")]) @?= "2024"
+            copyrightYears (metadataJson [("date", String "2024-02-20"), ("lastModifiedAt", String "2024-02-20")]) @?= "2024"
         , testCase "is a range when lastModifiedAt differs" $
-            copyrightYears (metadataOf [("date", String "2024-02-20"), ("lastModifiedAt", String "2026-03-01")]) @?= "2024–2026"
+            copyrightYears (metadataJson [("date", String "2024-02-20"), ("lastModifiedAt", String "2026-03-01")]) @?= "2024–2026"
         , testCase "is empty without a date" $
-            copyrightYears (metadataOf []) @?= ""
+            copyrightYears (metadataJson []) @?= ""
         ]
 
 postCopyrightTests :: TestTree
@@ -246,10 +233,10 @@ postCopyrightTests =
     testGroup
         "postCopyright"
         [ testCase "names only the opted-in authors" $
-            map authorName (filter authorAddCopyrightNotice (resolveAuthors cfg (metadataOf [("author", stringList ["example", "example-org"])])))
+            map authorName (filter authorAddCopyrightNotice (resolveAuthors cfg (metadataJson [("author", stringList ["example", "example-org"])])))
                 @?= ["Example Author"]
         , testCase "is false when no author opts in" $
-            any authorAddCopyrightNotice (resolveAuthors cfg (metadataOf [("author", String "example-org")]))
+            any authorAddCopyrightNotice (resolveAuthors cfg (metadataJson [("author", String "example-org")]))
                 @?= False
         ]
 
@@ -258,52 +245,23 @@ authoredByTests =
     testGroup
         "authoredBy"
         [ testCase "accepts an explicitly listed author" $
-            authoredBy cfg exampleAuthor (metadataOf [("author", String "example")])
+            authoredBy cfg exampleAuthor (metadataJson [("author", String "example")])
                 @?= True
         , testCase "accepts any author of a multi-author post" $
-            authoredBy cfg orgAuthor (metadataOf [("author", stringList ["example", "example-org"])])
+            authoredBy cfg orgAuthor (metadataJson [("author", stringList ["example", "example-org"])])
                 @?= True
         , testCase "assigns a post without authors to the site default" $
-            authoredBy cfg exampleAuthor (metadataOf []) @?= True
+            authoredBy cfg exampleAuthor (metadataJson []) @?= True
         , testCase "does not assign a post without authors to other authors" $
-            authoredBy cfg orgAuthor (metadataOf []) @?= False
+            authoredBy cfg orgAuthor (metadataJson []) @?= False
         , testCase "rejects an author the post does not list" $
-            authoredBy cfg orgAuthor (metadataOf [("author", String "example")])
+            authoredBy cfg orgAuthor (metadataJson [("author", String "example")])
                 @?= False
         ]
 
--- | Front matter with string values, as Hakyll stores it
-metadataOf :: [(Text, Value)] -> Metadata
-metadataOf = KeyMap.fromList . map (\(key, value) -> (AesonKey.fromText key, value))
-
--- | A 'SiteConfig' with two authors (example is the default)
+-- | The shared config with two authors (example is the default)
 cfg :: SiteConfig
-cfg =
-    SiteConfig
-        { siteTitle = "site"
-        , siteDescription = ""
-        , siteCopyrightYear = 0
-        , siteCurrentYear = 2021
-        , siteDomain = "example.com"
-        , siteLanguage = defaultLanguage
-        , siteAlternateNames = []
-        , siteLogo = Nothing
-        , siteLogoConfigured = Nothing
-        , siteBrand = Nothing
-        , siteAuthors = [exampleAuthor, orgAuthor]
-        , siteDefaultAuthor = exampleAuthor
-        , mathjaxVersion = ""
-        , highlightStyle = Pygments
-        , contentDir = "content"
-        , assetsDir = "assets"
-        , templatesDir = "templates"
-        , contentTemplatesDir = "content/templates"
-        , contentCssDir = "content/css"
-        , contentTemplateNames = []
-        , siteEnv = Dev
-        , siteRubyData = Nothing
-        , siteJaRubyCheck = CheckError
-        }
+cfg = testConfig{siteAuthors = [exampleAuthor, orgAuthor], siteDefaultAuthor = exampleAuthor}
 
 exampleAuthor :: Author
 exampleAuthor = (author' "example" "Example Author" True){authorAddCopyrightNotice = True}

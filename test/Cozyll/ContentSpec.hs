@@ -3,12 +3,10 @@ module Cozyll.ContentSpec (tests) where
 
 import Cozyll.Config (Env (..))
 import Cozyll.Content (isHidden, parseAliasesYaml, tocLabelOf)
-import Data.Aeson (Value (Bool, String))
-import Data.Aeson.Key (fromString)
-import Data.Aeson.KeyMap qualified as KM
-import Data.Either (isLeft)
+import Cozyll.TestUtils (assertFails, metadata, metadataJson)
+import Data.Aeson (Value (Bool))
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, testCase, (@?=))
+import Test.Tasty.HUnit (testCase, (@?=))
 
 tests :: TestTree
 tests =
@@ -35,8 +33,8 @@ isHiddenTests =
             isHidden Prod nonDraftMetadata @?= False
         ]
   where
-    draftMetadata = KM.singleton (fromString "draft") (Bool True)
-    nonDraftMetadata = KM.singleton (fromString "title") (Bool False)
+    draftMetadata = metadataJson [("draft", Bool True)]
+    nonDraftMetadata = metadataJson [("title", Bool False)]
 
 -- Aliases --------------------------------------------------------------------
 
@@ -55,7 +53,7 @@ aliasTests =
         , testCase "rejects the home page" $
             parseAliasesYaml "aliases: [/]" @?= Left ["aliases: / is the home page, it can't be an alias"]
         , testCase "rejects something that isn't text" $
-            assertBool "expected parsing to fail" (isLeft (parseAliasesYaml "aliases: 3"))
+            assertFails (parseAliasesYaml "aliases: 3")
         ]
 
 -- Table of contents label ----------------------------------------------------
@@ -65,11 +63,11 @@ tocLabelOfTests =
     testGroup
         "tocLabelOf"
         [ testCase "reads the label" $
-            tocLabelOf (KM.singleton (fromString "TOC") (String "Contents")) @?= Just "Contents"
+            tocLabelOf (metadata [("TOC", "Contents")]) @?= Just "Contents"
         , testCase "reads a custom label" $
-            tocLabelOf (KM.singleton (fromString "TOC") (String "Table of contents")) @?= Just "Table of contents"
+            tocLabelOf (metadata [("TOC", "Table of contents")]) @?= Just "Table of contents"
         , testCase "is nothing for an empty label" $
-            tocLabelOf (KM.singleton (fromString "TOC") (String "")) @?= Nothing
+            tocLabelOf (metadata [("TOC", "")]) @?= Nothing
         , testCase "is nothing without a TOC" $
-            tocLabelOf (KM.singleton (fromString "title") (String "x")) @?= Nothing
+            tocLabelOf (metadata [("title", "x")]) @?= Nothing
         ]

@@ -1,7 +1,6 @@
 -- | Tests for brand resolution, the generated icon list, and manifest parity
 module Cozyll.BrandSpec (tests) where
 
-import Control.Exception (bracket)
 import Cozyll.Brand (
     Brand (..),
     LogoFormat (..),
@@ -13,12 +12,11 @@ import Cozyll.Brand (
     needsImageMagick,
     resolveBrand,
  )
-import Cozyll.Config (siteConfiguration)
+import Cozyll.Config (Env (Example), siteConfiguration)
 import Cozyll.Domain.Website (Manifest (..))
-import Cozyll.Fixture (buildFixture, copyTree, withBuildLock)
+import Cozyll.Fixture (copyTree, withBuildLock, withBuiltExample, withBuiltFrom)
 import Cozyll.Rules.WellKnown (manifestTxt)
-import Data.ByteString.Char8 qualified as BS8
-import Data.List (isInfixOf, isPrefixOf)
+import Cozyll.TestUtils (assertContains, assertNotContains, replaceInFile)
 import Hakyll.Commands qualified as Commands
 import Hakyll.Core.Logger qualified as Logger
 import System.Directory (
@@ -26,7 +24,6 @@ import System.Directory (
     doesFileExist,
     getCurrentDirectory,
     removeFile,
-    removePathForcibly,
     withCurrentDirectory,
  )
 import System.Exit (ExitCode (..))
@@ -142,13 +139,13 @@ manifestTests =
         "manifestTxt"
         [ testCase "lists exactly the generated PNG icons" $ do
             let output = manifestTxt "Example" manifest (brandIconsFor LogoSvg [])
-            assertBool "192 icon" ("/favicon-192.png" `isInfixOf` output)
-            assertBool "512 icon" ("/favicon-512.png" `isInfixOf` output)
-            assertBool "no ICO" (not ("/favicon.ico" `isInfixOf` output))
-            assertBool "no SVG" (not ("/favicon.svg" `isInfixOf` output))
-            assertBool "no apple icon" (not ("/apple-touch-icon.png" `isInfixOf` output))
+            assertContains "/favicon-192.png" output
+            assertContains "/favicon-512.png" output
+            assertNotContains "/favicon.ico" output
+            assertNotContains "/favicon.svg" output
+            assertNotContains "/apple-touch-icon.png" output
         , testCase "omits the icons key without a logo" $
-            assertBool "no icons key" (not ("\"icons\"" `isInfixOf` manifestTxt "Example" manifest []))
+            assertNotContains "\"icons\"" (manifestTxt "Example" manifest [])
         , testCase "includes a single URL icon without sizes" $ do
             let icon =
                     SiteIcon
@@ -160,9 +157,9 @@ manifestTests =
                         , iconManifest = True
                         }
                 output = manifestTxt "Example" manifest [icon]
-            assertBool "src" ("https://cdn.example.com/logo.svg" `isInfixOf` output)
-            assertBool "type" ("\"type\": \"image/svg+xml\"" `isInfixOf` output)
-            assertBool "no sizes" (not ("\"sizes\"" `isInfixOf` output))
+            assertContains "https://cdn.example.com/logo.svg" output
+            assertContains "\"type\": \"image/svg+xml\"" output
+            assertNotContains "\"sizes\"" output
         ]
 
 integrationTests :: TestTree
@@ -171,32 +168,32 @@ integrationTests =
         "integration"
         [ testCase "the configured logo drives the head, the header, the manifest and JSON-LD" $ do
             root <- getCurrentDirectory
-            bracket (buildFixture root (root </> "example-content")) (removePathForcibly . fst) $ \(_, site) -> do
+            withBuiltExample $ \_ site -> do
                 html <- readFile (site </> "index.html")
-                assertBool "ico link" ("<link rel=\"icon\" href=\"./favicon.ico\" sizes=\"any\">" `isInfixOf` html)
-                assertBool "svg link" ("<link rel=\"icon\" href=\"./favicon.svg\" type=\"image/svg+xml\">" `isInfixOf` html)
-                assertBool "apple link" ("<link rel=\"apple-touch-icon\" href=\"./apple-touch-icon.png\">" `isInfixOf` html)
-                assertBool "header logo" ("<img src=\"./images/logo.svg\" alt>" `isInfixOf` html)
-                assertBool "json-ld logo" ("https://example.com/images/logo.svg" `isInfixOf` html)
+                assertContains "<link rel=\"icon\" href=\"./favicon.ico\" sizes=\"any\">" html
+                assertContains "<link rel=\"icon\" href=\"./favicon.svg\" type=\"image/svg+xml\">" html
+                assertContains "<link rel=\"apple-touch-icon\" href=\"./apple-touch-icon.png\">" html
+                assertContains "<img src=\"./images/logo.svg\" alt>" html
+                assertContains "https://example.com/images/logo.svg" html
                 manifestText <- readFile (site </> "manifest.webmanifest")
-                assertBool "192 icon" ("/favicon-192.png" `isInfixOf` manifestText)
-                assertBool "512 icon" ("/favicon-512.png" `isInfixOf` manifestText)
+                assertContains "/favicon-192.png" manifestText
+                assertContains "/favicon-512.png" manifestText
 
                 nested <- readFile (site </> "languages" </> "japanese" </> "index.html")
-                assertBool "nested header logo" ("<img src=\"../../images/logo.svg\" alt>" `isInfixOf` nested)
+                assertContains "<img src=\"../../images/logo.svg\" alt>" nested
 
             withSystemTempDirectory "brand-content" $ \content -> do
                 copyTree (root </> "example-content") content
-                replaceInFile "  logo: images/logo.svg\n" "" (content </> "website.yaml")
+                replaceInFile (content </> "website.yaml") "  logo: images/logo.svg\n" ""
                 removeFile (content </> "media" </> "branding" </> "logo.svg")
-                bracket (buildFixture root content) (removePathForcibly . fst) $ \(_, site) -> do
+                withBuiltFrom Example content $ \_ site -> do
                     html <- readFile (site </> "index.html")
-                    assertBool "no icon links" (not ("rel=\"icon\"" `isInfixOf` html))
-                    assertBool "no apple icon" (not ("apple-touch-icon" `isInfixOf` html))
-                    assertBool "no header logo" (not ("<img src=\"./images/logo.svg\"" `isInfixOf` html))
-                    assertBool "no json-ld logo" (not ("\"logo\":" `isInfixOf` html))
+                    assertNotContains "rel=\"icon\"" html
+                    assertNotContains "apple-touch-icon" html
+                    assertNotContains "<img src=\"./images/logo.svg\"" html
+                    assertNotContains "\"logo\":" html
                     manifestText <- readFile (site </> "manifest.webmanifest")
-                    assertBool "no icons key" (not ("\"icons\"" `isInfixOf` manifestText))
+                    assertNotContains "\"icons\"" manifestText
                     logger <- Logger.new Logger.Error
                     result <-
                         withBuildLock
@@ -207,16 +204,16 @@ integrationTests =
             withSystemTempDirectory "brand-remote" $ \content -> do
                 copyTree (root </> "example-content") content
                 replaceInFile
+                    (content </> "website.yaml")
                     "logo: images/logo.svg"
                     "logo: https://cdn.example.com/logo.svg"
-                    (content </> "website.yaml")
-                bracket (buildFixture root content) (removePathForcibly . fst) $ \(_, site) -> do
+                withBuiltFrom Example content $ \_ site -> do
                     html <- readFile (site </> "index.html")
-                    assertBool "head link" ("<link rel=\"icon\" href=\"https://cdn.example.com/logo.svg\" type=\"image/svg+xml\">" `isInfixOf` html)
-                    assertBool "header logo" ("<img src=\"https://cdn.example.com/logo.svg\" alt>" `isInfixOf` html)
-                    assertBool "json-ld logo" ("https://cdn.example.com/logo.svg" `isInfixOf` html)
+                    assertContains "<link rel=\"icon\" href=\"https://cdn.example.com/logo.svg\" type=\"image/svg+xml\">" html
+                    assertContains "<img src=\"https://cdn.example.com/logo.svg\" alt>" html
+                    assertContains "https://cdn.example.com/logo.svg" html
                     manifestText <- readFile (site </> "manifest.webmanifest")
-                    assertBool "manifest icon" ("https://cdn.example.com/logo.svg" `isInfixOf` manifestText)
+                    assertContains "https://cdn.example.com/logo.svg" manifestText
                     assertBool "no generated ico" . not =<< doesFileExist (site </> "favicon.ico")
                     assertBool "no generated svg" . not =<< doesFileExist (site </> "favicon.svg")
         ]
@@ -231,21 +228,6 @@ writeFileAt root relative contents = do
     let path = root </> relative
     createDirectoryIfMissing True (takeDirectory path)
     writeFile path contents
-
--- | Replaces the first occurrence of a needle in a file
-replaceInFile :: String -> String -> FilePath -> IO ()
-replaceInFile needle replacement path = do
-    contents <- BS8.readFile path
-    BS8.writeFile path (BS8.pack (replace needle replacement (BS8.unpack contents)))
-
--- | Replaces the first occurrence of a needle
-replace :: String -> String -> String -> String
-replace needle replacement = go
-  where
-    go [] = []
-    go value@(char : rest)
-        | needle `isPrefixOf` value = replacement ++ go (drop (length needle) value)
-        | otherwise = char : go rest
 
 -- | A manifest with only the colours the icon list does not touch
 manifest :: Manifest

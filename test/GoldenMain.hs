@@ -4,7 +4,8 @@ are run as a separate test suite.
 module Main (main) where
 
 import Control.Exception (bracket)
-import Golden (buildSiteSnapshot, goldenTests, relativeFiles)
+import Cozyll.Fixture (walkFiles)
+import Golden (buildSiteSnapshot, goldenTests)
 import System.Directory (getCurrentDirectory, removePathForcibly)
 import Test.Tasty (defaultIngredients, defaultMainWithIngredients)
 import Test.Tasty.Runners.AntXML (antXMLRunner)
@@ -14,5 +15,5 @@ main :: IO ()
 main = do
     root <- getCurrentDirectory
     bracket (buildSiteSnapshot root) (removePathForcibly . fst) $ \(_, snapshotDir) -> do
-        files <- relativeFiles snapshotDir
+        files <- walkFiles snapshotDir
         defaultMainWithIngredients (antXMLRunner : defaultIngredients) (goldenTests root snapshotDir files)

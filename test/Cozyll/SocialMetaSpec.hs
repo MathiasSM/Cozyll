@@ -1,7 +1,6 @@
 -- | Tests for the social-meta helpers: main-image detection, page metadata, URLs, dates, locales, and titles
 module Cozyll.SocialMetaSpec (tests) where
 
-import Cozyll.Config (Env (Dev), SiteConfig (..))
 import Cozyll.Context.SocialMeta (
     MainImage (..),
     PageItem (..),
@@ -19,53 +18,14 @@ import Cozyll.Context.SocialMeta (
     titleOf,
  )
 import Cozyll.Domain.Author (Author (..))
-import Cozyll.Domain.Language (defaultLanguage)
-import Cozyll.Domain.Website (CheckMode (..), HighlightStyle (Pygments))
 import Cozyll.Domain.Website qualified as Web
-import Cozyll.TestUtils (mkAuthor)
+import Cozyll.TestUtils (assertContains, assertNotContains, metadata, mkAuthor, siteYaml, testConfig)
 import Cozyll.Yaml (decodeYaml)
-import Data.Aeson (Value (String))
-import Data.Aeson.Key qualified as AesonKey
-import Data.Aeson.KeyMap qualified as KeyMap
-import Data.List (isInfixOf)
 import Data.Text (Text)
-import Hakyll (Metadata, defaultHakyllReaderOptions)
+import Hakyll (defaultHakyllReaderOptions)
 import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.HUnit (assertBool, assertFailure, testCase, (@?=))
+import Test.Tasty.HUnit (assertFailure, testCase, (@?=))
 import Text.Pandoc (Pandoc, readMarkdown, runPure)
-
--- | Front matter with string values, as Hakyll stores it
-metadataOf :: [(Text, Text)] -> Metadata
-metadataOf = KeyMap.fromList . map (\(key, value) -> (AesonKey.fromText key, String value))
-
--- | A 'SiteConfig' with only the fields the URL helpers read; the rest are dummies
-mkConfig :: SiteConfig
-mkConfig =
-    SiteConfig
-        { siteTitle = "site"
-        , siteDescription = ""
-        , siteCopyrightYear = 0
-        , siteCurrentYear = 2021
-        , siteDomain = "example.com"
-        , siteLanguage = defaultLanguage
-        , siteAlternateNames = []
-        , siteLogo = Nothing
-        , siteLogoConfigured = Nothing
-        , siteBrand = Nothing
-        , siteAuthors = [mkAuthor ""]
-        , siteDefaultAuthor = mkAuthor ""
-        , mathjaxVersion = ""
-        , highlightStyle = Pygments
-        , contentDir = "content"
-        , assetsDir = "assets"
-        , templatesDir = "templates"
-        , contentTemplatesDir = "content/templates"
-        , contentCssDir = "content/css"
-        , contentTemplateNames = []
-        , siteEnv = Dev
-        , siteRubyData = Nothing
-        , siteJaRubyCheck = CheckError
-        }
 
 -- | Parses Markdown the way the site does
 markdown :: Text -> Pandoc
@@ -118,8 +78,8 @@ pageMetaOfTests =
         "pageMetaOf"
         [ testCase "collects the title, description, URL, language, and dates" $
             pageMetaOf
-                mkConfig
-                ( metadataOf
+                testConfig
+                ( metadata
                     [ ("title", "T")
                     , ("description", "D")
                     , ("path", "prose/tour/")
@@ -137,7 +97,7 @@ pageMetaOfTests =
                     , pageMetaModified = Just "2024-03-01"
                     }
         , testCase "falls back to the site root, English, and no dates" $
-            pageMetaOf mkConfig (metadataOf [("title", "T")])
+            pageMetaOf testConfig (metadata [("title", "T")])
                 @?= PageMeta
                     { pageMetaTitle = "T"
                     , pageMetaDescription = Nothing
@@ -153,15 +113,15 @@ absoluteUrlTests =
     testGroup
         "absoluteUrl"
         [ testCase "keeps a root path" $
-            absoluteUrl mkConfig "/" @?= "https://example.com/"
+            absoluteUrl testConfig "/" @?= "https://example.com/"
         , testCase "adds a slash to a relative path" $
-            absoluteUrl mkConfig "foo" @?= "https://example.com/foo"
+            absoluteUrl testConfig "foo" @?= "https://example.com/foo"
         , testCase "does not double a leading slash" $
-            absoluteUrl mkConfig "/foo" @?= "https://example.com/foo"
+            absoluteUrl testConfig "/foo" @?= "https://example.com/foo"
         , testCase "maps an empty path to the site root" $
-            absoluteUrl mkConfig "" @?= "https://example.com/"
+            absoluteUrl testConfig "" @?= "https://example.com/"
         , testCase "collapses leading double slashes" $
-            absoluteUrl mkConfig "//foo" @?= "https://example.com/foo"
+            absoluteUrl testConfig "//foo" @?= "https://example.com/foo"
         ]
 
 absoluteImageUrlTests :: TestTree
@@ -169,17 +129,17 @@ absoluteImageUrlTests =
     testGroup
         "absoluteImageUrl"
         [ testCase "makes a relative image path absolute" $
-            absoluteImageUrl mkConfig "images/a.png" @?= "https://example.com/images/a.png"
+            absoluteImageUrl testConfig "images/a.png" @?= "https://example.com/images/a.png"
         , testCase "keeps an http URL" $
-            absoluteImageUrl mkConfig "http://x/y.png" @?= "http://x/y.png"
+            absoluteImageUrl testConfig "http://x/y.png" @?= "http://x/y.png"
         , testCase "keeps an https URL" $
-            absoluteImageUrl mkConfig "https://x/y.png" @?= "https://x/y.png"
+            absoluteImageUrl testConfig "https://x/y.png" @?= "https://x/y.png"
         , testCase "keeps an uppercase HTTPS URL" $
-            absoluteImageUrl mkConfig "HTTPS://x/y.png" @?= "HTTPS://x/y.png"
+            absoluteImageUrl testConfig "HTTPS://x/y.png" @?= "HTTPS://x/y.png"
         , testCase "keeps a protocol-relative URL" $
-            absoluteImageUrl mkConfig "//cdn/x.png" @?= "//cdn/x.png"
+            absoluteImageUrl testConfig "//cdn/x.png" @?= "//cdn/x.png"
         , testCase "keeps a data URI" $
-            absoluteImageUrl mkConfig "data:image/png;base64,AAAA" @?= "data:image/png;base64,AAAA"
+            absoluteImageUrl testConfig "data:image/png;base64,AAAA" @?= "data:image/png;base64,AAAA"
         ]
 
 isoDateTests :: TestTree
@@ -208,11 +168,11 @@ titleOfTests =
     testGroup
         "titleOf"
         [ testCase "uses the title" $
-            titleOf (metadataOf [("title", "T")]) @?= "T"
+            titleOf (metadata [("title", "T")]) @?= "T"
         , testCase "prefers shareTitle" $
-            titleOf (metadataOf [("shareTitle", "S"), ("title", "T")]) @?= "S"
+            titleOf (metadata [("shareTitle", "S"), ("title", "T")]) @?= "S"
         , testCase "falls back to the title when shareTitle is empty" $
-            titleOf (metadataOf [("shareTitle", ""), ("title", "T")]) @?= "T"
+            titleOf (metadata [("shareTitle", ""), ("title", "T")]) @?= "T"
         ]
 
 descriptionOfTests :: TestTree
@@ -220,15 +180,15 @@ descriptionOfTests =
     testGroup
         "descriptionOf"
         [ testCase "uses the description" $
-            descriptionOf (metadataOf [("description", "D")]) @?= Just "D"
+            descriptionOf (metadata [("description", "D")]) @?= Just "D"
         , testCase "prefers shareDescription" $
-            descriptionOf (metadataOf [("shareDescription", "SD"), ("description", "D")]) @?= Just "SD"
+            descriptionOf (metadata [("shareDescription", "SD"), ("description", "D")]) @?= Just "SD"
         , testCase "is Nothing without a description" $
-            descriptionOf (metadataOf []) @?= Nothing
+            descriptionOf (metadata []) @?= Nothing
         , testCase "falls back to the description when shareDescription is empty" $
-            descriptionOf (metadataOf [("shareDescription", ""), ("description", "D")]) @?= Just "D"
+            descriptionOf (metadata [("shareDescription", ""), ("description", "D")]) @?= Just "D"
         , testCase "treats an empty description as absent" $
-            descriptionOf (metadataOf [("description", "")]) @?= Nothing
+            descriptionOf (metadata [("description", "")]) @?= Nothing
         ]
 
 siteParsingTests :: TestTree
@@ -249,34 +209,20 @@ siteParsingTests =
                     Web.siteLogo site @?= Nothing
         ]
   where
-    siteWithExtras =
-        unlines
-            [ "title: Example"
-            , "description: An example site"
-            , "copyrightYear: 2020"
-            , "domain: example.com"
-            , "alternateName: [Ex, example.com]"
-            , "logo: images/logo.png"
-            ]
-    siteMinimal =
-        unlines
-            [ "title: Example"
-            , "description: An example site"
-            , "copyrightYear: 2020"
-            , "domain: example.com"
-            ]
+    siteWithExtras = siteYaml ["alternateName: [Ex, example.com]", "logo: images/logo.png"]
+    siteMinimal = siteYaml []
 
 pageKindOfTests :: TestTree
 pageKindOfTests =
     testGroup
         "pageKindOf"
-        [ testCase "defaults to WebPage" $ pageKindOf (metadataOf []) @?= Right WebPage
+        [ testCase "defaults to WebPage" $ pageKindOf (metadata []) @?= Right WebPage
         , testCase "accepts a whitelisted schemaType" $
-            pageKindOf (metadataOf [("schemaType", "AboutPage")]) @?= Right AboutPage
+            pageKindOf (metadata [("schemaType", "AboutPage")]) @?= Right AboutPage
         , testCase "accepts ProfilePage" $
-            pageKindOf (metadataOf [("schemaType", "ProfilePage")]) @?= Right ProfilePage
+            pageKindOf (metadata [("schemaType", "ProfilePage")]) @?= Right ProfilePage
         , testCase "rejects an unknown schemaType" $
-            pageKindOf (metadataOf [("schemaType", "Blog")]) @?= Left "Blog"
+            pageKindOf (metadata [("schemaType", "Blog")]) @?= Left "Blog"
         ]
 
 jsonLdTests :: TestTree
@@ -284,16 +230,16 @@ jsonLdTests =
     testGroup
         "jsonLD"
         [ testCase "wraps every page in a @context + @graph document" $
-            assertContains "{\"@context\":\"https://schema.org\",\"@graph\":[" (jsonLD mkConfig WebPage [] [] pageMeta Nothing)
+            assertContains "{\"@context\":\"https://schema.org\",\"@graph\":[" (jsonLD testConfig WebPage [] [] pageMeta Nothing)
         , testCase "home has WebSite, Organization, and the default author" $ do
-            let json = jsonLD mkConfig WebSite [] [] homeMeta Nothing
+            let json = jsonLD testConfig WebSite [] [] homeMeta Nothing
             assertContains "\"@type\":\"WebSite\",\"@id\":\"https://example.com/#website\"" json
             assertContains "\"publisher\":{\"@id\":\"https://example.com/#organization\"}" json
             assertContains "\"mainEntity\":{\"@id\":\"https://example.com/authors/example#person\"}" json
             assertContains "\"@type\":\"Organization\",\"@id\":\"https://example.com/#organization\"" json
             assertContains "\"@type\":\"Person\",\"@id\":\"https://example.com/authors/example#person\"" json
         , testCase "posts are BlogPosting with author, publisher, and url" $ do
-            let json = jsonLD mkConfig Article [exampleAuthor] [] postMeta (Just (MainImage "images/a.png" "alt"))
+            let json = jsonLD testConfig Article [exampleAuthor] [] postMeta (Just (MainImage "images/a.png" "alt"))
             assertContains "\"@type\":\"BlogPosting\",\"@id\":\"https://example.com/prose/tour#article\"" json
             assertContains "\"mainEntityOfPage\":{\"@id\":\"https://example.com/prose/tour\"" json
             assertContains "\"author\":[{\"@id\":\"https://example.com/authors/example#person\",\"@type\":\"Person\"" json
@@ -301,13 +247,13 @@ jsonLdTests =
             assertContains "\"publisher\":{\"@id\":\"https://example.com/#organization\",\"@type\":\"Organization\",\"name\":\"site\"}" json
             assertContains "\"image\":\"https://example.com/images/a.png\"" json
         , testCase "posts carry the copyright only when an author opted in" $ do
-            let optedIn = jsonLD mkConfig Article [exampleAuthor] [] postMeta Nothing
-                optedOut = jsonLD mkConfig Article [exampleAuthor{authorAddCopyrightNotice = False}] [] postMeta Nothing
+            let optedIn = jsonLD testConfig Article [exampleAuthor] [] postMeta Nothing
+                optedOut = jsonLD testConfig Article [exampleAuthor{authorAddCopyrightNotice = False}] [] postMeta Nothing
             assertContains "\"copyrightNotice\":\"© Example Author 2024–2026\"" optedIn
             assertContains "\"copyrightHolder\":[{\"@id\":\"https://example.com/authors/example#person\"" optedIn
             assertNotContains "copyrightNotice" optedOut
         , testCase "standalone pages are a WebPage inside the site" $ do
-            let json = jsonLD mkConfig AboutPage [] [] pageMeta Nothing
+            let json = jsonLD testConfig AboutPage [] [] pageMeta Nothing
             assertContains "\"@type\":\"AboutPage\",\"@id\":\"https://example.com/about\"" json
             assertContains "\"isPartOf\":{\"@id\":\"https://example.com/#website\",\"@type\":\"WebSite\"" json
         , testCase "profile pages link their author and list their posts" $ do
@@ -315,7 +261,7 @@ jsonLdTests =
                     [ PageItem "https://example.com/prose/tour" "A tour" (Just "2024-02-20")
                     , PageItem "https://example.com/prose/lists" "Lists" (Just "2024-01-20")
                     ]
-                json = jsonLD mkConfig ProfilePage [exampleAuthor] items (pageMeta{pageMetaUrl = "https://example.com/authors/example"}) Nothing
+                json = jsonLD testConfig ProfilePage [exampleAuthor] items (pageMeta{pageMetaUrl = "https://example.com/authors/example"}) Nothing
             assertContains "\"@type\":\"ProfilePage\",\"@id\":\"https://example.com/authors/example\"" json
             assertContains "\"mainEntity\":{\"@id\":\"https://example.com/authors/example#person\"}" json
             assertContains "\"hasPart\":[{\"@id\":\"https://example.com/prose/tour#article\",\"@type\":\"BlogPosting\"" json
@@ -326,14 +272,14 @@ jsonLdTests =
                     [ PageItem "https://example.com/prose/tour" "" Nothing
                     , PageItem "https://example.com/prose/lists" "" Nothing
                     ]
-                json = jsonLD mkConfig CollectionPage [] items (pageMeta{pageMetaUrl = "https://example.com/prose"}) Nothing
+                json = jsonLD testConfig CollectionPage [] items (pageMeta{pageMetaUrl = "https://example.com/prose"}) Nothing
             assertContains "\"@type\":\"CollectionPage\"" json
             assertContains "\"@type\":\"ItemList\"" json
             assertContains "\"numberOfItems\":2" json
             assertContains "\"position\":1,\"url\":\"https://example.com/prose/tour\"" json
             assertContains "\"position\":2,\"url\":\"https://example.com/prose/lists\"" json
         , testCase "an empty collection has no ItemList" $ do
-            let json = jsonLD mkConfig CollectionPage [] [] (pageMeta{pageMetaUrl = "https://example.com/showcase"}) Nothing
+            let json = jsonLD testConfig CollectionPage [] [] (pageMeta{pageMetaUrl = "https://example.com/showcase"}) Nothing
             assertContains "\"@type\":\"CollectionPage\"" json
             assertNotContains "ItemList" json
         ]
@@ -367,11 +313,3 @@ exampleAuthor =
         , authorLinks = ["https://example.com"]
         , authorAddCopyrightNotice = True
         }
-
-assertContains :: String -> String -> IO ()
-assertContains needle haystack =
-    assertBool ("expected " ++ show needle ++ " in " ++ haystack) (needle `isInfixOf` haystack)
-
-assertNotContains :: String -> String -> IO ()
-assertNotContains needle haystack =
-    assertBool ("did not expect " ++ show needle ++ " in " ++ haystack) (not (needle `isInfixOf` haystack))
