@@ -1,3 +1,4 @@
+/* Content extras: external-link icon, table of contents, line blocks, task lists, footnotes */
 
 /* Add icon to external links within main content *****************************/
 a[href^=http]::after {

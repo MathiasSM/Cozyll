@@ -1,0 +1,40 @@
+/* Site footer and social links */
+/* site footer ****************************************************************/
+.site-footer {
+  color:var(--color-surface-brand-fg);
+  background: var(--color-surface-brand);
+  text-align:end;
+  padding: .5rem 1rem;
+}
+
+/* social-contact *************************************************************/
+.social-contact {
+  list-style-type: none;
+  padding:0;
+  margin-inline-start: -.5rem;
+  margin-inline-end: -.5rem;
+
+  a[href^=http]::after { display:none }
+
+  li {
+    margin:.5rem;
+    display: inline-block;
+  }
+  a {
+    display: flex;
+    padding: .5rem 1rem;
+    background: var(--color-surface-weak);
+    color: var(--color-fg);
+    gap: .5em;
+    span[aria-hidden="true"] svg {
+      width: 1em;
+      fill: var(--color-surface-strong-border);
+    }
+    &:hover {
+      background: var(--color-bg-highlight);
+      span[aria-hidden="true"] svg {
+        fill: var(--color-surface-brand-fg);
+      }
+    }
+  }
+}

@@ -1,23 +1,4 @@
-/* general initial layout */
-body {
-  display: flex;
-  flex-direction: column;
-  min-height:100vh;
-}
-main { flex:1; }
-
-@media (width >= 340px) {
-  .site-description {font-size: 1.2em;}
-  .site-header nav {flex-direction: row;}
-}
-
-@media (width >= 500px) {
-  .social-contact {
-    display: flex;
-    flex-wrap: wrap;
-  }
-}
-
+/* Desktop layout: grid regions and large-screen height tiers */
 /* Desktop layout */
 @media (width >= 1000px) and (height >= 600px) {
   body {

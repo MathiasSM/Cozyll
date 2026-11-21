@@ -1,0 +1,21 @@
+/* Layout: base flex column and small-screen breakpoints */
+/* general initial layout */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height:100vh;
+}
+main { flex:1; }
+
+@media (width >= 340px) {
+  .site-description {font-size: 1.2em;}
+  .site-header nav {flex-direction: row;}
+}
+
+@media (width >= 500px) {
+  .social-contact {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
+
