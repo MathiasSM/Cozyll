@@ -11,7 +11,6 @@
   body { widows: 2; display: block !important;}
 
   .site-header {display: block; color: black; background: none;}
-  .site-header svg {fill:var(--color-surface-brand)}
 
   .site-header nav,
   .site-footer {display:none}

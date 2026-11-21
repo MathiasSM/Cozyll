@@ -32,7 +32,6 @@ img, figure {border: none; max-width:100%; margin:0;}
 span[aria-hidden="true"] svg {
   width: 100%;
   height: auto;
-  vertical-align: center;
 }
 p:first-child {margin-top:0}
 
