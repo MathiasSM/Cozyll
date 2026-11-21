@@ -58,6 +58,7 @@ import Cozyll.Discover (discoverGroups)
 import Cozyll.Domain.Author (Author (..), authorTypeName, authorUrlPath)
 import Cozyll.Format (yearRange)
 import Cozyll.Metadata qualified as Meta
+import Cozyll.Paths (stripLeadingSlashes)
 import Data.List (find, nubBy)
 import Data.Maybe (fromMaybe, mapMaybe)
 import Hakyll (
@@ -182,7 +183,7 @@ per page ('Nothing' when the author has no image)
 already-root-relative value is not double-slashed.
 -}
 profileImageUrl :: Author -> Maybe String
-profileImageUrl author = ("/" ++) . dropWhile (== '/') <$> authorProfileImage author
+profileImageUrl author = ("/" ++) . stripLeadingSlashes <$> authorProfileImage author
 
 -- | The display name, falling back to the full name
 displayNameOf :: Author -> String

@@ -14,7 +14,7 @@ module Cozyll.Brand (
 ) where
 
 import Control.Monad (filterM)
-import Cozyll.Paths (mediaTarget)
+import Cozyll.Paths (mediaTarget, stripLeadingSlashes)
 import Data.Char (toLower)
 import Data.List (isPrefixOf, stripPrefix)
 import System.Directory (doesDirectoryExist, doesFileExist, listDirectory)
@@ -63,7 +63,7 @@ data Brand = Brand
 iconHref :: SiteIcon -> FilePath
 iconHref icon
     | isWebUrl (iconPath icon) = iconPath icon
-    | otherwise = '/' : dropWhile (== '/') (iconPath icon)
+    | otherwise = '/' : stripLeadingSlashes (iconPath icon)
 
 {- | The candidates for a site-relative logo path, in resolution order:
 @content\/static@ first, then the media files that publish at that path.
@@ -73,7 +73,7 @@ brandCandidates :: FilePath -> FilePath -> [FilePath]
 brandCandidates contentDir logo
     | isWebUrl logo || isDataUrl logo || not (safeSitePath logo) = []
     | otherwise =
-        let path = dropWhile (== '/') logo
+        let path = stripLeadingSlashes logo
             static = contentDir </> "static" </> path
             media = contentDir </> "media"
             mediaCandidates = case stripPrefix "images/" path of
@@ -112,7 +112,7 @@ urlBrand url = Brand url Nothing Nothing [singleIcon url]
 -- | The brand for a local source: generate the icon set for SVG/PNG
 localBrand :: FilePath -> FilePath -> [FilePath] -> Brand
 localBrand raw source overrides =
-    let logo = dropWhile (== '/') raw
+    let logo = stripLeadingSlashes raw
      in case logoFormat source of
             Just format -> Brand logo (Just source) (Just format) (brandIconsFor format overrides)
             Nothing -> Brand logo Nothing Nothing [singleIcon logo]
@@ -189,7 +189,7 @@ iconMimeType path = case map toLower (takeExtension path) of
 -- | Whether a path is a safe site-relative path (no @..@ or @.@ segments)
 safeSitePath :: FilePath -> Bool
 safeSitePath path =
-    let segments = splitDirectories (dropWhile (== '/') path)
+    let segments = splitDirectories (stripLeadingSlashes path)
      in not (null segments) && all (`notElem` [".", ".."]) segments
 
 -- | Whether a value is a protocol-relative or absolute web URL

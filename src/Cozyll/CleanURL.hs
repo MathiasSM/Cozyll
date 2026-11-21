@@ -4,6 +4,7 @@
 module Cozyll.CleanURL (outputPath, pathRoute, cleanIndex, cleanIndexUrls, cleanIndexHtmls) where
 
 import Cozyll.Metadata (Key (Path), lookupKey)
+import Cozyll.Paths (stripLeadingSlashes)
 import Data.List (isSuffixOf)
 import Hakyll (Compiler, Item, Metadata, Routes, customRoute, replaceAll, toFilePath, withUrls)
 import System.FilePath.Posix (takeExtension, (</>))
@@ -16,7 +17,7 @@ outputPath path
     | null (takeExtension path) = withoutSlash </> "index.html"
     | otherwise = withoutSlash
   where
-    withoutSlash = dropWhile (== '/') path
+    withoutSlash = stripLeadingSlashes path
 
 -- | Route from the `path:` front matter, laid out by 'outputPath'
 pathRoute :: Metadata -> Routes

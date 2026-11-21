@@ -53,9 +53,10 @@ import Control.Applicative ((<|>))
 import Cozyll.Config (SiteConfig, baseUrl, siteAlternateNames, siteDefaultAuthor, siteDescription, siteLanguage, siteLogo, siteTitle)
 import Cozyll.Domain.Author (Author (..), AuthorType (..), authorName, authorSchemaType, authorUrlPath)
 import Cozyll.Domain.Language qualified as L
-import Cozyll.Format (yearRange)
+import Cozyll.Format (yearOf, yearRange)
 import Cozyll.JsonLd qualified as JsonLd
 import Cozyll.Metadata (Key (..), lookupKey)
+import Cozyll.Paths (stripLeadingSlashes)
 import Cozyll.Yaml (Check (runCheck))
 import Data.Aeson (ToJSON, Value, object, (.=))
 import Data.Aeson.Encoding (Series)
@@ -68,7 +69,6 @@ import Hakyll (Compiler, Context, Item (..), Metadata, constField, getMetadata, 
 import Text.Pandoc (Block (Figure), Inline (Image), Pandoc)
 import Text.Pandoc.Shared (stringify)
 import Text.Pandoc.Walk (query)
-import Text.Read (readMaybe)
 
 -- | What kind of page the social metadata describes
 data PageKind = Article | WebSite | WebPage | ProfilePage | CollectionPage | AboutPage | ContactPage
@@ -177,7 +177,7 @@ pageUrl cfg metadata = maybe (baseUrl cfg ++ "/") (absoluteUrl cfg) (lookupKey P
 absoluteUrl :: SiteConfig -> String -> String
 absoluteUrl cfg path
     | null path || all (== '/') path = baseUrl cfg ++ "/"
-    | otherwise = baseUrl cfg ++ "/" ++ dropWhile (== '/') path
+    | otherwise = baseUrl cfg ++ "/" ++ stripLeadingSlashes path
 
 -- | Absolute URL for an image: external URLs and data URIs are kept as-is
 absoluteImageUrl :: SiteConfig -> FilePath -> String
@@ -454,10 +454,6 @@ entityImageField :: Author -> AesonKey.Key
 entityImageField author = case authorType author of
     Person -> "image"
     Organization -> "logo"
-
--- | The year of a @YYYY-MM-DD@ value
-yearOf :: String -> Maybe Int
-yearOf = readMaybe . take 4
 
 -- | Appends a time to a date-only @YYYY-MM-DD@ value
 isoDate :: String -> String

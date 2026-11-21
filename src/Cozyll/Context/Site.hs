@@ -5,6 +5,7 @@ import Cozyll.Brand (SiteIcon (..), brandIcons, iconHref)
 import Cozyll.Config (SiteConfig, baseUrl, mathjaxVersion, siteBrand, siteCopyrightYear, siteCurrentYear, siteDescription, siteDomain, siteLogo, siteTitle)
 import Cozyll.Context.Common (itemField, maybeField)
 import Cozyll.Format (yearRange)
+import Cozyll.Paths (stripLeadingSlashes)
 import Data.Char (toLower)
 import Data.List (isPrefixOf)
 import Data.Maybe (fromMaybe, isJust)
@@ -32,7 +33,7 @@ siteLogoSrc logo
     | "//" `isPrefixOf` lowered = logo
     | "http://" `isPrefixOf` lowered = logo
     | "https://" `isPrefixOf` lowered = logo
-    | otherwise = '/' : dropWhile (== '/') logo
+    | otherwise = '/' : stripLeadingSlashes logo
   where
     lowered = map toLower logo
 
