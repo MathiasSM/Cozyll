@@ -19,7 +19,7 @@
   .main-article > .content  { column-count:2; column-fill: auto; height:100%}
   .main-article a[href^=http]::after { content: " [" attr(href) "] "; }
 
-  .site-header svg, .site-header svg * {fill: var(--color-surface-border);}
+  .site-header svg, .site-header svg * {fill: var(--color-surface-weak-border);}
 
   .social-contact {display:block !important;}
   .social-contact li {padding: 0; margin: 0;}
