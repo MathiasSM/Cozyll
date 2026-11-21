@@ -3,11 +3,12 @@ module Cozyll.Context.Site (siteContext) where
 
 import Cozyll.Brand (SiteIcon (..), brandIcons, iconHref)
 import Cozyll.Config (SiteConfig, baseUrl, mathjaxVersion, siteBrand, siteCopyrightYear, siteCurrentYear, siteDescription, siteDomain, siteLogo, siteTitle)
+import Cozyll.Context.Common (itemField, maybeField)
 import Cozyll.Format (yearRange)
 import Data.Char (toLower)
 import Data.List (isPrefixOf)
 import Data.Maybe (fromMaybe, isJust)
-import Hakyll (Context, Item (itemBody), constField, field, listField, makeItem, noResult)
+import Hakyll (Context, Item (itemBody), constField, field, listField, makeItem)
 
 -- | Sets site-wide information (site-<info>)
 siteContext :: SiteConfig -> Context a
@@ -47,13 +48,8 @@ faviconsContext cfg = listField "favicons" iconContext (mapM makeItem headIcons)
     iconContext :: Context SiteIcon
     iconContext =
         mconcat
-            [ field "href" (pure . iconHref . itemBody)
+            [ itemField "href" iconHref
             , field "rel" (pure . fromMaybe "" . iconRel . itemBody)
-            , optionalField "type" iconType
-            , optionalField "sizes" iconSizes
+            , maybeField "type" iconType
+            , maybeField "sizes" iconSizes
             ]
-
--- | A field present only when the icon carries a value, so @$if()$ is false
-optionalField :: String -> (a -> Maybe String) -> Context a
-optionalField key value = field key $ \item ->
-    maybe (noResult $ "no " ++ key) pure (value (itemBody item))

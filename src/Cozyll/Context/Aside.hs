@@ -32,6 +32,7 @@ import Cozyll.Metadata (Key (..), keyName, lookupKey)
 import Data.Maybe (isJust)
 import Data.Text qualified as T
 import Hakyll (
+    Compiler,
     Context,
     Metadata,
     boolFieldM,
@@ -69,30 +70,32 @@ table-of-contents markup produced by "Cozyll.Compile" (@""@ when none).
 asideContext :: String -> Context String
 asideContext tocHtml =
     field "toc" (tocField tocHtml)
-        <> tocLabelField
-        <> toggleLabelField RubyToggle "rubyToggleLabel"
-        <> toggleLabelField RubyControl "rubyControlLabel"
-        <> toggleLabelField ImagesToggle "imagesToggleLabel"
+        <> tocLabelField metadata
+        <> toggleLabelField metadata RubyToggle "rubyToggleLabel"
+        <> toggleLabelField metadata RubyControl "rubyControlLabel"
+        <> toggleLabelField metadata ImagesToggle "imagesToggleLabel"
         <> boolFieldM "hasControls" (\_ -> hasAnyControl <$> metadata)
         <> boolFieldM "hasAside" (\_ -> hasAside <$> metadata)
   where
+    -- every field of a context is evaluated on its own, so the action is what is shared
+    metadata :: Compiler Metadata
     metadata = getUnderlying >>= getMetadata
 
     tocField "" _ = noResult "no toc"
     tocField html _ = return html
 
 -- | Exposes the table of contents label (markdown-rendered), defaulting to "Contents"
-tocLabelField :: Context String
-tocLabelField = field "tocLabel" $ \_ -> do
-    o <- getUnderlying >>= getMetadata
+tocLabelField :: Compiler Metadata -> Context String
+tocLabelField metadata = field "tocLabel" $ \_ -> do
+    o <- metadata
     case tocLabelOf o of
         Just label -> return (renderInlineMarkdown label)
         Nothing -> noResult "no toc"
 
 -- | Exposes a toggle's front-matter label, rendered from markdown to inline HTML
-toggleLabelField :: Key -> String -> Context String
-toggleLabelField k name = field name $ \_ -> do
-    o <- getUnderlying >>= getMetadata
+toggleLabelField :: Compiler Metadata -> Key -> String -> Context String
+toggleLabelField metadata k name = field name $ \_ -> do
+    o <- metadata
     case lookupKey k o of
         Just label -> return (renderInlineMarkdown label)
         Nothing -> noResult $ keyName k ++ ": not set"
