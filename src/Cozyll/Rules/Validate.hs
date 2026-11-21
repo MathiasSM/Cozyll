@@ -1,14 +1,14 @@
 -- | Build-time checks that content is consistent across files
 module Cozyll.Rules.Validate (missingPaths, validateAuthorRefs, validateNavEntries, validatePaths) where
 
-import Control.Monad (unless)
 import Cozyll.Config (Env, SiteConfig, pagesPattern, postsPattern, projectsGroup, siteAuthors, siteEnv, siteLanguage, writingsPattern)
 import Cozyll.Content (isHidden)
 import Cozyll.Discover (discoverGroups)
 import Cozyll.Domain.Author (authorId)
 import Cozyll.Domain.Nav (parseNavEntry)
 import Cozyll.Metadata (Key (Author, Path), lookupKey, lookupKeyList)
-import Hakyll (Metadata, Rules, getAllMetadata, preprocess, toFilePath)
+import Cozyll.Rules.Common (failIfAny)
+import Hakyll (Metadata, Rules, getAllMetadata, toFilePath)
 import System.FilePath.Posix (dropExtension, joinPath, splitDirectories, takeBaseName)
 
 {- | Fails the build, once, listing every page whose menu entry (`nav:`) is invalid
@@ -19,11 +19,7 @@ validateNavEntries :: SiteConfig -> Rules ()
 validateNavEntries cfg = do
     pages <- getAllMetadata $ pagesPattern cfg "*"
     let problems = [toFilePath page ++ ": " ++ problem | (page, metadata) <- pages, Left found <- [parseNavEntry (siteLanguage cfg) metadata], problem <- found]
-    unless (null problems)
-        $ preprocess
-        $ ioError
-        $ userError
-        $ "Invalid menu entries:\n" ++ unlines (map ("  " ++) problems)
+    failIfAny "Invalid menu entries" problems
 
 {- | Fails the build, once, listing every post whose @author:@ id is unknown
 
@@ -42,11 +38,7 @@ validateAuthorRefs cfg = do
             , theId <- ids
             , theId `notElem` knownIds
             ]
-    unless (null problems)
-        $ preprocess
-        $ ioError
-        $ userError
-        $ "Unknown author ids:\n" ++ unlines (map ("  " ++) problems)
+    failIfAny "Unknown author ids" problems
 
 {- | Fails the build, once, listing every built item whose front matter lacks @path:@
 
@@ -57,11 +49,7 @@ validatePaths :: SiteConfig -> Rules ()
 validatePaths cfg = do
     items <- getAllMetadata $ writingsPattern cfg
     let problems = missingPaths (siteEnv cfg) [(toFilePath ident, metadata) | (ident, metadata) <- items]
-    unless (null problems)
-        $ preprocess
-        $ ioError
-        $ userError
-        $ "Missing `path` front matter:\n" ++ unlines (map ("  " ++) problems)
+    failIfAny "Missing `path` front matter" problems
 
 {- | The items that would be built but have no @path:@, each with the line to add
 
