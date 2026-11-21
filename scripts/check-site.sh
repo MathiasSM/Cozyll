@@ -52,6 +52,13 @@ die() { printf 'error: %s\n' "$*" >&2; exit 1; }
 info() { printf '%s\n' "$*" >&2; }
 need() { command -v "$1" >/dev/null 2>&1 || die "missing '$1'. $2"; }
 
+# Runs a command with errexit suspended and records its status in `rc`, so the
+# caller can map a failure to an exit code instead of aborting.
+status_of() {
+  rc=0
+  "$@" || rc=$?
+}
+
 content_dir="content"
 site_dir="_site"
 schema_dir="schema"
@@ -64,18 +71,28 @@ a11y_fail=""
 a11y_report=""
 check=""
 
+# Assigns a value option; the loop below guards the arity for all of them once.
+set_option() {
+  case "$1" in
+    --content-dir) content_dir="$2" ;;
+    --site-dir) site_dir="$2" ;;
+    --schema-dir) schema_dir="$2" ;;
+    --port) port="$2" ;;
+    --standard) standard="$2" ;;
+    --config) config="$2" ;;
+    --vnu-jar) vnu_jar="$2" ;;
+    --fail) fail_links="$2" ;;
+  esac
+}
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     content-schema|html|a11y|links-external|xml|jsonld|wellknown|spelling|all)
       check="$1"; shift ;;
-    --content-dir) content_dir="$2"; shift 2 ;;
-    --site-dir) site_dir="$2"; shift 2 ;;
-    --schema-dir) schema_dir="$2"; shift 2 ;;
-    --port) port="$2"; shift 2 ;;
-    --standard) standard="$2"; shift 2 ;;
-    --config) config="$2"; shift 2 ;;
-    --vnu-jar) vnu_jar="$2"; shift 2 ;;
-    --fail) fail_links="$2"; shift 2 ;;
+    --content-dir|--site-dir|--schema-dir|--port|--standard|--config|--vnu-jar|--fail)
+      [ "$#" -ge 2 ] || die "option $1 requires a value"
+      set_option "$1" "$2"
+      shift 2 ;;
     --a11y-fail)
       [ "$#" -ge 2 ] || die "option --a11y-fail requires true or false"
       case "$2" in
@@ -134,7 +151,7 @@ run_a11y() {
   need python3 "Install Python 3."
   need npx "Install Node.js."
 
-  local cfg report temp_report pid ready rc summary_rc
+  local cfg report temp_report pid ready rc
   cfg="$(mktemp)"
   if [ -n "$a11y_report" ]; then
     report="$a11y_report"
@@ -163,10 +180,7 @@ run_a11y() {
 
   python3 "$script_dir/a11y_config.py" "$site_dir" "$port" "$standard" > "$cfg"
 
-  set +e
-  npx --yes pa11y-ci --config "$cfg" --json > "$report"
-  rc=$?
-  set -e
+  status_of npx --yes pa11y-ci --config "$cfg" --json > "$report"
   case "$rc" in
     0|2) ;;
     *)
@@ -175,19 +189,16 @@ run_a11y() {
       ;;
   esac
 
-  set +e
-  python3 "$script_dir/a11y_report.py" "$report"
-  summary_rc=$?
-  set -e
+  status_of python3 "$script_dir/a11y_report.py" "$report"
 
   if [ -n "$a11y_report" ]; then
     info "pa11y-ci report: $report"
   fi
 
-  if [ "$summary_rc" -eq 1 ]; then
+  if [ "$rc" -eq 1 ]; then
     exit 1
   fi
-  if [ "$summary_rc" -eq 2 ]; then
+  if [ "$rc" -eq 2 ]; then
     case "$a11y_fail" in
       true) exit 1 ;;
       false) exit 0 ;;
@@ -214,11 +225,13 @@ run_links_external() {
 
 run_xml() {
   need xmllint "Install libxml2-utils."
-  if find "$site_dir" -type f -name '*.xml' | grep -q .; then
-    find "$site_dir" -type f -name '*.xml' -print0 | xargs -0 xmllint --noout
-  else
+  local first
+  first="$(find "$site_dir" -type f -name '*.xml' -print -quit || true)"
+  if [ -z "$first" ]; then
     info "no XML files found in $site_dir"
+    return 0
   fi
+  find "$site_dir" -type f -name '*.xml' -print0 | xargs -0 -r xmllint --noout
 }
 
 run_jsonld() {
@@ -294,34 +307,32 @@ run_all_check() {
   all_hard=1
 }
 
+# Runs the default CI set in order, finishing every check before it exits.
+run_all() {
+  run_all_check content-schema run_content_schema
+  run_all_check html run_html
+  run_all_check a11y run_a11y
+  run_all_check xml run_xml
+  run_all_check jsonld run_jsonld
+  run_all_check wellknown run_wellknown
+
+  printf '\nSummary:\n'
+  for line in "${summary[@]}"; do
+    printf '  %s\n' "$line"
+  done
+
+  if [ "$all_hard" -ne 0 ]; then
+    exit 1
+  fi
+  if [ "$all_advisory" -ne 0 ]; then
+    exit 2
+  fi
+  exit 0
+}
+
+# Each check is a run_<name> function, so the parser's list is the only place
+# the names are spelled out; run_all owns the explicit order for `all`.
 case "$check" in
-  content-schema) run_content_schema ;;
-  html) run_html ;;
-  a11y) run_a11y ;;
-  links-external) run_links_external ;;
-  xml) run_xml ;;
-  jsonld) run_jsonld ;;
-  wellknown) run_wellknown ;;
-  spelling) run_spelling ;;
-  all)
-    run_all_check content-schema run_content_schema
-    run_all_check html run_html
-    run_all_check a11y run_a11y
-    run_all_check xml run_xml
-    run_all_check jsonld run_jsonld
-    run_all_check wellknown run_wellknown
-
-    printf '\nSummary:\n'
-    for line in "${summary[@]}"; do
-      printf '  %s\n' "$line"
-    done
-
-    if [ "$all_hard" -ne 0 ]; then
-      exit 1
-    fi
-    if [ "$all_advisory" -ne 0 ]; then
-      exit 2
-    fi
-    exit 0
-    ;;
+  all) run_all ;;
+  *) run_"${check//-/_}" ;;
 esac
