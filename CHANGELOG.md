@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [3.6.0.0] - 2026-11-21
+
 ### Removed
 
 - The `rubyUnknown` front-matter key and the unknown-level ruby checkbox; ruby without a JLPT level is now always shown, and a page whose only control was `rubyUnknown` no longer renders the aside.
@@ -8,6 +10,7 @@
 
 - The ruby `<select>` no longer offers "All" (it was the same as "N5 and harder") and gains "Hide all JLPT"; `ruby.all` is replaced in `localization.yaml` by `ruby.N5-or-harder` … `ruby.N1-or-harder` and `ruby.none`, so content repos using `rubyControl` must add them or the build fails.
 - The aside control strip scrolls and fades as one row, its chips read their label first and no longer highlight on hover, and the desktop sidebar is a fixed `20em` column instead of sizing to its content.
+- This release also contains an internal refactor with no user-visible change: shared page-assembly and rule-failure helpers, one JSON/enum/decoding helper set, one context-field builder set, and a consolidated test harness.
 
 ### Fixed
 
@@ -475,7 +478,8 @@
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.1...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.6.0.0...master
+[3.6.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.1...v3.6.0.0
 [3.5.1.1]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.0...v3.5.1.1
 [3.5.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.0.0...v3.5.1.0
 [3.5.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.3.1...v3.5.0.0
