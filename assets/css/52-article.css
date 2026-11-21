@@ -1,0 +1,68 @@
+/* Article and aside: main article, controls strip and toggle visibility */
+/* main-article ***************************************************************/
+.main-article {
+  padding: 0 1em;
+  max-width:75ch;
+  margin:0 auto;
+  font-size:1.1em
+}
+.main-article > header {margin-bottom:1em;}
+.main-article > header > div {font-style:italic}
+
+/* site aside *****************************************************************/
+.site-aside {
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    overflow-x: auto;
+    mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
+
+    header {
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    menu {
+      display: flex;
+      align-items: stretch;
+      gap: .5rem;
+      margin: 0;
+      line-height: 1;
+
+      li {
+        flex: 0 0 auto;
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        &:last-child {
+          padding-inline-end: 2rem;
+        }
+        > * {
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+
+    /* Control labels: see templates/controls--*.html */
+    .ruby-toggle, .ruby-control, .images-toggle {
+      padding:.5rem;
+      background: var(--color-surface-weak);
+      display: flex;
+      gap: .5em;
+      align-items: center;
+    }
+
+  }
+  details.toc {
+    summary { font-weight: bold; }
+    border: none;
+    padding:0;
+  }
+}
+ruby.ruby-hidden rt {visibility: hidden;}
+.no-ruby rt {visibility: hidden;}
+.no-images img, .no-images figure {display: none;}
+

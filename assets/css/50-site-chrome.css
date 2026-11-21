@@ -1,0 +1,54 @@
+/* Site chrome: header, logo, description and menu */
+/* common classes *************************************************************/
+.post-date-header {font-style:normal;color:var(--color-fg-muted)}
+
+/* site header ****************************************************************/
+.site-header {
+  background: var(--color-surface-brand);
+  color: var(--color-surface-brand-fg);
+  display: flex;
+  flex-direction: column;
+  text-align: center
+}
+.site-header svg * {fill: var(--color-surface-brand-fg);}
+.site-header a {color: currentcolor}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1em 0 .5em;
+  font-size: 2em;
+
+  > svg {width: auto; height: 2em;}
+  > img {width: auto; height: 2em;}
+  > div {margin-inline-start: .5em;}
+}
+
+.site-description {font-size: 1.1em;font-weight:bold}
+.site-description::before {content:'[ '}
+.site-description::after {content:' ]'}
+
+/* site header nav ************************************************************/
+.site-header nav {
+  font-weight: bold;
+  display: flex;
+  justify-content: space-around;
+  padding: .5rem 0 0;
+  flex-direction: column;
+  flex-wrap:wrap;
+
+  a {
+    padding: .4em;
+    flex:1;
+    &:hover {
+      color:var(--color-interactive-hover);
+      background: var(--color-surface-strong)
+    }
+    &:active, &.active {
+      color:var(--color-interactive-selected);
+      background: var(--color-surface-strong)
+    }
+  }
+}
+

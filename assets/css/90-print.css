@@ -1,3 +1,4 @@
+/* Print media: page breaks, printable colours and link URLs */
 /* Print */
 @media print {
   ruby.ruby-hidden rt {visibility: visible;}
