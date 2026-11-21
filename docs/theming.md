@@ -110,8 +110,34 @@ Cozyll assembles one stylesheet, `styles.css`, from:
 2. every `content/css/*.css`, in filename order;
 3. the Pandoc syntax-highlighting stylesheet for `highlight.style`.
 
-The numeric prefixes in `assets/css/` (`00-`, `05-`, `10-`, …) make the vendored order
+The numeric prefixes in `assets/css/` (`00-`, `10-`, `20-`, …) make the vendored order
 explicit; your files always come after them, so the cascade works without `!important`.
+
+The vendored CSS is split into one file per concern:
+
+| Block | File | Owns |
+|---|---|---|
+| Tokens | `00-tokens.css` | `color-scheme`, every `--color-*` and `--font-*` token, `--round-corners`, and the platform support table. |
+| Typography | `10-typography.css` | Body and heading font stacks, the per-language CJK stacks (ja, ko, zh-Hant, zh-Hans), CJK emphasis marks and the CJK minimum size. |
+| Elements | `20-elements.css` | Plain-HTML defaults, selector for selector: the reset, inline text, headings, tables, the shared corner radius, forms, links, code, quotes, details, figures, ruby, read-only checkboxes, `hr` and `mark`. |
+| Components | `40-content-extras.css` | External-link icon, `nav#TOC`, line blocks, task lists and footnotes. |
+| Components | `50-site-chrome.css` | Site header, logo, description and menu row. |
+| Components | `52-article.css` | Main article and its header, site aside, controls strip, and the `ruby-hidden`, `no-ruby` and `no-images` visibility classes. |
+| Components | `54-lists.css` | Post list and project status chips. |
+| Components | `56-footer-and-social.css` | Site footer and social links. |
+| Print | `90-print.css` | Every `@media print` rule, deliberately in one place. |
+| Layout | `92-layout.css` | The base flex column and the 340px / 500px breakpoints. |
+| Layout | `94-layout-desktop.css` | The 1000x600 grid, its per-region adjustments, and the desktop height tiers. |
+
+`20-elements.css` is intentionally one file of plain-HTML defaults: piecemeal overrides of
+single tags are rare next to region restyles. `90-print.css` and the two `9x-layout` files are
+cross-cutting on purpose, because print is a medium and layout is where regions are adjusted at
+large sizes.
+
+To restyle one feature, add any `content/css/*.css` file. Its name does not need to match a
+vendored one, and it is concatenated last, so the cascade works without `!important`. The
+vendored file names are a map of the theme, not an override API: override the rules or the
+tokens from your own file rather than replacing a vendored one.
 
 In `SITE_ENV=dev`, the concatenated CSS and the highlighting CSS are left readable (comments
 and formatting survive). `prod` and `example` minify both. Switching `SITE_ENV` clears
@@ -119,9 +145,9 @@ and formatting survive). `prod` and `example` minify both. Switching `SITE_ENV` 
 
 ### Custom properties
 
-`assets/css/00-variables.css` defines the theme's custom properties on `:root`. Override
-them from a `content/css/*.css` file (or replace the file with a `content/css/00-variables.css`
-override, which is concatenated after the vendored one).
+`assets/css/00-tokens.css` defines the theme's custom properties on `:root`. Override them
+from any `content/css/*.css` file; its name does not need to match a vendored one, because
+content CSS is concatenated after the vendored files.
 
 Colours:
 
