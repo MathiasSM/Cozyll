@@ -5,6 +5,8 @@ module Cozyll.Config (
 
     -- * Deployment config
     SiteConfig (..),
+    SiteInputs (..),
+    siteConfigFrom,
     Env (..),
     envText,
     envFromText,
@@ -57,11 +59,13 @@ module Cozyll.Config (
 )
 where
 
-import Cozyll.Brand (Brand, brandCandidates)
-import Cozyll.Domain.Author (Author)
-import Cozyll.Domain.Language (Language)
+import Cozyll.Brand (Brand, brandCandidates, brandLogo)
+import Cozyll.Domain.Author (Author, defaultAuthor)
+import Cozyll.Domain.Language (Language, defaultLanguage)
 import Cozyll.Domain.Website (CheckMode (..), HighlightStyle)
+import Cozyll.Domain.Website qualified as Web
 import Cozyll.Ruby.Index (RubyData, indexPath)
+import Data.Maybe (fromMaybe)
 import Data.String (fromString)
 import Hakyll (Compiler, Configuration, Identifier, Pattern, Snapshot, defaultConfiguration, fromFilePath, getMatches, ignoreFile, (.||.))
 import System.FilePath.Posix (takeFileName, (<.>), (</>))
@@ -86,8 +90,9 @@ envFromText "dev" = Just Dev
 envFromText "example" = Just Example
 envFromText _ = Nothing
 
-{- | Build-time site configuration, gathered once from the environment by "Cozyll.Cli".
-Every field maps to an environment variable; see @.env.example@
+{- | Build-time site configuration, assembled once by "Cozyll.Cli" (environment
+overrides) or by the test fixture. Every field maps to an environment variable;
+see @.env.example@
 -}
 data SiteConfig = SiteConfig
     { siteTitle :: String
@@ -142,6 +147,66 @@ data SiteConfig = SiteConfig
     , siteJaRubyCheck :: CheckMode
     -- ^ Severity of the ruby coverage check (site default; front matter may override)
     }
+
+{- | The build inputs that are not derived from @website.yaml@: everything a
+caller resolves (the environment, the build year, IO).
+-}
+data SiteInputs = SiteInputs
+    { inputsYear :: Int
+    -- ^ The build year (see 'siteCurrentYear')
+    , inputsAuthors :: [Author]
+    -- ^ Every author, in @authors.yaml@ file order
+    , inputsBrand :: Maybe Brand
+    -- ^ The logo-derived brand
+    , inputsTemplateNames :: [FilePath]
+    -- ^ The template names the content provides
+    , inputsRubyData :: Maybe RubyData
+    -- ^ The derived ruby index, when the content provides one
+    , inputsEnv :: Env
+    -- ^ The build environment
+    , inputsContentDir :: FilePath
+    -- ^ Where the actual content lives
+    , inputsAssetsDir :: FilePath
+    -- ^ Where the vendored assets live
+    , inputsTemplatesDir :: FilePath
+    -- ^ Where the vendored templates live
+    }
+
+{- | Assembles a 'SiteConfig'; environment overrides and IO stay with the caller
+
+Shared by the binary and the test fixture, so a new field is filled from
+@website.yaml@ in one place. The callers differ only in the 'SiteInputs' they
+resolve: the fixture pins 'inputsYear' and applies no overrides.
+-}
+siteConfigFrom :: Web.Website -> SiteInputs -> SiteConfig
+siteConfigFrom website inputs =
+    SiteConfig
+        { siteTitle = Web.siteTitle site
+        , siteDescription = Web.siteDescription site
+        , siteCopyrightYear = Web.siteCopyrightYear site
+        , siteCurrentYear = inputsYear inputs
+        , siteDomain = Web.siteDomain site
+        , siteLanguage = fromMaybe defaultLanguage (Web.siteLanguage site)
+        , siteAlternateNames = Web.siteAlternateNames site
+        , siteLogo = brandLogo <$> inputsBrand inputs
+        , siteLogoConfigured = Web.siteLogo site
+        , siteBrand = inputsBrand inputs
+        , siteAuthors = inputsAuthors inputs
+        , siteDefaultAuthor = either (error . unlines) id (defaultAuthor (inputsAuthors inputs))
+        , mathjaxVersion = Web.mathjaxVersion (Web.websiteMathjax website)
+        , highlightStyle = Web.highlightStyle (Web.websiteHighlight website)
+        , contentDir = inputsContentDir inputs
+        , assetsDir = inputsAssetsDir inputs
+        , templatesDir = inputsTemplatesDir inputs
+        , contentTemplatesDir = inputsContentDir inputs </> "templates"
+        , contentCssDir = inputsContentDir inputs </> "css"
+        , contentTemplateNames = inputsTemplateNames inputs
+        , siteEnv = inputsEnv inputs
+        , siteRubyData = inputsRubyData inputs
+        , siteJaRubyCheck = Web.websiteJaRubyCheck website
+        }
+  where
+    site = Web.websiteSite website
 
 {- | Hakyll's default configuration, except that @.nojekyll@ is not ignored:
 it is a site file users put in 'staticDir', not a build dropping.

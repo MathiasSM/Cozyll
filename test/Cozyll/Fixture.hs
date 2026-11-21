@@ -17,17 +17,14 @@ module Cozyll.Fixture (
 import Control.Concurrent.MVar (MVar, newMVar, withMVar)
 import Control.Exception (bracket)
 import Control.Monad (forM, forM_, when)
-import Cozyll.Brand (Brand, brandLogo, resolveBrand)
-import Cozyll.Config (Env (..), SiteConfig (..), siteConfiguration)
+import Cozyll.Brand (Brand, resolveBrand)
+import Cozyll.Config (Env (..), SiteConfig, SiteInputs (..), siteConfigFrom, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
-import Cozyll.Domain.Language (defaultLanguage)
 import Cozyll.Domain.Website (loadWebsite)
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.Ruby.Index (RubyData, defaultMaxIndexBytes, loadIndexFile)
 import Cozyll.Rules (rules)
-import Cozyll.TestUtils (testConfig)
 import Cozyll.Theme (discoverContentTemplateNames)
-import Data.Maybe (fromMaybe)
 import Hakyll.Commands qualified as Commands
 import Hakyll.Core.Logger qualified as Logger
 import Hakyll.Core.Runtime (RunMode (RunModeNormal))
@@ -60,30 +57,25 @@ withBuildLock action = withMVar buildLock (const action)
 mkSiteConfig :: Web.Website -> [Author.Author] -> [FilePath] -> Maybe Brand -> Maybe RubyData -> SiteConfig
 mkSiteConfig = mkSiteConfigFor Example
 
--- | Builds a 'SiteConfig' for @env@ from a parsed @website.yaml@ (no environment overrides)
+{- | Builds a 'SiteConfig' for @env@ from a parsed @website.yaml@ (no environment overrides)
+
+'siteCurrentYear' is pinned to 2021 so the fixture's output (and the golden
+files) do not change every January.
+-}
 mkSiteConfigFor :: Env -> Web.Website -> [Author.Author] -> [FilePath] -> Maybe Brand -> Maybe RubyData -> SiteConfig
 mkSiteConfigFor env website authors contentTemplateNames brand rubyData =
-    let site = Web.websiteSite website
-        defaultAuthor' = either (error . unlines) id (Author.defaultAuthor authors)
-        logo = brandLogo <$> brand
-     in testConfig
-            { siteTitle = Web.siteTitle site
-            , siteDescription = Web.siteDescription site
-            , siteCopyrightYear = Web.siteCopyrightYear site
-            , siteDomain = Web.siteDomain site
-            , siteLanguage = fromMaybe defaultLanguage (Web.siteLanguage site)
-            , siteAlternateNames = Web.siteAlternateNames site
-            , siteLogo = logo
-            , siteLogoConfigured = Web.siteLogo site
-            , siteBrand = brand
-            , siteAuthors = authors
-            , siteDefaultAuthor = defaultAuthor'
-            , mathjaxVersion = Web.mathjaxVersion (Web.websiteMathjax website)
-            , highlightStyle = Web.highlightStyle (Web.websiteHighlight website)
-            , contentTemplateNames = contentTemplateNames
-            , siteEnv = env
-            , siteRubyData = rubyData
-            , siteJaRubyCheck = Web.websiteJaRubyCheck website
+    siteConfigFrom
+        website
+        SiteInputs
+            { inputsYear = 2021
+            , inputsAuthors = authors
+            , inputsBrand = brand
+            , inputsTemplateNames = contentTemplateNames
+            , inputsRubyData = rubyData
+            , inputsEnv = env
+            , inputsContentDir = "content"
+            , inputsAssetsDir = "assets"
+            , inputsTemplatesDir = "templates"
             }
 
 {- | Loads the configuration and the website of a fixture build directory.

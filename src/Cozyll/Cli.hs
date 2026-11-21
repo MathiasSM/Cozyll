@@ -5,7 +5,7 @@ module Cozyll.Cli (Invocation (..), cli, invocationFor, parseEnvValue, unsupport
 
 import Control.Exception (IOException, SomeException, displayException, fromException, try)
 import Control.Monad (filterM, unless, void, when)
-import Cozyll.Brand (brandLogo, resolveBrand)
+import Cozyll.Brand (resolveBrand)
 import Cozyll.BuildState (
     BuildStart (..),
     BuildState (..),
@@ -17,9 +17,8 @@ import Cozyll.BuildState (
     writeBuildState,
  )
 import Cozyll.Cli.Data (runDataCommand)
-import Cozyll.Config (Env (..), SiteConfig (..), envFromText, envText, requiredContent, siteConfiguration)
+import Cozyll.Config (Env (..), SiteConfig (..), SiteInputs (..), envFromText, envText, requiredContent, siteConfigFrom, siteConfiguration)
 import Cozyll.Domain.Author qualified as Author
-import Cozyll.Domain.Language (defaultLanguage)
 import Cozyll.Domain.Website qualified as Web
 import Cozyll.Init (InitOptions (..), defaultInitOptions, initSite)
 import Cozyll.Ruby.Index (dataDirName, indexFileName, indexLimitIO, loadIndexFile)
@@ -407,37 +406,33 @@ loadSiteConfig env contentDir website = do
     highlight <- highlightStyleFromEnv (Web.websiteHighlight website)
     contentTemplates <- discoverContentTemplateNames (contentDir </> "templates")
     authors <- Author.loadAuthors contentDir
-    defaultAuthor' <- either (die . unlines) pure (Author.defaultAuthor authors)
+    -- Validated here too, so a missing default author still dies with the problem list
+    _ <- either (die . unlines) pure (Author.defaultAuthor authors)
     brand <- resolveBrand contentDir (Web.siteLogo site)
     today <- utctDay <$> getCurrentTime
     let (currentYearInteger, _, _) = toGregorian today
         currentYear = fromIntegral currentYearInteger
-        logo = brandLogo <$> brand
     pure
-        SiteConfig
+        ( siteConfigFrom
+            website
+            SiteInputs
+                { inputsYear = currentYear
+                , inputsAuthors = authors
+                , inputsBrand = brand
+                , inputsTemplateNames = contentTemplates
+                , inputsRubyData = Nothing
+                , inputsEnv = env
+                , inputsContentDir = contentDir
+                , inputsAssetsDir = "assets" -- TODO
+                , inputsTemplatesDir = "templates" -- TODO
+                }
+        )
             { siteTitle = title
             , siteDescription = description
             , siteCopyrightYear = year
-            , siteCurrentYear = currentYear
             , siteDomain = domain
-            , siteLanguage = fromMaybe defaultLanguage (Web.siteLanguage site)
-            , siteAlternateNames = Web.siteAlternateNames site
-            , siteLogo = logo
-            , siteLogoConfigured = Web.siteLogo site
-            , siteBrand = brand
-            , siteAuthors = authors
-            , siteDefaultAuthor = defaultAuthor'
             , mathjaxVersion = mathjax
             , highlightStyle = highlight
-            , contentDir = contentDir
-            , assetsDir = "assets" -- TODO
-            , templatesDir = "templates" -- TODO
-            , contentTemplatesDir = contentDir </> "templates"
-            , contentCssDir = contentDir </> "css"
-            , contentTemplateNames = contentTemplates
-            , siteEnv = env
-            , siteRubyData = Nothing
-            , siteJaRubyCheck = Web.websiteJaRubyCheck website
             }
   where
     override :: (Read a) => String -> a -> IO a
