@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+## [3.7.0.0] - 2026-11-21
+
+### Changed
+
+- Internal refactor with no user-visible change: the page-assembly tail and the rule-failure reporting are shared helpers, the JSON, enum and decoding helpers are one set, the context-field builders are one set, the test harness is consolidated, and the CLI and config helpers are shared.
+
 ## [3.6.0.0] - 2026-11-21
 
 ### Removed
@@ -477,7 +483,8 @@
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.6.0.0...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.7.0.0...master
+[3.7.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.6.0.0...v3.7.0.0
 [3.6.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.1...v3.6.0.0
 [3.5.1.1]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.0...v3.5.1.1
 [3.5.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.0.0...v3.5.1.0
