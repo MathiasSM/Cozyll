@@ -1,5 +1,5 @@
 -- | Rules for a post group: its index page and its posts
-module Cozyll.Rules.PostGroup (processPostGroup) where
+module Cozyll.Rules.PostGroup (groupPosts, postGroups, processPostGroup) where
 
 import Cozyll.CleanURL (pathRoute)
 import Cozyll.Compile (applyTemplates, finishPage, loadPageBody)
@@ -13,6 +13,7 @@ import Cozyll.Rules.SinglePages (Page (..), page, processPage)
 import Hakyll (
     Compiler,
     Context,
+    Item,
     Rules,
     boolField,
     compile,
@@ -26,6 +27,15 @@ import Hakyll (
     route,
     saveSnapshot,
  )
+
+-- | A group's posts, at their published snapshot (unsorted)
+groupPosts :: SiteConfig -> String -> Compiler [Item String]
+groupPosts cfg groupName =
+    loadAllSnapshots (postsPattern cfg groupName) (postSnapshot groupName)
+
+-- | The posts of every listed group, concatenated (unsorted)
+postGroups :: SiteConfig -> [String] -> Compiler [Item String]
+postGroups cfg groups = concat <$> mapM (groupPosts cfg) groups
 
 -- | Processes a group: its index page and all the item pages
 processPostGroup :: SiteConfig -> String -> Rules ()
@@ -66,11 +76,11 @@ processPostGroupItems cfg groupName =
 -- | Build context for archive page
 getCtx :: SiteConfig -> String -> Compiler (Context String)
 getCtx cfg groupName = do
-    posts <- recentFirst =<< loadAllSnapshots (postsPattern cfg groupName) (postSnapshot groupName)
+    posts <- recentFirst =<< groupPosts cfg groupName
     return $ listField "posts" (globalContext cfg) (return posts) <> globalContext cfg
 
 -- | The items an archive page lists, for its ItemList structured data
 getItems :: SiteConfig -> String -> Compiler [PageItem]
 getItems cfg groupName = do
-    posts <- recentFirst =<< loadAllSnapshots (postsPattern cfg groupName) (postSnapshot groupName)
+    posts <- recentFirst =<< groupPosts cfg groupName
     mapM (pageItemOf cfg) posts

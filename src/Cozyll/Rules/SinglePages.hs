@@ -4,11 +4,10 @@ module Cozyll.Rules.SinglePages (Page (..), page, processPage, pageCompiler) whe
 import Cozyll.CleanURL (pathRoute)
 import Cozyll.Compile (applyTemplates, finishPage, loadPageBody)
 import Cozyll.Config (SiteConfig, contentTemplate, pageTemplate, pagesPattern, siteEnv)
-import Cozyll.Content (isHidden, isIndex)
+import Cozyll.Content (isHidden, isHome, isIndex)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
 import Cozyll.Context.SocialMeta (PageItem, PageKind (CollectionPage, WebSite), pageKindOf, pageMetaOf)
-import Cozyll.Metadata (Key (Home), lookupKey)
 import Hakyll (
     Compiler,
     Context,
@@ -56,7 +55,7 @@ pageCompiler cfg Page{pageName, pageContext, pageTemplates, pageListItems} = do
 -- | The page's structured-data kind: home is a @WebSite@, a group index a @CollectionPage@, anything else from @schemaType:@
 pageKind :: Metadata -> Compiler PageKind
 pageKind metadata
-    | lookupKey Home metadata == Just "true" = pure WebSite
+    | isHome metadata = pure WebSite
     | isIndex metadata = pure CollectionPage
     | otherwise = case pageKindOf metadata of
         Right kind -> pure kind

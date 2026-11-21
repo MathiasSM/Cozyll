@@ -5,16 +5,16 @@ import Control.Applicative ((<|>))
 import Control.Monad (filterM, forM)
 import Cozyll.CleanURL (cleanIndexHtmls)
 import Cozyll.Config (SiteConfig, pagesPattern, postsPattern, resolveTemplate, siteInputFingerprint)
-import Cozyll.Content (isIndex, isSitemapExcluded)
+import Cozyll.Content (isHome, isIndex, isSitemapExcluded)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Author (authorPages, authorPosts)
 import Cozyll.Discover (discoverGroups)
+import Cozyll.Format (parseDay)
 import Cozyll.Metadata qualified as K
 import Cozyll.Rules.AuthorPages (authorPageIdentifier)
 import Cozyll.Theme (themeFingerprint)
 import Data.Maybe (catMaybes)
 import Data.Time (Day, defaultTimeLocale, formatTime)
-import Data.Time.Format (parseTimeM)
 import Hakyll (
     Compiler,
     Context (..),
@@ -101,10 +101,6 @@ sitemapLastmod overrides = Context $ \key _ item ->
 isIndexable :: Item String -> Compiler Bool
 isIndexable item = not . isSitemapExcluded <$> getMetadata (itemIdentifier item)
 
--- | Whether the page is the home page (`home: true` in front matter)
-isHome :: Metadata -> Bool
-isHome meta = K.lookupKey K.Home meta == Just "true"
-
 -- | An item's effective last-modified date: @lastModifiedAt@, falling back to @date@
 itemModified :: Item String -> Compiler (Maybe Day)
 itemModified item = modifiedOf <$> getMetadata (itemIdentifier item)
@@ -114,10 +110,6 @@ modifiedOf :: Metadata -> Maybe Day
 modifiedOf meta =
     (K.lookupKey K.LastModifiedAt meta >>= parseDay)
         <|> (K.lookupKey K.Date meta >>= parseDay)
-
--- | A @YYYY-MM-DD@ value
-parseDay :: String -> Maybe Day
-parseDay = parseTimeM True defaultTimeLocale "%Y-%m-%d"
 
 renderDay :: Day -> String
 renderDay = formatTime defaultTimeLocale "%Y-%m-%d"

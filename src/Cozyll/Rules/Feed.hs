@@ -3,13 +3,14 @@ module Cozyll.Rules.Feed (processFeeds) where
 
 import Control.Monad (forM_)
 import Cozyll.CleanURL (cleanIndex)
-import Cozyll.Config (SiteConfig, baseUrl, postSnapshot, postsPattern, resolveTemplate, siteDefaultAuthor, siteInputFingerprint)
+import Cozyll.Config (SiteConfig, baseUrl, resolveTemplate, siteDefaultAuthor, siteInputFingerprint)
 import Cozyll.Content (requirePostOf)
 import Cozyll.Domain.Author (authorName)
 import Cozyll.Domain.Feed (Feed (..), absoluteUrl, feeds, siteFeed)
 import Cozyll.Domain.Post (Post (..))
 import Cozyll.Domain.Website (Website (websiteFeed), feedSize)
 import Cozyll.Rules.Common (failIfAny)
+import Cozyll.Rules.PostGroup (groupPosts, postGroups)
 import Cozyll.Theme (themeFingerprint)
 import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Time (Day, defaultTimeLocale, formatTime)
@@ -24,7 +25,6 @@ import Hakyll (
     field,
     fromFilePath,
     idRoute,
-    loadAllSnapshots,
     loadBody,
     mapContext,
     recentFirst,
@@ -44,7 +44,7 @@ processFeeds cfg website = do
     case found of
         Left problems -> failIfAny "Invalid feeds" problems
         Right groupFeeds -> do
-            let postGroups = mapMaybe feedGroup groupFeeds
+            let groups = mapMaybe feedGroup groupFeeds
             forM_ (siteFeed cfg : groupFeeds) $ \feed ->
                 create [fromFilePath $ feedFile feed] $ do
                     route idRoute
@@ -52,14 +52,11 @@ processFeeds cfg website = do
                         siteInputFingerprint cfg
                         themeFingerprint cfg
                         posts <- case feedGroup feed of
-                            Just group -> recentFirst =<< loadGroup group
-                            Nothing -> recentFirst . concat =<< mapM loadGroup postGroups
+                            Just group -> recentFirst =<< groupPosts cfg group
+                            Nothing -> recentFirst =<< postGroups cfg groups
                         feedTemplate <- loadBody (resolveTemplate cfg "atom-feed.xml")
                         itemTemplate <- loadBody (resolveTemplate cfg "atom-item.xml")
                         renderAtomWithTemplates feedTemplate itemTemplate (configuration cfg feed) (itemContext cfg) (take feedSize' posts)
-  where
-    loadGroup group =
-        loadAllSnapshots (postsPattern cfg group) (postSnapshot group)
 
 configuration :: SiteConfig -> Feed -> FeedConfiguration
 configuration cfg feed =

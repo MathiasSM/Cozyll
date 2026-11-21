@@ -1,5 +1,5 @@
--- | Site paths shared by the publication rules and brand resolution
-module Cozyll.Paths (mediaTarget) where
+-- | Site paths shared by the publication rules, brand resolution and contexts
+module Cozyll.Paths (mediaTarget, stripLeadingSlashes) where
 
 import Data.List (stripPrefix)
 import Data.Maybe (fromMaybe)
@@ -22,3 +22,7 @@ mediaTarget :: FilePath -> FilePath -> FilePath
 mediaTarget mediaDir' path =
     let rest = fromMaybe path (stripPrefix (addTrailingPathSeparator mediaDir') path)
      in "images" </> fromMaybe rest (stripPrefix "branding/" rest)
+
+-- | Drops any leading slashes, so a path can be re-rooted with a single one
+stripLeadingSlashes :: FilePath -> FilePath
+stripLeadingSlashes = dropWhile (== '/')

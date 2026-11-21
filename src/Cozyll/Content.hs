@@ -2,6 +2,7 @@
 module Cozyll.Content (
     isDraft,
     isHidden,
+    isHome,
     isIndex,
     isSitemapExcluded,
     isTemplated,
@@ -55,6 +56,10 @@ isHidden _ = isDraft
 -- | Whether an item is a group index page (`index: true` in its front matter)
 isIndex :: Metadata -> Bool
 isIndex o = runCheck (optional o K.Index) == Right (Just True)
+
+-- | Whether a page is the home page (`home: true` in front matter)
+isHome :: Metadata -> Bool
+isHome meta = K.lookupKey K.Home meta == Just "true"
 
 -- | Whether an item is marked `sitemap: false`, and so left out of the sitemap
 isSitemapExcluded :: Metadata -> Bool
