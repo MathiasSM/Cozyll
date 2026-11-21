@@ -1,5 +1,5 @@
 -- | Rules for standalone pages
-module Cozyll.Rules.SinglePages (Page (..), page, processPage, pageCompiler) where
+module Cozyll.Rules.SinglePages (Page (..), page, processPage) where
 
 import Cozyll.CleanURL (pathRoute)
 import Cozyll.Compile (applyTemplates, finishPage, loadPageBody)
@@ -38,7 +38,7 @@ data Page = Page
 page :: SiteConfig -> String -> Page
 page cfg name = Page{pageName = name, pageContext = return (globalContext cfg), pageTemplates = [], pageListItems = return []}
 
--- | Compiles a standalone page's body (shared by 'processPage' and the dev example pages)
+-- | Compiles a standalone page's body (used by 'processPage')
 pageCompiler :: SiteConfig -> Page -> Compiler (Item String)
 pageCompiler cfg Page{pageName, pageContext, pageTemplates, pageListItems} = do
     ctx <- pageContext

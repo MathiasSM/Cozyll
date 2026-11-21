@@ -7,7 +7,6 @@ module Cozyll.Brand (
     brandIconsFor,
     filesUnder,
     iconHref,
-    iconNeedsConversion,
     manifestIcons,
     needsImageMagick,
     resolveBrand,

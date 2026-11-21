@@ -56,7 +56,6 @@ module Cozyll.Ruby.Sources (
     sourceKindName,
     defaultSourcesYaml,
     sourcesFileName,
-    sourcesPath,
     readSourcesFile,
     loadSources,
     resolveSources,
@@ -89,7 +88,6 @@ import Data.Text qualified as T
 import Data.Yaml (decodeEither', prettyPrintParseException)
 import Language.Haskell.TH.Syntax (makeRelativeToProject)
 import System.Directory (doesFileExist)
-import System.FilePath.Posix ((</>))
 
 -- | What a source points at
 data SourceKind = Repo | Release
@@ -147,10 +145,6 @@ instance FromJSON SourcesFile where
 -- | The file name inside @ruby-data/@
 sourcesFileName :: FilePath
 sourcesFileName = "sources.yaml"
-
--- | The user override path for a content root
-sourcesPath :: FilePath -> FilePath
-sourcesPath contentDir = contentDir </> "ruby-data" </> sourcesFileName
 
 {- | The vendored default, embedded at compile time so the executable works from
 any content repo (and so @data sources --write@ preserves the comments).

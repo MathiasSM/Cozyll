@@ -41,7 +41,6 @@ author. The canonical URL and @og:url@ are @https://<domain>/authors/<id>@, and
 -}
 module Cozyll.Context.Author (
     resolveAuthors,
-    authorItemContext,
     authorContext,
     authorPageContext,
     authorPages,
