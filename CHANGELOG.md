@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [3.6.0.0] - 2026-11-21
+
 ### Removed
 
 - The `rubyUnknown` front-matter key and the unknown-level ruby checkbox; ruby without a JLPT level is now always shown, and a page whose only control was `rubyUnknown` no longer renders the aside.
@@ -475,7 +477,8 @@
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.1...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.6.0.0...master
+[3.6.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.1...v3.6.0.0
 [3.5.1.1]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.0...v3.5.1.1
 [3.5.1.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.0.0...v3.5.1.0
 [3.5.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.4.3.1...v3.5.0.0
