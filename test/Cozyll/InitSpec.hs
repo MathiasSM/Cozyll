@@ -80,6 +80,14 @@ tests =
                     case result of
                         Left problem -> assertBool "names schema/" ("schema" `isInfixOf` problem)
                         Right _ -> assertFailure "init should fail without schema/"
+            , testCase "fails clearly when the example website config is missing" $
+                withSystemTempDirectory "cozyll-init" $ \temp -> do
+                    let schema = temp </> "schema"
+                    createDirectoryIfMissing True schema
+                    result <- initSite defaultInitOptions{initDir = temp, initSchemaDir = schema}
+                    case result of
+                        Left problem -> assertBool "names the missing file" ("example.website.yaml" `isInfixOf` problem)
+                        Right _ -> assertFailure "init should fail without schema/example.website.yaml"
             ]
         , testGroup
             "generated files"

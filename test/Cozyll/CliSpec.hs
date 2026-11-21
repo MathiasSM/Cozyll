@@ -43,6 +43,8 @@ tests =
                 invocationFor ["data", "--help"] @?= RunDataArgs ["--help"]
             , testCase "rejects preview with a pointer to watch" $
                 invocationFor ["preview"] @?= Reject (unsupportedCommand "preview" "use 'cozyll watch'")
+            , testCase "rejects preview even with trailing arguments" $
+                invocationFor ["preview", "--help"] @?= Reject (unsupportedCommand "preview" "use 'cozyll watch'")
             ]
         , testGroup
             "usageText"

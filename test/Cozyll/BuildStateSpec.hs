@@ -14,7 +14,7 @@ import Cozyll.BuildState (
     siteOutputExistsIn,
     writeBuildStateIn,
  )
-import Cozyll.Config (Env (..))
+import Cozyll.Config (Env (..), envFromText, envText)
 import Data.Time (UTCTime (..), addUTCTime, fromGregorian, secondsToDiffTime)
 import System.Directory (createDirectoryIfMissing, doesDirectoryExist, doesFileExist, setModificationTime)
 import System.FilePath ((</>))
@@ -133,5 +133,20 @@ tests =
                     writeFile (content </> "page.md") "page"
                     setModificationTime (content </> "page.md") builtAt
                     newestContentChange content builtAt >>= (@?= Nothing)
+            ]
+        , testGroup
+            "env codec"
+            [ testCase "renders prod" $
+                envText Prod @?= "prod"
+            , testCase "renders dev" $
+                envText Dev @?= "dev"
+            , testCase "renders example" $
+                envText Example @?= "example"
+            , testCase "round-trips every environment through the state file spelling" $
+                mapM_ (\env -> envFromText (envText env) @?= Just env) [Prod, Dev, Example]
+            , testCase "rejects names outside the codec" $ do
+                envFromText "bogus" @?= Nothing
+                envFromText "" @?= Nothing
+                envFromText "Prod" @?= Nothing
             ]
         ]
