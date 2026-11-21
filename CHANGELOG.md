@@ -1,5 +1,16 @@
 ## [Unreleased]
 
+## [4.0.0.0] - 2026-11-21
+
+### Removed
+
+- Deleted the unused exports `Cozyll.Compile.runPandoc`, `Cozyll.Ruby.Index.emptyIndex`, `Cozyll.Ruby.Sources.sourcesPath`, `Cozyll.BuildState.buildStatePath` and `Cozyll.BuildState.resetBuildOutputs`.
+- `Cozyll.Rules.SinglePages.pageCompiler`, `Cozyll.Context.Author.authorItemContext`, `Cozyll.Context.SocialMeta.pageUrl`, `Cozyll.Brand.iconNeedsConversion` and `Cozyll.Domain.Website.highlightStyleName` are no longer exported; they are still used internally. No behaviour changed.
+
+### Changed
+
+- The vendored stylesheet is now 11 files, one per concern (tokens, typography, elements, content extras, site chrome, article, lists, footer and social, print, layout, desktop layout). Overriding is unchanged: any `content/css/*.css` file is still concatenated last. The published `styles.css` is semantically identical; only the kit's vendored filenames changed, and `docs/theming.md` documents the new map.
+
 ## [3.8.0.0] - 2026-11-21
 
 ### Fixed
@@ -496,7 +507,8 @@
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.8.0.0...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v4.0.0.0...master
+[4.0.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.8.0.0...v4.0.0.0
 [3.8.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.7.0.0...v3.8.0.0
 [3.7.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.6.0.0...v3.7.0.0
 [3.6.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.1...v3.6.0.0
