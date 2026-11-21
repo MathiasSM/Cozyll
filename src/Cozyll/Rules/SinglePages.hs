@@ -2,16 +2,13 @@
 module Cozyll.Rules.SinglePages (Page (..), page, processPage, pageCompiler) where
 
 import Cozyll.CleanURL (pathRoute)
-import Cozyll.Compile (applyTemplates, finish, runPandocWith)
-import Cozyll.Config (SiteConfig, contentTemplate, pageTemplate, pagesPattern, siteEnv, siteJaRubyCheck, siteRubyData)
-import Cozyll.Content (isHidden, isIndex, isTemplated)
+import Cozyll.Compile (applyTemplates, finishPage, loadPageBody)
+import Cozyll.Config (SiteConfig, contentTemplate, pageTemplate, pagesPattern, siteEnv)
+import Cozyll.Content (isHidden, isIndex)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Aside (asideContext)
-import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (PageItem, PageKind (CollectionPage, WebSite), PageMeta (pageMetaLanguage), pageKindOf, pageMetaOf, socialMetaContext)
-import Cozyll.Localization (ogLocaleFor)
+import Cozyll.Context.SocialMeta (PageItem, PageKind (CollectionPage, WebSite), pageKindOf, pageMetaOf)
 import Cozyll.Metadata (Key (Home), lookupKey)
-import Cozyll.Theme (applyContentAsTemplate)
 import Hakyll (
     Compiler,
     Context,
@@ -21,7 +18,6 @@ import Hakyll (
     Rules,
     compile,
     getMetadata,
-    getResourceString,
     getUnderlying,
     matchMetadata,
     metadataRoute,
@@ -47,18 +43,15 @@ page cfg name = Page{pageName = name, pageContext = return (globalContext cfg), 
 pageCompiler :: SiteConfig -> Page -> Compiler (Item String)
 pageCompiler cfg Page{pageName, pageContext, pageTemplates, pageListItems} = do
     ctx <- pageContext
-    templated <- isTemplated
-    body <- getResourceString >>= (if templated then applyContentAsTemplate cfg ctx else return)
-    (item', tocHtml, mainImg) <- runPandocWith (siteRubyData cfg) (siteJaRubyCheck cfg) body
+    (item', tocHtml, mainImg) <- loadPageBody cfg ctx
     underlying <- getUnderlying
     metadata <- getMetadata underlying
     kind <- pageKind metadata
     items <- pageListItems
     let ctx' = asideContext tocHtml <> ctx
         pageMeta = pageMetaOf cfg metadata
-    ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
     applyTemplates ctx' ([contentTemplate cfg] <> pageTemplates <> [pageTemplate cfg]) item'
-        >>= finish cfg (socialMetaContext cfg kind [] items pageMeta mainImg ogLocale <> navContext cfg pageName (pageMetaLanguage pageMeta) <> ctx')
+        >>= finishPage cfg kind [] items pageMeta mainImg ctx' pageName
 
 -- | The page's structured-data kind: home is a @WebSite@, a group index a @CollectionPage@, anything else from @schemaType:@
 pageKind :: Metadata -> Compiler PageKind

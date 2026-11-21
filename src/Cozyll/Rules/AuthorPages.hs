@@ -4,15 +4,13 @@ module Cozyll.Rules.AuthorPages (
     authorPageIdentifier,
 ) where
 
-import Cozyll.Compile (applyTemplates, finish)
+import Cozyll.Compile (applyTemplates, finishPage)
 import Cozyll.Config (SiteConfig, baseUrl, resolveTemplate, siteLanguage)
 import Cozyll.Context (globalContext)
 import Cozyll.Context.Author (authorPageContext, authorPages, authorPosts, displayNameOf)
-import Cozyll.Context.Nav (navContext)
-import Cozyll.Context.SocialMeta (MainImage (..), PageKind (ProfilePage), PageMeta (..), pageItemOf, socialMetaContext)
+import Cozyll.Context.SocialMeta (MainImage (..), PageKind (ProfilePage), PageMeta (PageMeta), pageItemOf)
 import Cozyll.Domain.Author (Author (..), authorUrlPath)
 import Cozyll.Domain.Language (languageCode)
-import Cozyll.Localization (ogLocaleFor)
 import Hakyll (
     Identifier,
     Rules,
@@ -42,18 +40,20 @@ processAuthorPage cfg author = create [authorPageIdentifier cfg author] $ do
         posts <- authorPosts cfg author
         items <- mapM (pageItemOf cfg) posts
         let displayName = displayNameOf author
-            pageMeta =
-                PageMeta
-                    { pageMetaTitle = displayName
-                    , pageMetaDescription = authorDescription author
-                    , pageMetaUrl = baseUrl cfg ++ authorUrlPath author
-                    , pageMetaLanguage = languageCode (siteLanguage cfg)
-                    , pageMetaPublished = Nothing
-                    , pageMetaModified = Nothing
-                    }
+            pageMeta = authorPageMeta cfg author
             mainImage = MainImage <$> authorProfileImage author <*> pure displayName
             ctx = authorPageContext cfg author <> listField "posts" (globalContext cfg) (return posts) <> globalContext cfg
-        ogLocale <- ogLocaleFor cfg (pageMetaLanguage pageMeta)
         makeItem ""
             >>= applyTemplates ctx [resolveTemplate cfg "author.html"]
-            >>= finish cfg (socialMetaContext cfg ProfilePage [author] items pageMeta mainImage ogLocale <> navContext cfg "authors" (languageCode $ siteLanguage cfg) <> ctx)
+            >>= finishPage cfg ProfilePage [author] items pageMeta mainImage ctx "authors"
+
+-- | The page metadata of an author's profile page
+authorPageMeta :: SiteConfig -> Author -> PageMeta
+authorPageMeta cfg author =
+    PageMeta
+        (displayNameOf author)
+        (authorDescription author)
+        (baseUrl cfg ++ authorUrlPath author)
+        (languageCode $ siteLanguage cfg)
+        Nothing
+        Nothing
