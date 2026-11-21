@@ -1,5 +1,5 @@
 -- | Level assignment and the build checks that run on rendered page bodies
-module Cozyll.Ruby (LevelSource (..), levelOf, checkKanjiCoverage, checkJaReadings) where
+module Cozyll.Ruby (LevelSource (..), sourceName, levelOf, checkKanjiCoverage, checkJaReadings) where
 
 import Cozyll.Ruby.Index (Level, RubyData (rdKanji, rdSegments, rdWords), isHan, levelRank, normalizeKey)
 import Data.Char (isAsciiUpper)
@@ -15,6 +15,12 @@ import Text.HTML.TagSoup (Tag (..), isTagCloseName, parseTags)
 -- | Where a level came from
 data LevelSource = FromWord | FromKanji | FromUnknown
     deriving (Eq, Show)
+
+-- | The @data-jlpt-source@ spelling of a provenance
+sourceName :: LevelSource -> Text
+sourceName FromWord = "word"
+sourceName FromKanji = "kanji"
+sourceName FromUnknown = "unknown"
 
 {- | Word first, then the hardest constituent kanji, else unknown.
 

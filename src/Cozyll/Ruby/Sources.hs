@@ -69,11 +69,10 @@ module Cozyll.Ruby.Sources (
 
 import Codec.Archive.Zip qualified as Zip
 import Control.Monad (forM, unless, when)
+import Cozyll.Ruby.Json (asArray, asObject, asText, decodeJson, required)
 import Cozyll.Yaml (enumFromJSON)
 import Crypto.Hash (Digest, SHA256, hash)
-import Data.Aeson (FromJSON (parseJSON), Value (..), eitherDecodeStrict', withObject, (.:), (.:?))
-import Data.Aeson.Key qualified as Key
-import Data.Aeson.KeyMap (KeyMap)
+import Data.Aeson (FromJSON (parseJSON), Value (..), withObject, (.:), (.:?))
 import Data.Aeson.KeyMap qualified as KeyMap
 import Data.Bifunctor (first)
 import Data.ByteString (ByteString)
@@ -289,7 +288,7 @@ parseCommitSha bytes = do
     value <- decodeJson bytes
     case value of
         Array commits -> case toList commits of
-            (Object commit : _) -> field "sha" commit >>= asText "sha"
+            (Object commit : _) -> required "sha" commit >>= asText "sha"
             _ -> Left "GitHub commits response is empty"
         _ -> Left "GitHub commits response is not an array"
 
@@ -297,11 +296,11 @@ parseRelease :: ByteString -> Either String (Text, Map Text Text)
 parseRelease bytes = do
     value <- decodeJson bytes
     obj <- asObject "GitHub release" value
-    tag <- field "tag_name" obj >>= asText "tag_name"
+    tag <- required "tag_name" obj >>= asText "tag_name"
     assets <- maybe (Right []) (asArray "assets") (KeyMap.lookup "assets" obj)
     digests <- (fmap (Map.fromList . concat) . forM assets) $ \asset -> do
         assetObject <- asObject "release asset" asset
-        name <- field "name" assetObject >>= asText "name"
+        name <- required "name" assetObject >>= asText "name"
         case KeyMap.lookup "digest" assetObject of
             Just (String digest) -> pure [(name, stripDigest digest)]
             _ -> pure []
@@ -371,23 +370,3 @@ extractEntry bytes name =
 
 sha256Hex :: ByteString -> Text
 sha256Hex bytes = T.pack (show (hash bytes :: Digest SHA256))
-
--- JSON helpers ----------------------------------------------------------------
-
-decodeJson :: ByteString -> Either String Value
-decodeJson = first show . eitherDecodeStrict'
-
-asObject :: String -> Value -> Either String (KeyMap Value)
-asObject _ (Object o) = Right o
-asObject label _ = Left (label ++ " must be an object")
-
-asArray :: String -> Value -> Either String [Value]
-asArray _ (Array a) = Right (toList a)
-asArray label _ = Left (label ++ " must be an array")
-
-field :: String -> KeyMap Value -> Either String Value
-field name obj = maybe (Left ("missing field " ++ name)) Right (KeyMap.lookup (Key.fromText (T.pack name)) obj)
-
-asText :: String -> Value -> Either String Text
-asText _ (String t) = Right t
-asText label _ = Left (label ++ " must be a string")
