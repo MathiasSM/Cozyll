@@ -21,7 +21,11 @@ import Cozyll.Ruby.Index (
     readIndexFile,
     writeTextFileAtomic,
  )
+import Cozyll.Ruby.Json (asArray, asInt, asMaybeInt, asObject, asText, decodeJson, required)
+import Data.Aeson (Value (..))
+import Data.Aeson.KeyMap qualified as KeyMap
 import Data.Bits ((.&.))
+import Data.ByteString qualified as BS
 import Data.Text (Text)
 import Data.Text qualified as T
 import System.FilePath ((</>))
@@ -84,6 +88,33 @@ tests =
                 case decodeIndex (T.replace "\"schemaVersion\": 1" "\"schemaVersion\": 2" (encodeIndex (Index [] [] []))) of
                     Left message -> assertBool message ("schemaVersion" `T.isInfixOf` T.pack message)
                     Right _ -> assertBool "expected a failure" False
+            ]
+        , testGroup
+            "json helpers"
+            [ testCase "asObject accepts an object" $
+                asObject "demo" (Object (KeyMap.singleton "k" Null)) @?= Right (KeyMap.singleton "k" Null)
+            , testCase "asObject rejects a wrong shape" $ asObject "demo" (String "x") @?= Left "demo must be an object"
+            , testCase "asArray accepts an array" $
+                case decodeJson "[\"a\", \"b\"]" of
+                    Right value -> asArray "demo" value @?= Right [String "a", String "b"]
+                    Left problem -> assertFailure problem
+            , testCase "asArray rejects a wrong shape" $ asArray "demo" Null @?= Left "demo must be an array"
+            , testCase "asText accepts a string" $ asText "demo" (String "x") @?= Right "x"
+            , testCase "asText rejects a wrong shape" $ asText "demo" (Bool True) @?= Left "demo must be a string"
+            , testCase "asInt accepts a whole number" $ asInt "demo" (Number 42) @?= Right 42
+            , testCase "asInt rejects a fraction" $ asInt "demo" (Number 1.5) @?= Left "demo must be an integer"
+            , testCase "asInt rejects a wrong shape" $
+                asInt "demo" (String "7") @?= Left "demo must be an integer"
+            , testCase "asMaybeInt treats null as nothing" $ asMaybeInt "demo" Null @?= Right Nothing
+            , testCase "asMaybeInt accepts a whole number" $ asMaybeInt "demo" (Number 3) @?= Right (Just 3)
+            , testCase "required finds a present field" $
+                required "name" (KeyMap.singleton "name" (String "x")) @?= Right (String "x")
+            , testCase "required names a missing field" $ required "name" KeyMap.empty @?= Left "missing field name"
+            , testCase "decodeJson accepts plain JSON" $
+                decodeJson "{\"a\": \"x\"}" @?= Right (Object (KeyMap.singleton "a" (String "x")))
+            , testCase "decodeJson tolerates a BOM" $
+                decodeJson (BS.pack [0xEF, 0xBB, 0xBF] <> "{\"a\": \"x\"}")
+                    @?= Right (Object (KeyMap.singleton "a" (String "x")))
             ]
         , testGroup
             "file diagnostics"
