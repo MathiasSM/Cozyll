@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+## [3.8.0.0] - 2026-11-21
+
+### Fixed
+
+- Form controls, fieldsets, the table of contents box and the print logo use a defined border colour token again, so they render their border.
+- `scripts/check-site.sh` value options report `option --x requires a value` instead of crashing with `unbound variable` under `set -u`.
+
+### Changed
+
+- The vendored stylesheet loses duplicated and unreachable rules with no visual change (a few dozen lines).
+- The site configuration assembly is shared by the binary and the test fixture.
+- The check script's duplicated status and dispatch code is collapsed.
+
 ## [3.7.0.0] - 2026-11-21
 
 ### Changed
@@ -483,7 +496,8 @@
 
 
 
-[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.7.0.0...master
+[Unreleased]: https://github.com/MathiasSM/Cozyll/compare/v3.8.0.0...master
+[3.8.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.7.0.0...v3.8.0.0
 [3.7.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.6.0.0...v3.7.0.0
 [3.6.0.0]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.1...v3.6.0.0
 [3.5.1.1]: https://github.com/MathiasSM/Cozyll/compare/v3.5.1.0...v3.5.1.1
