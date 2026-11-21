@@ -13,10 +13,22 @@ tests =
         [ testCase "handles --help" $ parseCommand ["--help"] @?= Right Help
         , testCase "handles --version" $ parseCommand ["--version"] @?= Right Version
         , testCase "handles a subcommand's --help" $ parseCommand ["fetch", "--help"] @?= Right Help
+        , testCase "handles a subcommand's --version" $ parseCommand ["fetch", "--version"] @?= Right Version
+        , testCase "parses verify" $
+            parseCommand ["verify"] @?= Right (Verify (Options Nothing Nothing Nothing False False False False))
+        , testCase "parses fmt" $
+            parseCommand ["fmt"] @?= Right (Format (Options Nothing Nothing Nothing False False False False))
         , testCase "parses fetch options" $
             case parseCommand ["fetch", "--from", "dir", "--check"] of
                 Right (Fetch opts) -> do
                     optFrom opts @?= Just "dir"
+                    optCheck opts @?= True
+                other -> assertFailure ("unexpected: " ++ show other)
+        , testCase "parses fetch data-dir options" $
+            case parseCommand ["fetch", "--from", "dir", "--data-dir", "d", "--check"] of
+                Right (Fetch opts) -> do
+                    optFrom opts @?= Just "dir"
+                    optDataDir opts @?= Just "d"
                     optCheck opts @?= True
                 other -> assertFailure ("unexpected: " ++ show other)
         , testCase "parses sources options" $
@@ -25,6 +37,13 @@ tests =
                     optWrite opts @?= True
                     optForce opts @?= True
                     optResolve opts @?= True
+                other -> assertFailure ("unexpected: " ++ show other)
+        , testCase "parses sources file options" $
+            case parseCommand ["sources", "--sources", "f", "--write", "--force"] of
+                Right (Sources opts) -> do
+                    optSources opts @?= Just "f"
+                    optWrite opts @?= True
+                    optForce opts @?= True
                 other -> assertFailure ("unexpected: " ++ show other)
         , testCase "rejects a flag on the wrong command" $
             case parseCommand ["verify", "--from", "dir"] of
