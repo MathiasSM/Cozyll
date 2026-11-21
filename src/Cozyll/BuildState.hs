@@ -10,7 +10,6 @@ missing.
 module Cozyll.BuildState (
     BuildState (..),
     BuildStart (..),
-    buildStatePath,
     buildStatePathIn,
     readBuildState,
     readBuildStateIn,
@@ -19,7 +18,6 @@ module Cozyll.BuildState (
     decideBuildStart,
     applyBuildStart,
     applyBuildStartIn,
-    resetBuildOutputs,
     resetBuildOutputsIn,
     siteOutputExists,
     siteOutputExistsIn,
@@ -90,10 +88,6 @@ instance FromJSON BuildState where
                 , buildStateBuiltAt = builtAt
                 , buildStateContentDir = contentDir
                 }
-
--- | Where the build state is stored, relative to the working directory
-buildStatePath :: FilePath
-buildStatePath = buildStatePathIn "."
 
 -- | The state path inside a given working directory
 buildStatePathIn :: FilePath -> FilePath
@@ -166,11 +160,7 @@ applyBuildStartIn root (Reset message) = do
     hPutStrLn stderr (T.unpack message)
     resetBuildOutputsIn root
 
--- | Removes @_site@ and @_cache@ together, tolerating paths that are absent
-resetBuildOutputs :: IO ()
-resetBuildOutputs = resetBuildOutputsIn "."
-
--- | 'resetBuildOutputs' inside a given working directory
+-- | Removes @_site@ and @_cache@ inside a given working directory, tolerating paths that are absent
 resetBuildOutputsIn :: FilePath -> IO ()
 resetBuildOutputsIn root = mapM_ (removeIfPresent root) ["_site", "_cache"]
   where

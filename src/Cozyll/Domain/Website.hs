@@ -28,7 +28,6 @@ module Cozyll.Domain.Website (
     -- ** highlight:
     Highlight (..),
     HighlightStyle (..),
-    highlightStyleName,
     parseHighlightStyle,
     toPandocStyle,
 

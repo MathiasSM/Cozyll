@@ -22,7 +22,6 @@ module Cozyll.Ruby.Index (
     KanjiRow (..),
     WordRow (..),
     SegmentRow (..),
-    emptyIndex,
     encodeIndex,
     decodeIndex,
     toRubyData,
@@ -140,9 +139,6 @@ data Index = Index
     , idxSegments :: [SegmentRow]
     }
     deriving (Eq, Show)
-
-emptyIndex :: Index
-emptyIndex = Index [] [] []
 
 -- | The runtime form: maps built once at startup
 data RubyData = RubyData

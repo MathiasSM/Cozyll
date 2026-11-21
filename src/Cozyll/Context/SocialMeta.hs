@@ -39,7 +39,6 @@ module Cozyll.Context.SocialMeta (
     mainImageOf,
     socialMetaContext,
     jsonLD,
-    pageUrl,
     absoluteUrl,
     absoluteImageUrl,
     isoDate,

@@ -1,5 +1,5 @@
 -- | Pandoc compilation and the post-processing shared by every page
-module Cozyll.Compile (runPandoc, runPandocWith, applyTemplates, finish, finishPage, loadPageBody, withSourcePath) where
+module Cozyll.Compile (runPandocWith, applyTemplates, finish, finishPage, loadPageBody, withSourcePath) where
 
 import Control.Monad (foldM, forM_, unless)
 import Control.Monad.Except (throwError)
@@ -49,15 +49,11 @@ import Text.Pandoc.Writers.Shared (toTableOfContents)
 -- citeproc) is ever added, literal `@` in content must be escaped as `\@`, or
 -- those fragments will silently turn into citations.
 
-{- | Custom configuration for Pandoc, returning the rendered body, the table
-of contents (when @TOC@ is set), and the page's main image (when one is tagged
-@#main-image@), so templates can place the TOC separately and social metadata
-can use the image.
+{- | Renders an item, annotating ruby and checking the body against the index
+when one is given, returning the rendered body, the table of contents (when
+@TOC@ is set), and the page's main image (when one is tagged @#main-image@), so
+templates can place the TOC separately and social metadata can use the image.
 -}
-runPandoc :: Item String -> Compiler (Item String, String, Maybe MainImage)
-runPandoc = runPandocWith Nothing CheckError
-
--- | Like 'runPandoc', but annotates ruby and checks the body against the ruby index
 runPandocWith :: Maybe RubyData -> CheckMode -> Item String -> Compiler (Item String, String, Maybe MainImage)
 runPandocWith rubyData checkMode item = do
     metadata <- getUnderlying >>= getMetadata
