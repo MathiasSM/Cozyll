@@ -30,7 +30,8 @@ module Cozyll.BuildState (
 
 import Control.Exception (IOException, try)
 import Control.Monad (forM, when)
-import Cozyll.Config (Env (..))
+import Cozyll.Brand (filesUnder)
+import Cozyll.Config (Env (..), envFromText, envText)
 import Data.Aeson (FromJSON (parseJSON), ToJSON (toJSON), eitherDecodeStrict', encode, object, withObject, (.:), (.=))
 import Data.ByteString qualified as BS
 import Data.ByteString.Lazy qualified as BL
@@ -199,34 +200,10 @@ since the build.
 -}
 newestContentChange :: FilePath -> UTCTime -> IO (Maybe FilePath)
 newestContentChange contentDir builtAt = do
-    exists <- doesDirectoryExist contentDir
-    if not exists
-        then pure Nothing
-        else do
-            files <- filesUnder ""
-            stamps <- forM files $ \relative -> do
-                let path = contentDir </> relative
-                modified <- getModificationTime path
-                pure (modified, path)
-            let newer = sortOn id [(modified, path) | (modified, path) <- stamps, modified > builtAt]
-            pure $ if null newer then Nothing else Just (snd (last newer))
-  where
-    filesUnder relative = do
-        entries <- listDirectory (contentDir </> relative)
-        fmap concat . forM entries $ \entry -> do
-            let child = if null relative then entry else relative </> entry
-            isDir <- doesDirectoryExist (contentDir </> child)
-            if isDir then filesUnder child else pure [child]
-
--- | The @SITE_ENV@ spelling used in messages and in the state file
-envText :: Env -> String
-envText Prod = "prod"
-envText Dev = "dev"
-envText Example = "example"
-
--- | Parses an @SITE_ENV@ spelling (inverse of 'envText')
-envFromText :: String -> Maybe Env
-envFromText "prod" = Just Prod
-envFromText "dev" = Just Dev
-envFromText "example" = Just Example
-envFromText _ = Nothing
+    files <- filesUnder contentDir
+    stamps <- forM files $ \relative -> do
+        let path = contentDir </> relative
+        modified <- getModificationTime path
+        pure (modified, path)
+    let newer = sortOn id [(modified, path) | (modified, path) <- stamps, modified > builtAt]
+    pure $ if null newer then Nothing else Just (snd (last newer))

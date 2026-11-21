@@ -5,6 +5,7 @@ module Cozyll.Brand (
     Brand (..),
     brandCandidates,
     brandIconsFor,
+    filesUnder,
     iconHref,
     iconNeedsConversion,
     manifestIcons,
@@ -96,7 +97,7 @@ resolveBrand contentDir (Just raw)
         warn ("site.logo: " ++ raw ++ " must be a site path or an absolute URL; omitting the logo")
         pure Nothing
     | otherwise = do
-        overrides <- staticFiles (contentDir </> "static")
+        overrides <- filesUnder (contentDir </> "static")
         existing <- filterM doesFileExist (brandCandidates contentDir raw)
         case existing of
             [] -> do
@@ -207,9 +208,9 @@ isDataUrl = isPrefixOf "data:" . map toLower
 warn :: String -> IO ()
 warn = hPutStrLn stderr
 
--- | Every file under the static directory, relative to it
-staticFiles :: FilePath -> IO [FilePath]
-staticFiles dir = do
+-- | Every file under a directory, relative to it; empty when it is absent
+filesUnder :: FilePath -> IO [FilePath]
+filesUnder dir = do
     present <- doesDirectoryExist dir
     if present then go "" else pure []
   where
