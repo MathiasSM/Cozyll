@@ -43,7 +43,7 @@ module Cozyll.Domain.Author (
 ) where
 
 import Control.Monad (unless)
-import Cozyll.Yaml (Check (..), decodeYaml)
+import Cozyll.Yaml (Check (..), decodeYaml, scalarString)
 import Data.Aeson (Object, Value (..))
 import Data.Aeson.Key (Key, fromString, toString)
 import Data.Aeson.KeyMap qualified as KeyMap
@@ -51,7 +51,6 @@ import Data.ByteString (ByteString)
 import Data.ByteString qualified as BS
 import Data.Char (isAsciiLower, isDigit)
 import Data.Foldable (toList)
-import Data.Scientific (Scientific, floatingOrInteger)
 import Data.Text qualified as T
 import Data.Text.Encoding (decodeUtf8')
 import System.Directory (doesFileExist)
@@ -234,21 +233,6 @@ scalarExtras object =
     ]
   where
     knownFields = ["name", "type", "siteDefault", "displayName", "description", "profileImage", "links", "addCopyrightNotice"]
-
--- | The text of a scalar value, if it is one
-scalarString :: Value -> Maybe String
-scalarString = \case
-    String text -> Just $ T.unpack text
-    Number n -> Just $ renderNumber n
-    Bool b -> Just $ if b then "true" else "false"
-    Null -> Just ""
-    _ -> Nothing
-
--- | A JSON number rendered without scientific notation
-renderNumber :: Scientific -> String
-renderNumber n = case floatingOrInteger n of
-    Right integer -> show (integer :: Integer)
-    Left double -> show (double :: Double)
 
 -- | Whether a value is a non-empty string
 isNonEmptyString :: Value -> Bool

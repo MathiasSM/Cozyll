@@ -57,15 +57,14 @@ module Cozyll.Domain.Website (
     FundingPlan (..),
 ) where
 
-import Control.Monad (unless, when)
+import Control.Monad (when)
 import Cozyll.Domain.Language (Language)
-import Cozyll.Yaml (enumFromJSON)
-import Data.Aeson (FromJSON (parseJSON), withObject, (.!=), (.:), (.:?))
+import Cozyll.Yaml (enumFromJSON, lookupEnum, readYamlFile, typeOptions)
+import Data.Aeson (FromJSON (parseJSON), genericParseJSON, withObject, (.!=), (.:), (.:?))
 import Data.Time (getCurrentTime, utctDay)
 import Data.Time.Calendar (Day, addDays)
 import Data.Time.Format (defaultTimeLocale, parseTimeM)
-import Data.Yaml (decodeFileEither, prettyPrintParseException)
-import System.Directory (doesFileExist)
+import GHC.Generics (Generic)
 import System.Exit (die)
 import System.FilePath.Posix ((</>))
 import Text.Pandoc.Highlighting (Style, breezeDark, espresso, haddock, kate, monochrome, pygments, tango, zenburn)
@@ -87,26 +86,26 @@ data Contact = Contact
     { contactEmail :: String
     , contactPage :: String
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | The @manifest:@ section: web app manifest colours
 data Manifest = Manifest
     { manifestBackgroundColor :: String
     , manifestThemeColor :: String
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | The @mathjax:@ section: which MathJax CDN version renders the site's math
 data Mathjax = Mathjax
     { mathjaxVersion :: String
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | The @highlight:@ section: which pandoc style renders code blocks
 data Highlight = Highlight
     { highlightStyle :: HighlightStyle
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | Severity of the ruby coverage check
 data CheckMode = CheckOff | CheckWarn | CheckError
@@ -123,7 +122,7 @@ instance FromJSON CheckMode where
 
 -- | Resolves a 'CheckMode' from its spelling, if known
 parseCheckMode :: String -> Maybe CheckMode
-parseCheckMode name = lookup name [(checkModeName mode, mode) | mode <- [minBound .. maxBound]]
+parseCheckMode = lookupEnum checkModeName
 
 -- | A pandoc syntax-highlighting style, as spelled in @highlight.style@
 data HighlightStyle = Pygments | Espresso | Zenburn | Tango | Kate | Monochrome | BreezeDark | Haddock
@@ -145,7 +144,7 @@ instance FromJSON HighlightStyle where
 
 -- | Resolves a 'HighlightStyle' from its @highlight.style@ spelling, if known
 parseHighlightStyle :: String -> Maybe HighlightStyle
-parseHighlightStyle name = lookup name [(highlightStyleName style, style) | style <- [minBound .. maxBound]]
+parseHighlightStyle = lookupEnum highlightStyleName
 
 -- | The pandoc 'Style' backing a 'HighlightStyle'
 toPandocStyle :: HighlightStyle -> Style
@@ -159,8 +158,8 @@ toPandocStyle BreezeDark = breezeDark
 toPandocStyle Haddock = haddock
 
 instance FromJSON Highlight where
-    parseJSON = withObject "highlight" $ \o ->
-        Highlight <$> o .: "style"
+    parseJSON value =
+        withObject "highlight" (\_ -> genericParseJSON (typeOptions "highlight") value) value
 
 -- | The @funding:@ section: data behind @funding.json@
 data Funding = Funding
@@ -169,14 +168,14 @@ data Funding = Funding
     , fundingChannels :: [FundingChannel]
     , fundingPlans :: [FundingPlan]
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | The entity being funded (the @funding.entity@ section)
 data FundingEntity = FundingEntity
     { fundingEntityEmail :: String
     , fundingEntityDescription :: String
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | A project listed in @funding.json@
 data FundingProject = FundingProject
@@ -188,7 +187,7 @@ data FundingProject = FundingProject
     , fundingProjectLicenses :: [String]
     , fundingProjectTags :: [String]
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | A funding channel in @funding.json@
 data FundingChannel = FundingChannel
@@ -197,7 +196,7 @@ data FundingChannel = FundingChannel
     , fundingChannelAddress :: String
     , fundingChannelDescription :: String
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | A funding plan in @funding.json@
 data FundingPlan = FundingPlan
@@ -210,7 +209,7 @@ data FundingPlan = FundingPlan
     , fundingPlanFrequency :: String
     , fundingPlanChannels :: [String]
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | The @security:@ section: data behind @.well-known/security.txt@
 data Security = Security
@@ -218,19 +217,19 @@ data Security = Security
     , securityExpires :: String
     , securityExpirationMarginDays :: Int
     }
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | The @robots:@ section: data behind @robots.txt@
 data Robots = Robots {robotsDisallow :: [String]}
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | The @trust:@ section: data behind @.well-known/trust.txt@
 data Trust = Trust {trustTrainingAllowed :: String}
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | The @feed:@ section: data behind @atom.xml@ files
 data FeedConfig = FeedConfig {feedSize :: Int}
-    deriving (Eq, Show)
+    deriving (Eq, Show, Generic)
 
 -- | Everything @website.yaml@ describes
 data Website = Website
@@ -260,76 +259,52 @@ instance FromJSON Site where
             <*> o .:? "logo"
 
 instance FromJSON Contact where
-    parseJSON = withObject "contact" $ \o ->
-        Contact <$> o .: "email" <*> o .: "page"
+    parseJSON value =
+        withObject "contact" (\_ -> genericParseJSON (typeOptions "contact") value) value
 
 instance FromJSON Manifest where
-    parseJSON = withObject "manifest" $ \o ->
-        Manifest <$> o .: "backgroundColor" <*> o .: "themeColor"
+    parseJSON value =
+        withObject "manifest" (\_ -> genericParseJSON (typeOptions "manifest") value) value
 
 instance FromJSON Mathjax where
-    parseJSON = withObject "mathjax" $ \o ->
-        Mathjax <$> o .: "version"
+    parseJSON value =
+        withObject "mathjax" (\_ -> genericParseJSON (typeOptions "mathjax") value) value
 
 instance FromJSON Funding where
-    parseJSON = withObject "funding" $ \o ->
-        Funding
-            <$> o .: "entity"
-            <*> o .: "projects"
-            <*> o .: "channels"
-            <*> o .: "plans"
+    parseJSON value =
+        withObject "funding" (\_ -> genericParseJSON (typeOptions "funding") value) value
 
 instance FromJSON FeedConfig where
-    parseJSON = withObject "feed" $ \o ->
-        FeedConfig <$> o .: "size"
+    parseJSON value =
+        withObject "feed" (\_ -> genericParseJSON (typeOptions "feed") value) value
 
 instance FromJSON FundingEntity where
-    parseJSON = withObject "funding.entity" $ \o ->
-        FundingEntity <$> o .: "email" <*> o .: "description"
+    parseJSON value =
+        withObject "funding.entity" (\_ -> genericParseJSON (typeOptions "fundingEntity") value) value
 
 instance FromJSON FundingProject where
-    parseJSON = withObject "funding.project" $ \o ->
-        FundingProject
-            <$> o .: "guid"
-            <*> o .: "name"
-            <*> o .: "description"
-            <*> o .: "repositoryUrl"
-            <*> o .: "repositoryWellKnown"
-            <*> o .: "licenses"
-            <*> o .: "tags"
+    parseJSON value =
+        withObject "funding.project" (\_ -> genericParseJSON (typeOptions "fundingProject") value) value
 
 instance FromJSON FundingChannel where
-    parseJSON = withObject "funding.channel" $ \o ->
-        FundingChannel
-            <$> o .: "guid"
-            <*> o .: "type"
-            <*> o .: "address"
-            <*> o .: "description"
+    parseJSON value =
+        withObject "funding.channel" (\_ -> genericParseJSON (typeOptions "fundingChannel") value) value
 
 instance FromJSON FundingPlan where
-    parseJSON = withObject "funding.plan" $ \o ->
-        FundingPlan
-            <$> o .: "guid"
-            <*> o .: "status"
-            <*> o .: "name"
-            <*> o .: "description"
-            <*> o .: "amount"
-            <*> o .: "currency"
-            <*> o .: "frequency"
-            <*> o .: "channels"
+    parseJSON value =
+        withObject "funding.plan" (\_ -> genericParseJSON (typeOptions "fundingPlan") value) value
 
 instance FromJSON Security where
-    parseJSON = withObject "security" $ \o ->
-        Security
-            <$> o .: "preferredLanguages"
-            <*> o .: "expires"
-            <*> o .: "expirationMarginDays"
+    parseJSON value =
+        withObject "security" (\_ -> genericParseJSON (typeOptions "security") value) value
 
 instance FromJSON Robots where
-    parseJSON = withObject "robots" $ \o -> Robots <$> o .: "disallow"
+    parseJSON value =
+        withObject "robots" (\_ -> genericParseJSON (typeOptions "robots") value) value
 
 instance FromJSON Trust where
-    parseJSON = withObject "trust" $ \o -> Trust <$> o .: "trainingAllowed"
+    parseJSON value =
+        withObject "trust" (\_ -> genericParseJSON (typeOptions "trust") value) value
 
 instance FromJSON Website where
     parseJSON = withObject "website" $ \o ->
@@ -348,12 +323,7 @@ instance FromJSON Website where
 
 -- | Reads and parses @<contentDir>/website.yaml@, failing with a clear message
 loadWebsite :: FilePath -> IO Website
-loadWebsite contentDir = do
-    let path = contentDir </> "website.yaml"
-    exists <- doesFileExist path
-    unless exists $ die $ path ++ " not found"
-    result <- decodeFileEither path
-    either (\e -> die $ "Invalid " ++ path ++ ":\n" ++ prettyPrintParseException e) pure result
+loadWebsite contentDir = readYamlFile $ contentDir </> "website.yaml"
 
 -- | Fails if the @security.txt@ expiration is within the configured margin (or already passed)
 validateSecurityExpiration :: Website -> IO ()
